@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<head>
+    <title><REPLACE id="guild.name"/> Sanctions</title>
+    <style>
+        .row {
+            display: flex;
+        }
+
+        .column {
+            flex: 50%;
+        }
+    </style>
+</head>
+<body>
+    <p>Please select an option below for <REPLACE id='guild.name'/></p><br/>
+    <a href="/sanctions/guild/user?guild=$REPLACE id='guild.id'/$&user=0">Search all sanctions against any user</a><br/>
+    <div class="row">
+        <div class="column">
+            <h2>Rules</h2>
+            <a href="/sanctions/guild/rule?guild=$REPLACE id='guild.id'/$&rule=-1">Custom-reason sanctions</a><br/>
+            <a href="/sanctions/guild/rule?guild=$REPLACE id='guild.id'/$&rule=0"><strong>All</strong> sanctions</a><br/>
+            <ol>
+                <REPLACE id="rules_list"/>
+            </ol>
+        </div>
+        <div class="column">
+            <h2>Users</h2>
+            <ul>
+                <REPLACE id="users_list"/>
+            </ul>
+        </div>
+    </div>
+</body>

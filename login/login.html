@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<head>
+    <title>Login Page</title>
+</head>
+<body>
+    <h1>THIS IS INSECURE</h1>
+    <h2>Like seriously</h2>
+    <h3>There is no HTTPS.</h3><br>
+    <h3>Don't enter anything you wouldn't want plastered on a billboard.</h3>
+
+    <div id="login">
+        <p>If you provide your ID, the username is ignored.</p>
+        <p>If you provide a username, we attempt to search for it.</p>
+        <p style="color: red;">You must provide one, or the other.</p>
+        <input id="username" type="text" placeholder="Discord Username"/>
+        <input id="number" type="number" placeholder="Discord ID"/> 
+        <input type="button" onclick="submit();" value="Submit" />
+        <p id="fb" style="display: none; color: darkred; font-weight: bold;">Feedback....</p>
+    </div>
+
+    <script>
+        function display(message) {
+            var doc = document.getElementById("fb");
+            doc.innerText = message;
+            if(message)
+                doc.style.display = "";
+            else
+                doc.style.display = "none";
+        }
+
+
+        function submit() {
+            var uname = document.getElementById("username");
+            var id = document.getElementById("number");
+            display("Submitting: " + uname.value.toString() + " " + id.value.toString());
+            var username = uname.value;
+            if(!username)
+                username = "null"
+            var ulong = id.value;
+            if(!ulong)
+                ulong = "0"
+            
+            var uri = `/login/attempt?name=${username}&id=${ulong}`;
+            window.location.replace(uri);
+        }
+    </script>
+</body>

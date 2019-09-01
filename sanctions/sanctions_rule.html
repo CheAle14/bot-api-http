@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<head>
+    <title>Sanctions per Rule</title>
+    <style>
+        #tInput {
+            width: 100%;
+            font-size: 16px;
+            padding: 12px 20px 12px 40px;
+            border: 1px solid #ddd;
+            margin-bottom: 12px;
+        }
+
+        #tTable {
+            border-collapse: collapse;
+            width: 100%;
+            border: 1px solid #ddd;
+            font-size: 18px;
+        }
+
+        #tTable th, #tTable td {
+            text-align: left;
+            padding: 12px;
+        }
+
+        #tTable tr {
+            border-bottom: 1px solid #ddd;
+        }
+
+        #tTable tr.header, #tTable tr:hover {
+            background-color: #f1f1f1;
+        }
+    </style>
+</head>
+<body>
+
+    <script>
+        const RULE_NUMBER = <REPLACE id="rule"/>;
+        function filter() {
+            var table = document.getElementById("tTable");
+            var input = document.getElementById("tInput");
+            var allRows = document.getElementsByTagName("tr");
+            for(var i = 0; i < allRows.length; i++) {
+                var row = allRows[i];
+                if(row) {
+                    if(!row.classList.contains("headers")) {
+                        if((input.value && row.innerHTML.indexOf(input.value) > -1) || !input.value) {
+                            row.style.display = "";
+                        } else {
+                            row.style.display = "none";
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <input id="tInput" onkeyup="filter();" type="text" placeholder="Type to filter ...">
+    <table id="tTable">
+        <tr class="headers"><th>Type</th><th>User</th><th>Admin</th><th>Date</th><th>Duration</th>
+        <th id="reason">Reason</th></tr>
+        <REPLACE id="rule_table"/>
+    </table>
+
+    <script>
+        var he = document.getElementById("reason");
+        he.style.display = RULE_NUMBER <= 0 ? "" : "none";
+    </script>
+</body>
