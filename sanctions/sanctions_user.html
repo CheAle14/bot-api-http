@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <head>
-    <title><REPLACE id='user.username'/> sanctions</title>
+    <title><REPLACE id='target.username'/> sanctions</title>
     <style>
         #tInput {
             width: 100%;
@@ -64,6 +64,6 @@
         var he = document.getElementById("user");
         he.style.display = USER_ID <= 0 ? "" : "none";
         var para = document.getElementById("against");
-        para.textContent = "Sanctions against " + (USER_ID <= 0 ? "any user" : "<REPLACE id='user.Username'/>")
+        para.textContent = "Sanctions against " + (USER_ID <= 0 ? "any user" : "<REPLACE id='target.Username'/>")
     </script>
 </head>
