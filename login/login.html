@@ -13,12 +13,27 @@
         <p>If you provide a username, we attempt to search for it.</p>
         <p style="color: red;">You must provide one, or the other.</p>
         <input id="username" type="text" placeholder="Discord Username"/>
-        <input id="number" type="number" placeholder="Discord ID"/> 
+        <input id="number" type="number" placeholder="Discord ID"/>
         <input type="button" onclick="submit();" value="Submit" />
         <p id="fb" style="display: none; color: darkred; font-weight: bold;">Feedback....</p>
     </div>
+    <br>
+    <div id="professional_retard">
+        <p>If you are advanced in your knowledge, you can provide the cookie manually:</p>
+        <input id="cookie" type="text" placeholder="Nom nom"/>
+        <input type="button" onclick="cookieyeet();" value="Submit"/>
+    </div>
 
     <script>
+        function cookieyeet() {
+            var doc = document.getElementById("cookie");
+            var cookie = doc.value;
+            document.cookie = "token=" + cookie + "; path=/"
+            display("Cookie set to " + cookie);
+            window.location.replace("/");
+        }
+
+
         function display(message) {
             var doc = document.getElementById("fb");
             doc.innerText = message;
@@ -39,7 +54,7 @@
             var ulong = id.value;
             if(!ulong)
                 ulong = "0"
-            
+
             var uri = `/login/attempt?name=${username}&id=${ulong}`;
             window.location.replace(uri);
         }
