@@ -1,8 +1,44 @@
 <!DOCTYPE html>
 <head>
-    <title>Attempting login</title>
+    <title>MLAPI Login</title>
 </head>
 <body>
     <h3><REPLACE id="header"/></h3>
     <p><REPLACE id="response"/></p>
+
+    <input id="btn" type="button" value="Re-Check" onclick="submit();"/>
+
+    <script>
+        const DO_THING = <REPLACE id="allow_button"/>;
+
+        function getCookie(cname) {
+            var name = cname + "=";
+            var ca = document.cookie.split(';');
+            for(var i = 0; i < ca.length; i++) {
+                var c = ca[i];
+                while (c.charAt(0) == ' ') {
+                c = c.substring(1);
+                }
+                if (c.indexOf(name) == 0) {
+                return c.substring(name.length, c.length);
+                }
+            }
+            return "";
+        }
+
+        function submit() {
+            if(DO_THING) {
+                var uri = "/login/check?" + getCookie("login_attempt").replace(/-/g, "=");
+                window.location.replace(uri);
+            } else {
+                alert("Button is disabled");
+            }
+        }
+
+        if(DO_THING == false) {
+            var doc = document.getElementById("btn");
+            doc.style.display = "none";
+        }
+    </script>
+
 </body>

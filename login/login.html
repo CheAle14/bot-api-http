@@ -17,20 +17,21 @@
         <input type="button" onclick="submit();" value="Submit" />
         <p id="fb" style="display: none; color: darkred; font-weight: bold;">Feedback....</p>
     </div>
-    <br>
-    <div id="professional_retard">
-        <p>If you are advanced in your knowledge, you can provide the cookie manually:</p>
-        <input id="cookie" type="text" placeholder="Nom nom"/>
-        <input type="button" onclick="cookieyeet();" value="Submit"/>
-    </div>
 
     <script>
         function cookieyeet() {
             var doc = document.getElementById("cookie");
             var cookie = doc.value;
-            document.cookie = "token=" + cookie + "; path=/"
+            setCookie("token", cookie, 3);
             display("Cookie set to " + cookie);
             window.location.replace("/");
+        }
+
+        function setCookie(cname, cvalue, exdays) {
+            var d = new Date();
+            d.setTime(d.getTime() + (exdays * 24 * 60 * 60 * 1000));
+            var expires = "expires="+d.toUTCString();
+            document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
         }
 
 
@@ -43,10 +44,14 @@
                 doc.style.display = "none";
         }
 
+        function rnd(min, max) {
+            return Math.floor(Math.random() * (+max - +min)) + +min; 
+        }
 
         function submit() {
             var uname = document.getElementById("username");
             var id = document.getElementById("number");
+            var nonce = rnd(0, 10000);
             display("Submitting: " + uname.value.toString() + " " + id.value.toString());
             var username = uname.value;
             if(!username)
@@ -54,8 +59,8 @@
             var ulong = id.value;
             if(!ulong)
                 ulong = "0"
-
-            var uri = `/login/attempt?name=${username}&id=${ulong}`;
+            setCookie("login_attempt", `name-${username}&id-${ulong}&nonce-${nonce}`, 3);
+            var uri = `/login/attempt?name=${username}&id=${ulong}&nonce=${nonce}`;
             window.location.replace(uri);
         }
     </script>
