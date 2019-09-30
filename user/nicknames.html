@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<head>
+    <meta charset="utf-8">
+    <title><REPLACE id="user.name"/></title>
+    <style>
+        .grid-container {
+            display: grid;
+        }
+        .grid-1 {
+            grid-column-start: 1;
+            grid-column-end: 2;
+        }
+        .grid-2 {
+            grid-column-start: 2;
+            grid-column-end: 3;
+        }
+        .bot {
+            background: #7289da;
+            color: #fff;
+            padding: .072rem .275rem;
+            margin-top: .075em;
+            border-radius: 3px;
+        }
+        input:read-only {
+            background: grey;
+            color: grey;
+        }
+        input::placeholder {
+            color: grey;
+        }
+    </style>
+</head>
+<body>
+    <!-- This be ugly, i know -->
+    <div class="grid-container">
+        <div class="grid-1">
+            <h3>User information for <REPLACE id="user.username"/></h3>
+            <table>
+                <tr><th>Guild</th><th>Nickname</th></tr>
+                <REPLACE id="table_nicks"/>
+            </table>
+        </div>
+        <div class="grid-2">
+            <h3>Information for users in your Guilds</h3>
+            <table>
+                <REPLACE id="table_other_nicks"/>
+            </table>
+        </div>
+    </div>
+
+
+    <script>
+        var doing = false;
+        function updateNick(input, e) {
+            if(e.key != "Enter")
+                return;
+            if(doing) {
+                alert("Request already in progress.");
+                return;
+            }
+            doing = true;
+            var split = input.id.split("-");
+            var guildId = split[0];
+            var userId = split[1];
+            var content = encodeURIComponent(input.value);
+            var url = `/user/nickchange?guildId=${guildId}&userid=${userId}&newnick=${content}`;
+            fetch(url)
+            .then(
+                function(response) {
+                    console.log(response);
+                    doing = false;
+                    if(response.status === 200) {
+                        var old = input.style;
+                        input.style = "background: #7cfc00;";
+                        delay(1000).then(function c() {
+                            input.style = old;
+                            alert("Nickname successfully changed");
+                        })
+                    } else {
+                        input.style = "color: red;";
+                        response.text().then(function(data) {
+                            alert(`Failed: ${response.status} ${data}`);
+                        })
+                    }
+                }
+            )
+            .catch(function(error) {
+                doing = false;
+                console.log(error);
+                alert("Errored in sending request, check console for details.");
+            });
+        }
+
+        function delay(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+    </script>
+</body>
