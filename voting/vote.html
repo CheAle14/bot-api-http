@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<head>
+    <title>Voting for #<REPLACE id="vote.id"/></title>
+</head>
+<body>
+    <p>Voting for proposal:</p>
+    <strong><REPLACE id="vote.topic"/></strong>
+    <ul>
+        <li><input onclick="toggle(this);" type="checkbox" id="0" class="vote"/><label>Strong Disapprove</label></li>
+        <li><input onclick="toggle(this);" type="checkbox" id="1" class="vote"/><label>Disapprove</label></li>
+        <li><input onclick="toggle(this);" type="checkbox" id="2" class="vote" checked/><label>Neutral</label></li>
+        <li><input onclick="toggle(this);" type="checkbox" id="3" class="vote"/><label>Approve</label></li>
+        <li><input onclick="toggle(this);" type="checkbox" id="4" class="vote"/><label>Strong Approve</label></li>
+    </ul>
+    <input onclick="submit();" type='button' value="Submit" style="width:100%; height:40%";/>
+
+    <script>
+
+        const ID = <REPLACE id='vote.id'/>;
+
+        function toggle(input) {
+            var checkboxes = document.getElementsByClassName("vote");
+            var anyClicked = false;
+            for(element of checkboxes) {
+                console.log(element);
+                if(element.id != input.id) {
+                    element.checked = false;
+                }
+                if(element.checked)
+                    anyClicked = true;
+            }
+            if(!anyClicked) 
+                input.checked = true;
+        }
+
+        function getVote() {
+            var checkboxes = document.getElementsByClassName("vote");
+            var anyClicked = false;
+            for(element of checkboxes) {
+                if(element.checked)
+                    return element.id;
+            }
+            return 2;
+        }
+
+        function submit() {
+            fetch(`/voting/submit?id=${ID}&vote=${getVote()}`, 
+                {"method": "PUT"})
+                .then(function (response) {
+                    if(response.ok) {
+                        window.location.replace("/voting");
+                    } else {
+                        response.text().then(function r(t) {
+                            alert(t);
+                        });
+                    }
+                }).catch(function(r) {
+                    alert(r);
+                });
+        }
+    </script>
+</body>
