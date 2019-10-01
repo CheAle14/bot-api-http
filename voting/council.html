@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<head>
+    <title>
+        TGC Council Voting
+    </title>
+    <style>
+        table {
+                border-collapse: collapse;
+                width: 100%;
+                border: 1px solid #ddd;
+                font-size: 18px;
+        }
+
+        .left {
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <h3>This uses a <a href='https://en.wikipedia.org/wiki/Ranked_voting'>Ranked Voting</a> system</h3>
+    <p>You <strong>must</strong> give a score for <em>every</em> candidate</p>
+    <table>
+        <tr>
+            <th>User</th>
+            <th class='left'>Strong Disapprove</th>
+            <th class='left'>Disapprove</th>
+            <th class='left'>Neutral</th>
+            <th class='left'>Approve</th>
+            <th class='left'>Strong Approve</th>
+        </tr>
+        <REPLACE id="table"/>
+    </table>
+    <br>
+    <input type='button' value='Submit' style="width: 100%;" onclick="submit();"/>
+
+    <script>
+        function toggle(user, input) {
+            console.log(user);
+            console.log(input);
+            var cbOfClass = document.getElementsByClassName(user);
+            console.log(cbOfClass);
+            for(element of cbOfClass) {
+                console.log(element);
+                if(element.id != input.id) {
+                    element.checked = false;
+                }
+            }
+        }
+
+        function getChecked() {
+            var dict = {};
+            var allCBS = document.getElementsByTagName("input");
+            console.log(allCBS);
+            for(element of allCBS) {
+                if(element.checked) {
+                    console.log(element);
+                    dict[element.classList[0]] = element.id;
+                }
+            }
+            return dict;
+        }
+
+        var doing = false;
+        function submit() {
+            if(doing){
+                alert("Submitting is in progress");
+                return;
+            }
+            doing = true;
+
+            var checked = getChecked();
+
+            var uri = `/voting/submit?list=`;
+            var str = "";
+            for(key of Object.keys(checked)) {
+                str += `${key}-${checked[key]};`;
+            }
+            fetch(uri + encodeURIComponent(str),
+                {"method": "PUT"})
+                .then(function(response) {
+                    if(response.ok){
+                        alert("Done")
+                        window.location.replace(window.location);
+                    } else {
+                        response.text().then(function (t) {
+                            alert(t);
+                        });
+                    }
+                    doing = false;
+                })
+                .catch(function(reason) {
+                    alert(reason);
+                    doing = false;
+                });
+        }
+    </script>
+</body>
