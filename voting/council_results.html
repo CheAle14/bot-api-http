@@ -11,11 +11,16 @@
     </style>
 </head>
 <body>
-    <p>You voted as follows:</p>
-    <table>
-        <tr><th>User</th><th>Score</th></tr>
-        <REPLACE id="self"/>
-    </table>
+    <div style='display: <REPLACE id="hideself"/>'>
+        <p>You voted as follows:</p>
+        <table>
+            <tr><th>User</th><th>Score</th></tr>
+            <REPLACE id="self"/>
+        </table>
+    </div>
     <br>
-    <REPLACE id="winners"/>
+    <div style="border: 1px green;">
+        <p>Winners:</p>
+        <REPLACE id="winners"/>
+    </div>
 </body>
