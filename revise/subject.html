@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<head>
+        <title>Revision Sessions</title>
+        <style>
+            table {
+                    border-collapse: collapse;
+                    width: 100%;
+                    border: 1px solid #ddd;
+                    font-size: 18px;
+                }
+            hr {
+                display: block;
+                margin-top: 0.5em;
+                margin-bottom: 0.5em;
+                margin-left: auto;
+                margin-right: auto;
+                border-style: inset;
+                border-width: 1px;
+            }
+            .red {
+                background: orangered;
+                color: black;
+            }
+            .green {
+                background: green;
+            }
+
+            td {
+                text-align: center;
+            }
+        </style>
+    </head>
+    <body>
+        <h1><REPLACE id="subject"/></h1>
+        <p>Total revision done: <strong><REPLACE id="total"/></strong></p>
+        <table>
+            <REPLACE id="table"/>
+        </table>
+    </body>

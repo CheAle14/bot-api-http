@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<head>
+    <title>Revision Sessions</title>
+    <style>
+        table {
+                border-collapse: collapse;
+                width: 100%;
+                border: 1px solid #ddd;
+                font-size: 18px;
+            }
+
+        hr {
+            display: block;
+            margin-top: 0.5em;
+            margin-bottom: 0.5em;
+            margin-left: auto;
+            margin-right: auto;
+            border-style: inset;
+            border-width: 1px;
+        }
+
+        .red {
+            background: orangered;
+            color: black;
+        }
+
+        input {
+            width: 100%;
+        }
+
+        .green {
+            background: green;
+        }
+    </style>
+</head>
+<body>
+    <h2>Current Session:</h2>
+    <REPLACE id="current"/>
+    <br>
+    <table>
+        <tr><th>Name</th><th>Last day</th><th>Time spent</th><th>Start</th></tr>
+        <REPLACE id="table"/>
+    </table>
+    <hr>
+    <p><em>Can't find your subject? You could:</em>
+        <ol>
+            <li>Associate your EduLink account through <strong>/edulink setup [username]</strong>, which takes your password</li>
+            <li><a href="https://masterlist.uk.ms/wiki/index.php/Bot:EduLink_OTP">Provide a single-use token, so the bot can store your lessons and nothing else</a></li>
+            <li>Manually start a session in the subject, through /revision start [name]</li>
+        </ol>
+    </p>
+    <script>
+        function start(subject) {
+            console.log(subject);
+            fetch("/revise/start?name=" + subject, 
+                {"method": "PUT"}
+            )
+            .then(function (response) {
+                if(response.ok) {
+                    setTimeout(function reload() {
+                        window.location.replace(window.location);
+                    }, 1000);
+                } else {
+                    response.text().then(function r(t) {alert(t);});
+                }
+            })
+            .catch(function(r){alert(r);});
+        }
+
+        function stop() {
+            console.log("Stopping");
+            fetch("/revise/end",
+                {"method": "PUT"}
+            )
+            .then(function (response) {
+                if(response.ok) {
+                    setTimeout(function reload() {
+                        window.location.replace(window.location);
+                    }, 1000);
+                } else {
+                    response.text().then(function r(t) {alert(t);});
+                }
+            })
+            .catch(function(r){alert(r);});
+        }
+
+
+        var timeStarted = new Date(<REPLACE id="time"/>);
+        var isAnyStarted = <REPLACE id="is_current"/>;
+        var timeDoc = null;
+        function doTime() {
+            if(isAnyStarted) {
+                if(!timeDoc)
+                    timeDoc = document.getElementById("time");
+                var now = new Date();
+                var diffInMS = now - timeStarted;
+                var diffInSeconds = diffInMS / 1000;
+                timeDoc.innerHTML = `<strong>${Math.round(diffInSeconds)}</strong>`;
+            }
+        }
+
+        var VAR = setInterval(doTime, 1000);
+    </script>
+</body>
