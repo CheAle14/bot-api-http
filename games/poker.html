@@ -19,6 +19,15 @@
             padding: 5px;
             border: 1px solid black;
         }
+
+        img {
+            width: 100px;
+            height: 200px;
+        }
+
+        input{
+            width: 75px;
+        }
     </style>
 </head>
 <body>
@@ -27,21 +36,76 @@
     </header>
     <table>
         <tr>
-            <th style="width:15%"><p>Community Cards</p></th>
-            <th style="width:15%"></th>
-            <th style="width:15%"></th>
-            <th style="width:15%"></th>
-            <th style="width:15%"></th>
-            <th style="width:15%"></th>
+            <th style="width:12.5%"><p>Community Cards</p></th>
+            <th style="width:12.5%"></th>
+            <th style="width:12.5%"></th>
+            <th style="width:12.5%"></th>
+            <th style="width:12.5%"></th>
+            <th style="width:12.5%"></th>
+            <th style="width:12.5%"><p>Your Hand</p></th>
+            <th style="width:12.5%"></th>
         </tr>
         <tr>
-            <td><div id="div" style="background-color:grey"></div></td>
-            <td><div id="div" style="background-color:grey"></div></td>
-            <td><div id="div" style="background-color:grey"></div></td>
-            <td><div id="div" style="background-color:grey"></div></td>
-            <td><div id="div" style="background-color:grey"></div></td>
-            <td><p>Your Hand</p></td>
+            <td><div id="div" style="background-color:grey"><img id="Flop1"></div></td>
+            <td><div id="div" style="background-color:grey"><img id="Flop2"></div></td>
+            <td><div id="div" style="background-color:grey"><img id="Flop3"></div></td>
+            <td><div id="div" style="background-color:grey"><img id="Turn"></div></td>
+            <td><div id="div" style="background-color:grey"><img id="River"></div></td>
+            <td><div id="div" style="background-color:white"><p>Your Chips:</p><p>Pot Chips:</p></div></td>
+            <td><div id="div" style="background-color:grey"><img id="Hand1"></div></td>
+            <td><div id="div" style="background-color:grey"><img id="Hand2"></div></td>
+        </tr>
+        <tr>
+            <td>Flop 1 card: <br><input type="text" id="SetCard" name="Flop 1" placeholder="Flop 1"><br><button onclick="Test()">Set Card</button></td>
         </tr>
     </table>
+    <script>
+        var Flop1 = "Cards/CardBack.PNG";
+        var Flop2 = "Cards/CardBack.PNG";
+        var Flop3 = "Cards/CardBack.PNG";
+        var Turn = "Cards/CardBack.PNG";
+        var River = "Cards/CardBack.PNG";
+        var Hand1 = "Cards/CardBack.PNG";
+        var Hand2 = "Cards/CardBack.PNG";
+        document.getElementById("Flop1").src = Flop1;
+        document.getElementById("Flop2").src = Flop2;
+        document.getElementById("Flop3").src = Flop3;
+        document.getElementById("Turn").src = Turn;
+        document.getElementById("River").src = River;
+        document.getElementById("Hand1").src = Hand1;
+        document.getElementById("Hand2").src = Hand2;
+
+        function Test() {
+            document.getElementById("Flop1").src = "Cards/" + document.getElementById("SetCard").value + ".PNG"
+        }
+
+        function ChangeFlop1() {
+            document.getElementById("Flop1").src =
+        }
+
+        function ChangeFlop2() {
+            document.getElementById("Flop2").src =
+        }
+
+        function ChangeFlop3() {
+            document.getElementById("Flop3").src =
+        }
+
+        function ChangeTurn() {
+            document.getElementById("Turn").src =
+        }
+
+        function ChangeRiver() {
+            document.getElementById("River").src =
+        }
+
+        function ChangeHand1() {
+            document.getElementById("Hand1").src =
+        }
+
+        function ChangeHand2() {
+            document.getElementById("Hand2").src =
+        }
+    </script>
 </body>
 </html>
