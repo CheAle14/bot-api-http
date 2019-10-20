@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<head>
+    <title>PR #<REPLACE id="pr.number"/></title>
+    <style>
+        td {
+            width: 25%;
+            height: 30px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <table>
+        <tr>
+            <td><strong>Changelog</strong></td>
+            <td><REPLACE id="changelog"/></td>
+            <td>
+                <input type="button" value="Pass" onclick="setStatus('changelog', 'success');"/>
+            </td>
+            <td>
+                <input type="button" value="Fail" onclick="setStatus('changelog', 'failure');"/>
+            </td>
+        </tr>
+        <tr>
+            <td><strong>Build</strong></td>
+            <td><REPLACE id="published"/></td>
+            <td>
+                <input type="button" value="Pass" onclick="setStatus('published', 'success');"/>
+            </td>
+            <td>
+                <input type="button" value="Fail" onclick="setStatus('published', 'failure');"/>
+            </td>
+        </tr>
+    </table>
+
+    <script>
+        const NUMBER = <REPLACE id="pr.number"/>
+
+        function setStatus(type, status){
+            fetch(`/github/status/${type}?number=${NUMBER}&status=${status}`, 
+                {"method": "PUT"}
+            )
+            .then(function (response) {
+                if(response.ok) {
+                    setTimeout(function reload() {
+                        window.location.replace(window.location);
+                    }, 1000);
+                } else {
+                    response.text().then(function r(t) {alert(t);});
+                }
+            })
+            .catch(function(r){alert(r);});
+        }
+    </script>
+
+</body>
