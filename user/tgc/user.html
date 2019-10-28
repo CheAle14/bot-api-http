@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<head>
+    <title>Settings for <REPLACE id="target.name"/></title>
+    <link rel="stylesheet" type="text/css" href="/css">
+    <style>
+
+        #locks {
+            width: 320px;
+            display: <REPLACE id="locksdisplay"/>
+        }
+
+        #left-div {
+            float: left;
+            width: 50%;
+            height: 100%;
+            margin-right: 8px;
+        }
+    </style>
+</head>
+<body>
+    <h2>The Grand Coding</h2>
+    <h3>Modifications to <REPLACE id="target.username"/>#<REPLACE id="target.discriminator"/></h3>
+    <label>Current Nickname: </label> <input placeholder="No nickname" readonly type="text" id="nickname" value='<REPLACE id="nickname"/>'>
+    <div id="locks">
+        <div id="left-div">
+            <label>Lock Nickname</label><input id="nicklock" type="checkbox" onclick="lock('nick');"/>
+        </div id="right-div">
+        <div>
+            <label>Lock Roles</label><input id="rolelock" type="checkbox" onclick="lock('role');"/>
+        </div>
+    </div>
+    <div>
+        <table>
+            <REPLACE id="table"/>
+        </table>
+    </div>
+    <script>
+        const USER_ID = <REPLACE id="id"/>;
+        const NICKLOCKED = <REPLACE id="nicklocked"/>;
+        const ROLELOCKED = <REPLACE id="rolelocked"/>;
+
+        document.getElementById("nicklock").checked = NICKLOCKED;
+        document.getElementById("rolelock").checked = ROLELOCKED;
+
+        function lock(type) {
+            var doc = document.getElementById(`${type}lock`);
+            fetch(`/user/tgc/lock?id=${USER_ID}&type=${type}&value=${doc.checked}`, {"method": "PUT"})
+            .then(function(response) {
+                if(response.ok) {
+                    alert("Lock has been updated");
+                    window.location.replace(window.location);
+                } else {
+                    doc.classList.add("error");
+                    response.text().then(function(text) {
+                        alert(text);
+                    });
+                }
+            }).catch(function(reason) {
+                alert("Error:" + reason);
+            });
+        }
+
+        function toggleRole(role) {
+            fetch(`/user/tgc/toggle?id=${USER_ID}&role=${role}`, {"method": "PUT"})
+            .then(function(response) {
+                if(response.ok) {
+                    alert("Roles have been updated");
+                    window.location.replace(window.location);
+                } else {
+                    doc.classList.add("error");
+                    response.text().then(function(text) {
+                        alert(text);
+                    });
+                }
+            }).catch(function(reason) {
+                alert("Error:" + reason);
+            });
+        }
+    </script>
+</body>
