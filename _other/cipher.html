@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<head>
+    <title>Cipher Thing</title>
+    <style>
+        .mono {
+            font-family: monospace;
+        }
+
+        tr {
+            width: 50%;
+        }
+    </style>
+</head>
+<body>
+    <p>Enter the original cipher text:</p>
+    <table style="width: 100%;">
+        <tr><th>Ciphered</th><th>Plain</th></tr>
+        <tr>
+            <td><textarea rows="50" cols="100" autofocus id="original"></textarea></td>
+            <td><textarea rows="50" cols="100" id="plaintext" readonly></textarea></td>
+        </tr>
+    </table>
+    <div id="dict">
+    </div>
+
+    <br>
+    <input type="button" value="Refresh" onclick="update();"/><br/>
+
+    <script>
+        
+        var AlphaBet = {};
+        function setup() {
+            var doc = document.getElementById("dict");
+            var alphabet = ["a", "b", "c", "d", "e", "f", "g",
+                            "h", "i", "j", "k", "l", "m", "n", "o", "p",
+                            "q", "r", "s", "t", "u", "v", "w", "x",
+                            "y", "z"];
+            console.log(alphabet);
+            for(var index in alphabet) {
+                var letter = alphabet[index];
+                console.log(letter);
+                AlphaBet[letter] = letter;
+                var text = `<label class='mono'>${letter} -> </label>`;
+                text += `<input type='text' onclick='change(this);' placeholder='${letter}' id='${letter}'/>`;
+                doc.innerHTML += text + "<br>";
+            }
+        }
+        setup();
+
+
+
+        function change(input) {
+            console.log(input.id);
+            AlphaBet[input.id] = input.value;
+            update();
+        }
+
+        function isUpper(str) {
+            return str.toUpperCase() === str;
+        }
+
+        function update() {
+            var cipher = document.getElementById("original");
+            var plain = document.getElementById("plaintext");
+            console.log("Updating");
+            var newText = "";
+            for(var index in cipher.value) {
+                var letter = cipher.value[index];
+                var newLetter = AlphaBet[letter.toLowerCase()];
+                var upper = isUpper(letter);
+                if(newLetter) {
+                    if(upper)
+                        newText += newLetter.toUpperCase();
+                    else
+                        newText += newLetter;
+                } else {
+                    newText += letter;
+                }
+            }
+            plain.value = newText;
+        }
+    </script>
+
+
+</body>

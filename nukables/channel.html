@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<head>
+    <title><REPLACE id="channel.name"/></title>
+    <link rel="stylesheet" type="text/css" href="../_style.css">
+    <link rel="stylesheet" type="text/css" href="/css">
+    <style>
+        .center {
+            text-align: center;
+            background-color: gray;
+        }
+    </style>
+</head>
+<body>
+    <h3>Modification of <REPLACE id="channel.name"/></h3>
+    <table>
+        <tr>
+            <th>Owner</th><th>Topic</th>
+        </tr>
+        <tr>
+            <td><REPLACE id="owner.name"/></td>
+            <td><REPLACE id="channel.topic"/></td>
+        </tr>
+
+        <tr>
+            <th colspan="2" class="center">Read Permission</th>
+        </tr>
+        <tr>
+            <th>Roles</th><th>Users</th>
+        </tr>
+        <tr><td><REPLACE id="read:r"/></td><td><REPLACE id="read:u"/></td></tr>
+
+        <tr>
+            <th colspan="2" class="center">Moderator Permission</th>
+        </tr>
+        <tr>
+            <th>Roles</th><th>Users</th>
+        </tr>
+        <tr><td><REPLACE id="mod:r"/></td><td><REPLACE id="mod:u"/></td></tr>
+
+        <tr>
+            <th colspan="2" class="center">Admin Permission</th>
+        </tr>
+        <tr>
+            <th>Roles</th><th>Users</th>
+        </tr>
+        <tr><td><REPLACE id="admin:r"/></td><td><REPLACE id="admin:u"/></td></tr>
+    </table>
+    <script>
+        var userList = {};
+        var roleList = {};
+
+        function addUsers() {
+<REPLACE id="users"/>
+        }
+
+        function addRoles() {
+<REPLACE id="roles"/>
+        }
+    </script>
+</body>

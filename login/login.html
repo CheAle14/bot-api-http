@@ -16,6 +16,8 @@
         <input id="username" type="text" placeholder="Discord Username"/>
         <input id="number" type="number" placeholder="Discord ID"/>
         <input type="button" onclick="submit();" value="Submit" />
+        <br>
+        <input id="password" type="password" placeholder="(Bot) Password (must provide user)" />
         <p id="fb" style="display: none; color: darkred; font-weight: bold;">Feedback....</p>
     </div>
 
@@ -52,6 +54,7 @@
         function submit() {
             var uname = document.getElementById("username");
             var id = document.getElementById("number");
+            var pwd = document.getElementById("password");
             var nonce = rnd(0, 10000);
             display("Submitting: " + uname.value.toString() + " " + id.value.toString());
             var username = uname.value;
@@ -59,9 +62,12 @@
                 username = "null"
             var ulong = id.value;
             if(!ulong)
-                ulong = "0"
-            setCookie("login_attempt", `name-${username}&id-${ulong}&nonce-${nonce}`, 3);
-            var uri = `/login/attempt?name=${username}&id=${ulong}&nonce=${nonce}`;
+                ulong = "0";
+            var password = pwd.value;
+            if(!password)
+                password = "null";
+            setCookie("login_attempt", `name-${username}&id-${ulong}&nonce-${nonce}&pwd-${password}`, 3);
+            var uri = `/login/attempt?name=${username}&id=${ulong}&pwd=${password}&nonce=${nonce}`;
             window.location.replace(uri);
         }
     </script>
