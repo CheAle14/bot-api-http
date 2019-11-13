@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<head>
+    <title>Chess Tournament Leaderboard</title>
+    <link rel="stylesheet" type="text/css" href="/css">
+    <style>
+        #admin {
+            border: red 1px;
+            margin: 1px;
+            background-color: lightcoral;
+        }
+    </style>
+</head>
+<body>
+    <h2>Chess Leaderboard</h2>
+    <table>
+        <tr><th>Position</th><th>Score</th><th>Name</th><th>W/L %</th><th>W/L Raw</th></tr>
+        <REPLACE id="table"/>
+    </table>
+
+    <div id="admin" style="display: <REPLACE id='admin'/>;">
+        <br>
+        <label>No abuse please: </label>
+        <input type="button" value="Create New User" onclick="newuser();" style="margin-left: 5px; width: 40%; height: 20px;"/>
+        <input type="button" value="Update Rankings" onclick="matchend();" style="width: 40%; height: 20px;" />
+    </div>
+
+    <script>
+        function newuser() {
+            var name = prompt("Enter new person's name");
+            if(name == null || name == "") {
+                // cancelled
+            } else {
+                fetch("/chess/api/player?name=" + name, 
+                    {"method": "PUT"}
+                )
+                .then(function (response) {
+                    if(response.ok) {
+                        setTimeout(function reload() {
+                            window.location.replace(window.location);
+                        }, 1000);
+                    } else {
+                        response.text().then(function r(t) {alert(t);});
+                    }
+                })
+                .catch(function(r){alert(r);});
+            }
+        }
+
+        function matchend() {
+            window.location.replace("/chess/match");
+        }
+    </script>
+</body>

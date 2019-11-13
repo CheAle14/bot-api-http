@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<head>
+    <title>Chess Match</title>
+    <link rel="stylesheet" type="text/css" href="/css">
+    <style>
+        select {
+            width: 40%;
+            height: 30px;
+        }
+        label {
+            width: 10%;
+            height: 30px;
+            margin: 5px;
+        }
+        #submit {
+            width: 100%;
+            height: 30px;
+            margin: 3px;
+        }
+        #cb {
+            width: 30px;
+            height: 30px;
+            margin: 3px;
+        }
+    </style>
+</head>
+<body>
+    <input id="cb" type="checkbox" onclick="toggledraw(this);"/><label>Is Draw? </label>
+    <br>
+    <label id="winlbl">Winner: </label><select id="winner">
+        <REPLACE id="playerlist"/>
+    </select>
+    <label id="loslbl">Loser:  </label><select id="loser">
+        <REPLACE id="playerlist"/>
+    </select>
+
+    <br>
+    <input id="submit" type="button" onclick="submit()" value="Submit" />
+
+    <script>
+        var DRAW = false;
+        function toggledraw(cb) {
+            DRAW = cb.checked;
+            var winner = document.getElementById("winlbl");
+            var loser = document.getElementById("loslbl");
+            if(DRAW) {
+                winner.innerHTML = "Player 1 Name";
+                loser.innerHTML = "Player 2 Name";
+            } else {
+                winner.innerHTML = "Winner Name";
+                loser.innerHTML = "Loser Name";
+            }
+        }
+
+        function submit() {
+            var winner = document.getElementById("winner");
+            var loser = document.getElementById("loser");
+            var winnerName = winner.options[winner.selectedIndex].text;
+            var loserName = loser.options[loser.selectedIndex].text;
+            fetch(`/chess/api/match?winner=${winnerName}&loser=${loserName}&draw${DRAW}`, 
+                    {"method": "PUT"}
+                )
+                .then(function (response) {
+                    if(response.ok) {
+                        window.location.replace("/chess")
+                    } else {
+                        response.text().then(function r(t) {alert(t);});
+                    }
+                })
+                .catch(function(r){alert(r);});
+        }
+    </script>
+</body>
