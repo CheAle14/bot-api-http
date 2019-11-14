@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<head>
+    <title>Change Users</title>
+    <link rel="stylesheet" type="text/css" href="/css">
+</head>
+<body>
+    <p>Remove or set user score below:</p>
+    <TABLE>
+        <tr><th>User</th><th>Score</th><th>Remove</th></tr>
+        <REPLACE id="table"/>
+    </TABLE>
+
+    <script>
+        function remove(name) {
+            if(confirm("Are you sure you want to remove " + name + " from the Leaderboards?")) {
+                fetch("/chess/api/remove?name=" + name, 
+                    {"method": "PUT"}
+                )
+                .then(function (response) {
+                    if(response.ok) {
+                        setTimeout(function reload() {
+                            window.location.replace(window.location);
+                        }, 100);
+                    } else {
+                        response.text().then(function r(t) {alert(t);});
+                    }
+                })
+                .catch(function(r){alert(r);});
+            }
+        }
+
+        function change(name) {
+            var thing = prompt("Enter new score for " + name + ". Cannot be below 100");
+            if(thing !== null) {
+                if(thing.length > 0) {
+                    if(!isNaN(thing)) {
+                        var number = parseInt(thing);
+                        fetch(`/chess/api/score?name=${name}&value=${number}`, 
+                            {"method": "PUT"}
+                        )
+                        .then(function (response) {
+                            if(response.ok) {
+                                setTimeout(function reload() {
+                                    window.location.replace(window.location);
+                                }, 100);
+                            } else {
+                                response.text().then(function r(t) {alert(t);});
+                            }
+                        })
+                        .catch(function(r){alert(r);});
+                        return;
+                    } else {
+                        alert("Input was not a number")
+                    }
+                } else {
+                    alert("Input was empty (zero length string)")
+                }
+            } else {
+                alert("No input was provided");
+            }
+        }
+    </script>
+    
+    <footer>
+            <hr>
+            <label><a href="/chess">Return to Leaderboard</a></label>
+    </footer>
+</body>
