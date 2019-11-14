@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<head>
+    <title>Landing Page (Login Please)</title>
+</head>
+<body>
+    <p>Thank you for visiting this <em>very nicely formatted</em> document</p>
+    <label>In order to achieve the maximum use out of this, please login; if you can: </label>
+    <input style="width: 150px; height: 50px;" type="button" value="Log In" onclick="login();"/>
+    <br>
+    <p>Without logging in, you have access to:</p>
+    <ul>
+        <li><strong><a href="/chess">View Chess leaderboard</a></strong></li>
+        <li><a href="/masterlist">View MASTERLIST of Servers</a></li>
+    </ul>
+
+    <script>
+        function login() {
+            window.location.replace("/login");
+        }
+    </script>
+</body>
