@@ -59,6 +59,25 @@
                 alert("No input was provided");
             }
         }
+
+        function changename(id, old) {
+            var newName = prompt(`Please enter new name of ${old}`, old);
+            if(newName != old) {
+                fetch(`/chess/api/changename?id=${id}&newName=${newName}`, 
+                            {"method": "PUT"}
+                        )
+                        .then(function (response) {
+                            if(response.ok) {
+                                setTimeout(function reload() {
+                                    window.location.replace(window.location);
+                                }, 100);
+                            } else {
+                                response.text().then(function r(t) {alert(t);});
+                            }
+                        })
+                        .catch(function(r){alert(r);});
+            }
+        }
     </script>
     
     <footer>

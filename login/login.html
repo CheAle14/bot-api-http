@@ -1,20 +1,46 @@
 <!DOCTYPE html>
 <head>
     <title>Login Page</title>
+    <style>
+        input {
+            width: 98%;
+            height: 60px;   
+            margin: 1px;
+            margin-left: 5px;
+        }
+        p, label {
+            margin-left: 6px;
+        }
+        html {
+            margin: 0px;
+            height: 100%;
+            width: 100%;
+        }
+        body {
+            margin: 0px;
+            min-height: 100%;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+        div {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            flex-direction: column;
+        }
+    </style>
 </head>
 <body>
-    <h1>THIS IS SECURE</h1>
-
-    <p>Like no joke, it uses HTTPS and everything</p>
-    <p>This process will require you to enter your Discord username, then click a button in discord</p>
-    <p>I do not see your credentials, or anything like that.</p>
-
     <div id="login">
-        <p>If you provide your ID, the username is ignored.</p>
-        <p>If you provide a username, we attempt to search for it.</p>
+        <button class="openbtn" onclick="openNav()">&#9776; Open Sidebar</button>
+        <p>Please login by providing your Discord username, OR your id</p>
+        <p>If you have set up a bypass password, you can enter that too</p>
         <p style="color: red;">You must provide one, or the other.</p>
         <input id="username" type="text" placeholder="Discord Username"/>
+        <br>
         <input id="number" type="number" placeholder="Discord ID"/>
+        <br>
         <input type="button" onclick="submit();" value="Submit" />
         <br>
         <label>Password is set via '/bot token pass' command </label><br/><input id="password" type="password" placeholder="(Bot) Password (must provide user)" />
