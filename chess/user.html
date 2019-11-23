@@ -6,7 +6,7 @@
 <body>
     <p>Remove or set user score below:</p>
     <TABLE>
-        <tr><th>User</th><th>Score</th><th>Remove</th></tr>
+        <tr><th>User</th><th>Score</th><th>Remove</th><th>Add Note</th></tr>
         <REPLACE id="table"/>
     </TABLE>
 
@@ -26,6 +26,29 @@
                     }
                 })
                 .catch(function(r){alert(r);});
+            }
+        }
+
+        function addNote(id) {
+            var note = prompt("Enter a new note to add to user");
+            var expires = prompt("Enter number of days before note expires", "31");
+            var intExpires = parseInt(expires);
+            if(intExpires && intExpires <= 31) {
+                if(note) {
+                    fetch(`/chess/api/note?id=${id}&note=${note}&expires=${intExpires}`, 
+                    {"method": "PUT"}
+                )
+                .then(function (response) {
+                    if(response.ok) {
+                        setTimeout(function reload() {
+                            window.location.replace(window.location);
+                        }, 100);
+                    } else {
+                        response.text().then(function r(t) {alert(t);});
+                    }
+                })
+                .catch(function(r){alert(r);});
+                }
             }
         }
 
