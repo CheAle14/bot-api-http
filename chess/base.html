@@ -16,22 +16,19 @@
     </style>
 </head>
 <body>
-    <div style="height: 35px;">
+    <div style="height: 35px;display: grid;grid-auto-flow: column;grid-template-columns: 25% 50% 25%;">
         <label class="header">Chess Leaderboard</label>
-        <REPLACE id="loginBtn"/>
+        <div id="admin" style="display: <REPLACE id='admin'/>;vertical-align: middle;align-items: center;justify-content: center;">
+            <input type="button" value="Create New User" onclick="newuser();" style="margin-left: 5px; width: 30%; height: 20px;">
+            <input type="button" value="Modify User" onclick="moduser();" style="margin-left: 5px; width: 30%; height: 20px;">
+            <input type="button" value="Update Rankings" onclick="matchend();" style="width: 30%; height: 20px;">
+        </div>
+        <REPLACE id='loginBtn'/>
     </div>
     <table>
         <tr><th>Position</th><th>Score</th><th>Name</th><th>W/L %</th><th>W/L Raw</th></tr>
         <REPLACE id="table"/>
     </table>
-
-    <div id="admin" style="display: <REPLACE id='admin'/>;">
-        <br>
-        <label>No abuse please: </label>
-        <input type="button" value="Create New User" onclick="newuser();" style="margin-left: 5px; width: 30%; height: 20px;"/>
-        <input type="button" value="Modify User" onclick="moduser();" style="margin-left: 5px; width: 30%; height: 20px;"/>
-        <input type="button" value="Update Rankings" onclick="matchend();" style="width: 30%; height: 20px;" />
-    </div>
 
     <script>
         function newuser() {
