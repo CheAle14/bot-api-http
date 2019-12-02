@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<head>
+    <title>Introuction of New Rule</title>
+    <style>
+    textarea {
+        width: 100%;
+        height: 100%;
+    }
+    </style>
+</head>
+<body>
+    <p>You can propose a brand new rule by editing the text areas below</p>
+    <p><strong>If an existing rule exists, it should be amended rather than a new one made</strong></p>
+
+    <table>
+        <tr><th>Language</th><th>Title</th><th>Text</th><th>Penalty</th></tr>
+        <tr><td>Click on name to submit for that language</td><td>A short, 10 word max, description</td><td>A longer explaination of the rule</td><td>An optional penalty for breaking the rule</td></tr>
+        <REPLACE id='table'/>
+    </table>
+
+    <p>To submit, click on the language code to submit that language</p>
+
+    <script>
+    function submit(code) {
+        console.log(code);
+        var titleDoc = document.getElementById("title-" + code);
+        var descDoc = document.getElementById("desc-" + code);
+        var penDoc = document.getElementById("penalty-" + code);
+        var title = titleDoc.value;
+        var desc = descDoc.value;
+        var pen = penDoc.value;
+        fetch(`/rules/api/introduce?locale=${code}&title=${title}&desc=${desc}&pen=${pen}`, 
+        {"method": "PUT"}
+        )
+        .then(function (response) {
+            if(response.ok) {
+                setTimeout(function reload() {
+                    window.location.replace("/rules");
+                }, 100);
+            } else {
+                response.text().then(function r(t) {alert(t);});
+            }
+        })
+        .catch(function(r){alert(r);});
+    }
+    </script>
+</body>

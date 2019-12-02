@@ -37,17 +37,17 @@
                 if(note) {
                     fetch(`/chess/api/note?id=${id}&note=${note}&expires=${intExpires}`, 
                     {"method": "PUT"}
-                )
-                .then(function (response) {
-                    if(response.ok) {
-                        setTimeout(function reload() {
-                            window.location.replace(window.location);
-                        }, 100);
-                    } else {
-                        response.text().then(function r(t) {alert(t);});
-                    }
-                })
-                .catch(function(r){alert(r);});
+                    )
+                    .then(function (response) {
+                        if(response.ok) {
+                            setTimeout(function reload() {
+                                window.location.replace(window.location);
+                            }, 100);
+                        } else {
+                            response.text().then(function r(t) {alert(t);});
+                        }
+                    })
+                    .catch(function(r){alert(r);});
                 }
             }
         }

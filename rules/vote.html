@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<head>
+    <title>Voting for Rule Change</title>
+</head>
+<body>
+    <p>Voting for the following:</p>
+    <ul>
+        <li><REPLACE id='short'/></li>
+        <li>Proposed by <REPLACE id='by'/></li>
+        <li><REPLACE id='sponser'/></li>
+        <li>Language is <REPLACE id='locale'/></li>
+    </ul>
+    <p>Compare and vote</p>
+    <table>
+        <tr><th>Original Title</th><th>Description</th><th>Penalty</th></tr>
+        <REPLACE id='original'/>
+        <tr><th>Proposed Title</th><th>Description</th><th>Penalty</th></tr>
+        <REPLACE id='proposal'/>
+    </table>
+    <input type="button" value="Aye" style='width:32%' onclick="approve()"/>
+    <input type="button" value="No" style='width: 33%' onclick="reject()"/>
+    <input type="button" value="Sponser" style='width: 32%' onclick="sponser()"/>
+    <p>Other voters:</p>
+    <table>
+        <tr><th>Ayes</th><th>Not voted</th><th>Noes</th></tr>
+        <REPLACE id='others'/>
+
+    </table>
+    <REPLACE id='cancel'/>
+
+    <script>
+        const VOTE_TYPE = "<REPLACE id='type'/>";
+        const VOTE_ID = "<REPLACE id='id'/>";
+        const VOTE_BY = "<REPLACE id='whoBy'/>";
+
+
+        function sponser() {
+            fetch(`/rules/api/sponser?id=${VOTE_ID}&type=${VOTE_TYPE}&proposed=${VOTE_BY}`, 
+            {"method": "PUT"}
+            )
+            .then(function (response) {
+                if(response.ok) {
+                    setTimeout(function reload() {
+                        window.location.replace(window.location);
+                    }, 100);
+                } else {
+                    response.text().then(function r(t) {alert(t);});
+                }
+            })
+            .catch(function(r){alert(r);});
+        }
+
+        function approve() {
+            vote("true");
+        }
+        function reject() {
+            vote("false");
+        }
+
+        function vote(how) {
+            fetch(`/rules/api/approve?id=${VOTE_ID}&type=${VOTE_TYPE}&proposed=${VOTE_BY}&vote=${how}`, 
+            {"method": "PUT"}
+            )
+            .then(function (response) {
+                if(response.ok) {
+                    setTimeout(function reload() {
+                        window.location.replace(window.location);
+                    }, 100);
+                } else {
+                    response.text().then(function r(t) {alert(t);});
+                }
+            })
+            .catch(function(r){alert(r);});
+        }
+
+        function veto(how){
+            fetch(`/rules/api/veto?id=${VOTE_ID}&type=${VOTE_TYPE}&proposed=${VOTE_BY}&howVeto=${how}`, 
+            {"method": "PUT"}
+            )
+            .then(function (response) {
+                if(response.ok) {
+                    setTimeout(function reload() {
+                        window.location.replace("/rules");
+                    }, 100);
+                } else {
+                    response.text().then(function r(t) {alert(t);});
+                }
+            })
+            .catch(function(r){alert(r);});
+        }
+
+        function veto_yes() {
+            veto("true");
+        }
+
+        function veto_reject() {
+            veto("false");
+        }
+
+        function withdraw() {
+            fetch(`/rules/api/withdraw?id=${VOTE_ID}&type=${VOTE_TYPE}`, 
+            {"method": "PUT"}
+            )
+            .then(function (response) {
+                if(response.ok) {
+                    setTimeout(function reload() {
+                        window.location.replace("/rules");
+                    }, 100);
+                } else {
+                    response.text().then(function r(t) {alert(t);});
+                }
+            })
+            .catch(function(r){alert(r);});
+        }
+    
+    </script>
+</body>

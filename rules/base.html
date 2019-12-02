@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<head>
+    <title>Rules - The Grand Coding</title>
+    <style>
+    .intro {
+        background-color: hotpink;
+    }
+    .amend {
+        background-color: indigo;
+    }
+    .translate {
+        background-color: lightcoral;
+    }
+    </style>
+</head>
+<body>
+    <p>Current rules in force:</p>
+    <table>
+        <tr><th>Rule No.</th><th>Text</th><th>Penalty</th><th>Amend</th></tr>
+        <REPLACE id='existing'/>
+    </table>
+    <input type="button" value="Propose New Rule" style="width: 100%; height: 20px;" onclick="newRule();"/>
+    <p>Current rules proposed for <label class='amend'>amendments</label>, <label class='intro'>new rules</label> and <label class='translate'>translations</label></p>
+    <table>
+        <tr><th>Rule No.</th><th>Locale</th><th>Proposed Text</th><th>Proposed Penalty</th><th>Proposed (Co-Sponsered)</th><th>Vote</th></tr>
+        <REPLACE id='amendments'/>
+    </table>
+    <script>
+        function newRule() {
+            window.location.replace("/rules/introduce");
+        }
+    </script>
+</body>
