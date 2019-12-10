@@ -15,4 +15,19 @@
         <hr>
         <p><a href="/chess">Return to Leaderboard</a></p>
     </footer>
+    <script>
+        function dispute(day, year, user, index, state) {
+            fetch(`/chess/api/dispute?day=${day}&year=${year}&user=${user}&index=${index}&state=${state}`, 
+                    {"method": "PUT"}
+                )
+                .then(function (response) {
+                    if(response.ok) {
+                        window.location.replace(window.location)
+                    } else {
+                        response.text().then(function r(t) {alert(t);});
+                    }
+                })
+                .catch(function(r){alert(r);});
+        }
+    </script>
 </body>
