@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<head>
+    <title>Chess Administration</title>
+</head>
+<body>
+    <TABLE>
+        <tr><th>Chess Id</th><th>Name</th><th>Discord Id</th><th>Role</th></tr>
+        <REPLACE id="table"/>
+    </TABLE>
+    <script>
+        function setUser(chess, discord) {
+            console.log(discord);
+            fetch(`/chess/api/connect?chessId=${chess}&discord=${discord.value}`, 
+                    {"method": "PUT"}
+                )
+                .then(function (response) {
+                    if(response.ok) {
+                        window.location.replace(window.location)
+                    } else {
+                        response.text().then(function r(t) {alert(t);});
+                    }
+                })
+                .catch(function(r){alert(r);});
+        }
+        function setRole(chess, role) {
+            console.log(chess);
+            console.log(role);
+            if(role.selectedIndex < 0)
+                return false;
+            var val = role[role.selectedIndex].value;
+            fetch(`/chess/api/setperm?id=${chess}&role=${val}`, 
+                    {"method": "PUT"}
+                )
+                .then(function (response) {
+                    if(response.ok) {
+                        window.location.replace(window.location)
+                    } else {
+                        response.text().then(function r(t) {alert(t);});
+                    }
+                })
+                .catch(function(r){alert(r);});
+        }
+    </script>
+</body>
