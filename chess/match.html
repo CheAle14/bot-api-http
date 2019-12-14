@@ -61,7 +61,7 @@
             var loser = document.getElementById("loser");
             var winnerName = winner.options[winner.selectedIndex].text;
             var loserName = loser.options[loser.selectedIndex].text;
-            fetch(`/chess/api/match?winner=${winnerName}&loser=${loserName}&draw${DRAW}`, 
+            fetch(`/chess/api/match?winner=${winnerName}&loser=${loserName}&draw=${DRAW}`, 
                     {"method": "PUT"}
                 )
                 .then(function (response) {
