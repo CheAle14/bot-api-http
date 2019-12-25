@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<head>
+    <title>TGC Memes Channel</title>
+    <style>
+        div {
+            padding-left: 5px;
+            padding-bottom: 10px;
+            background-color: #8E9297;
+        }
+        body {
+            background-color: #DCDDDE;
+        }
+        img {
+            padding-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+    <REPLACE id='msgs'/>
+
+    <script>
+        function view(node) {
+            var atcId = node.id;
+            var msgId = node.parentNode.id;
+            window.location.href = `/memes/img?msgId=${msgId}&attchId=${atcId}`;
+        }
+    </script>
+</body>

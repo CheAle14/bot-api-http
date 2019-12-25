@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<head>
+    <title>Analysis</title>
+    <style>
+        .tbl {
+            width:75%;
+        }
+        .bit-0 {
+            background-color: darkcyan;
+        }
+        .bit-1 {
+            background-color: darkblue;
+        }
+    </style>
+</head>
+<body>
+    <p><strong>Step 0</strong> Image to analyize, from <REPLACE id='author'/></p>
+    <REPLACE id="original"/>
+    <br/>
+    <p><strong>Step 1</strong> Reduce image to a 16x16 representation</p>
+    <REPLACE id="reduced"/>
+    <p><strong>Step 2</strong> Calculate average brightness of all pixels in the 16x16 image</p>
+    <REPLACE id="brightness"/>
+    <p><strong>Step 3</strong> Calculate a hash, by comparing each pixel's brightness to the average</p>
+    <REPLACE id="table"/>
+    <p><strong>Step 3.5</strong> Represent this hash in text form</p>
+    <p><em><REPLACE id='hash'/></em></p>
+    <p><strong>Step 4</strong> Compare hash with other images recorded</p>
+    <REPLACE id='compare'/>
+    <p><strong>Step 5</strong> Decide if any pass threshold to act on</p>
+</body>
