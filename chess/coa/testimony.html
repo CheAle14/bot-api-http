@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<head>
+    <title>Witness: <REPLACE id='witness.name'/></title>
+    <style>
+        input {
+            width: 100%;
+            height: 75px;
+        }
+        .error {
+            color:red;
+        }
+        div {
+            margin-bottom: 10px;
+            border: 1px dotted black;
+            padding: 5px;
+        }
+        div:target {
+            background-color: goldenrod;
+        }
+        span {
+            margin-right: 15px;
+            font-weight: bold;
+        }
+        .bot {
+            background-color: lightcyan;
+        }
+    </style>
+</head>
+<body>
+    <REPLACE id="advStage"/>
+    <hr>
+    <strong>Witness Testimony of <REPLACE id='witness.name'/> follows:</strong>
+    <REPLACE id="testimony"/>
+    <script>
+        const NUMBER = "<REPLACE id='hearing.casenumber'/>";
+        const WITNESS = "<REPLACE id='witness.id'/>";
+        function moveNext() {
+            fetch(`/chess/coa/stage?num=${NUMBER}&wit=${WITNESS}`,
+                {"method": "PUT"}
+            )
+            .then(function (response) {
+                if(response.ok) {
+                    window.location.href = "/chess/coa/hearing?num=" + NUMBER;
+                } else {
+                    response.text().then(function r(t) {alert(t);});
+                }
+            })
+            .catch(function(r){alert(r);});
+        }
+    </script>
+</body>

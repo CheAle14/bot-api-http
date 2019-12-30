@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<head>
+    <title>Select Judges</title>
+</head>
+<body>
+    <h3><REPLACE id='hearing.title'/></h3>
+    <p><strong><REPLACE id='hearing.description'/></strong></p>
+    <br>
+    <select id='j1'>
+        <REPLACE id='list1'/>
+    </select>
+    <select id='j2'>
+        <REPLACE id='list2'/>
+    </select>
+    <select id='j3'>
+        <REPLACE id='list3'/>
+    </select>
+    <input type="button" value="Submit" onclick="doSubmit();"/>
+    <script>
+        const NUMBER = "<REPLACE id='hearing.casenumber'/>";
+        function doSubmit() {
+            var j1 = document.getElementById("j1").value;
+            var j2 = document.getElementById("j2").value;
+            var j3 = document.getElementById("j3").value;
+            fetch(`/chess/coa/select?num=${NUMBER}&first=${j1}&second=${j2}&third=${j3}`,
+                {"method": "PUT"}
+            )
+            .then(function (response) {
+                if(response.ok) {
+                    window.location.href = "/chess/coa/hearing?num=" + NUMBER;
+                } else {
+                    response.text().then(function r(t) {alert(t);});
+                }
+            })
+            .catch(function(r){alert(r);});
+        }
+    </script>
+</body>

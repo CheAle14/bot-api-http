@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<head>
+    <title>Court of Appeals Hearings</title>
+    <style>
+        input {
+            width: 100%;
+            margin-top: 10px;
+            height: 25px;
+        }
+    </style>
+</head>
+<body>
+    <p>Current Hearings open:</p>
+    <table>
+        <tr><th>Case No.</th><th>Title</th><th>Justices</th></tr>
+        <REPLACE id='table'/>
+    </table>
+    <p>Current requested hearings</p>
+    <table>
+        <tr><th>Plaintiff</th><th>Defendant</th><th>Description</th><th>Justices Approving</th></tr>
+        <REPLACE id='pending'/>
+    </table>
+    <input type="button" value="Request a hearing" onclick="window.location.href = '/chess/coa/newappeal'"/>
+
+    <script>
+    </script>
+</body>

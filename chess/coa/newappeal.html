@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<head>
+    <title>Request an Appeal</title>
+    <style>
+    input {
+        width: 100%;
+        height: 25px;
+        margin-top: 5px;
+    }
+    select {
+        width: 100px;
+        height: 25px;
+        font-weight: bold;
+    }
+    </style>
+</head>
+<body>
+    <label><strong>Plaintiff:</strong> <REPLACE id='plaintiff'/></label>
+    <br>
+    <label><strong>Defendant:</strong> <select id='players'><REPLACE id='players'/></select></label>
+    <input id="reason" type="text" maxlength="256" placeholder="SHORT description on why appeal wanted"/>
+    <br>
+    <input type="button" onclick="yeetThatOne();" value="Submit"/>
+    <script>
+        function yeetThatOne() {
+            var selectCase = document.getElementById("players");
+            var reason = document.getElementById("reason").value;
+            fetch(`/chess/coa/request?def=${selectCase.value}&reason=${encodeURIComponent(reason)}`,
+                {"method": "PUT"}
+            )
+            .then(function (response) {
+                if(response.ok) {
+                    window.location.replace("/chess/coa")
+                } else {
+                    response.text().then(function r(t) {alert(t);});
+                }
+            })
+            .catch(function(r){alert(r);});
+        }
+    </script>
+</body>
