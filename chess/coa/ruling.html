@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<head>
+    <title>Reach Verdict</title>
+</head>
+<body>
+    <h3><REPLACE id='hearing.title'/></h3>
+    <p>As a Justice, you are part of a panel of Justices that are selected to represent the Court of Appeals<br>
+    You are expected to deliberate with the other Justices, then finally reach a verdict<br>
+    This verdict may typically involve:
+    <ul>
+        <li>Unanimous - all Justices agree entirely on a way forward</li>
+        <li>Majority - most Justices agree, or concur</li>
+        <li>Concur - reaching the same conclusion, but with some (or most) different reasons</li>
+        <li>Minority - the Justices that disagree with the majority verdict</li>
+    </ul>
+    Any descision <strong>must</strong> have a majority behind it; that means at least <strong><REPLACAE id='hearing.JudgeRulingMinimum'/></strong> justices must all concur
+    </p>
+    <p>
+        Below are the possible options this Court may come to:
+        <ul>
+            <li><strong>Dismiss</strong> - for cases incorrect on a procedural point (eg, plaintiff having no <a href='https://en.wikipedia.org/wiki/Standing_(law)'>standing</a>, Court having no jurisdiction) </li>
+            <li><strong>Uphold</strong> - The Tournament Moderator's descision was entirely correct and requires no correction</li>
+            <li><strong>Remand</strong> - Make a requirement of some sort (eg, a limit) then send the matter back down to the Moderator for them to take those requirements into account</li>
+            <li><strong>Overturn</strong> - Remove the Moderator's descision entirely and the Court issues its own</li>
+            <li><strong>Other</strong> - for when the other verdicts dont fit (<strong>you must provide proper explaination</strong>)</li>
+        </ul>
+    </p>
+    <p>Please note: You are expected to be able to explain your position, such that it can be written up and released</p>
+    <table>
+        <tr><th>Dismiss</th><th>Uphold</th><th>Remand</th><th>Overturn</th><th>Other</th><th>Undecided</th></tr>
+        <REPLACE id='judges'/>
+        <tr>
+            <td><input type="button" value="Vote: Dismiss" onclick='votefor("Dismiss");'/></td>
+            <td><input type="button" value="Vote: Uphold" onclick='votefor("Uphold");'/></td>
+            <td><input type="button" value="Vote: Remand" onclick='votefor("Remand");'/></td>
+            <td><input type="button" value="Vote: Overturn" onclick='votefor("Overturn");'/></td>
+            <td><input type="button" value="Vote: Other" onclick='votefor("Other");'/></td>
+            <td></td>
+        </tr>
+    </table>
+    <script>
+        const NUMBER = "<REPLACE id='hearing.casenumber'/>";
+        function votefor(what) {
+            fetch(`/chess/coa/rule?num=${NUMBER}&type=${what}`,
+                {"method": "PUT"}
+            )
+            .then(function (response) {
+                if(response.ok) {
+                    window.location.replace(window.location.href);
+                } else {
+                    response.text().then(function r(t) {alert(t);});
+                }
+            })
+            .catch(function(r){alert(r);});
+        }
+    </script>
+</body>
