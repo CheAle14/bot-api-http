@@ -25,6 +25,7 @@
   <link rel="stylesheet" type="text/css" href="../../_style.css">
 </head>
 <body>
+    <REPLACE id='appeal'/>
     <p>Witnesses:</p>
     <table>
         <tr><th>Name</th><th>Called by</th></tr>
@@ -32,4 +33,19 @@
     </table>
     <hr>
     <REPLACE id='judge'/>
+    <script>
+        function grantAppeal(num) {
+            fetch(`/chess/coa/allow_enbanc?num=${num}`,
+                {"method": "PUT"}
+            )
+            .then(function (response) {
+                if(response.ok) {
+                    window.location.replace("/chess/coa")
+                } else {
+                    response.text().then(function r(t) {alert(t);});
+                }
+            })
+            .catch(function(r){alert(r);});
+        }
+    </script>
 </body>

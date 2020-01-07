@@ -12,20 +12,42 @@
         height: 25px;
         font-weight: bold;
     }
+    hr {
+        margin-bottom: 25px !important;
+        margin-top: 25px !important;
+    }
     </style>
 </head>
 <body>
+    <h1>PLEASE READ:</h1>
+    <p>There are a number of things that you can appeal against:</p>
+    <ul>
+        <li>Appeal against the descision of a Moderator (or a Justice acting as a Moderator) - use first form below</li>
+        <li>Continue your appeal: After the Court has reached a verdict, ask for the case to be heard en banc</li>
+        <li>Appeal a technical change by the Chief Justice: When the Chief Justice changes something for technical reasons, appeal that change</li>
+    </ul>
+    <p><strong>Open a new Case against a specific person, or Moderator</strong></p>
     <label><strong>Plaintiff:</strong> <REPLACE id='plaintiff'/></label>
     <br>
     <label><strong>Defendant:</strong> <select id='players'><REPLACE id='players'/></select></label>
     <input id="reason" type="text" maxlength="256" placeholder="SHORT description on why appeal wanted"/>
     <br>
-    <input type="button" onclick="yeetThatOne();" value="Submit"/>
+    <input type="button" onclick="yeetThatOne();" value="Submit appeal"/>
+    <hr>
+    <p><strong>Appeal a previous Court hearing to be heard <em>en banc</em></strong></p>
+    <table>
+        <tr><th>Case Num.</th><th>Title</th><th>Allegation</th><th>Ruling</th><th>Appeal</th></tr>
+        <REPLACE id='table'/>
+    </table>
+    <hr>
+    <p><strong>Pursuant to Section III, Act 5: Appeal a technical modification made by the Chief Justice</strong></p>
+    <input id="reason2" type="text" maxlength="250" placeholder="SHORT desc why appeal technical change"/>
+    <input type="button" onclick="appealTechnical(document.getElementById('reason2').value);" value="Submit"/>
     <script>
-        function yeetThatOne() {
-            var selectCase = document.getElementById("players");
-            var reason = document.getElementById("reason").value;
-            fetch(`/chess/coa/request?def=${selectCase.value}&reason=${encodeURIComponent(reason)}`,
+        const CHIEF_ID = "<REPLACE id='chief'/>";
+
+        function requestNewAppeal(defendant, reason) {
+            fetch(`/chess/coa/request?def=${defendant}&reason=${encodeURIComponent(reason)}`,
                 {"method": "PUT"}
             )
             .then(function (response) {
@@ -36,6 +58,30 @@
                 }
             })
             .catch(function(r){alert(r);});
+        }
+
+        function yeetThatOne() {
+            var selectCase = document.getElementById("players");
+            var reason = document.getElementById("reason").value;
+            requestNewAppeal(selectCase.value, reason);
+        }
+
+        function appealCase(number) {
+            fetch(`/chess/coa/enbanc?num=${number}`,
+                {"method": "PUT"}
+            )
+            .then(function (response) {
+                if(response.ok) {
+                    window.location.replace("/chess/coa")
+                } else {
+                    response.text().then(function r(t) {alert(t);});
+                }
+            })
+            .catch(function(r){alert(r);});
+        }
+
+        function appealTechnical(reason) {
+            requestNewAppeal(CHIEF_ID, "S3A5: " + reason);
         }
     </script>
 </body>
