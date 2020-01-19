@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<head>
+    <title>Chessclock</title>
+    <style>
+        div {
+            width: 100%;
+        }
+        label {
+            width: 37.5%;
+            height: 100%;
+            display:inline-block;
+            text-align: center;
+            font-weight: bold;
+            font-size: x-large;
+        }
+        input {
+            height: 100%;
+            display: inline-block;
+        }
+        .lrg {
+            height: 100%;
+            width: 49.5%;
+            margin: 1;
+            padding: 0;
+            border: 0;
+        }
+        html, 
+        body {
+            height: 100%;
+        }
+    </style>
+</head>
+<body style="width: 100%; margin-left: 0; height:100%" onload="setDisplay()">
+    <!-- This needs to be designed such that it displays horizontally -->
+    <div style="height: 20%; padding-left: 8;" >
+        <label id='whiteTime'>05:00.000</label>
+        <input id='haltboth' style="width: 24%;" type="button" value="Halt Both" onclick="stopBoth();"/>
+        <label id="blackTime">05:00.000</label>
+    </div>
+    <div style="height: 80%">
+        <input id='whiteBtn' class='lrg' type="button" value="End White Turn" onclick="stopWhite();"/>
+        <input id='blackBtn' class='lrg' style="color:white; background-color: black; float:right;" type="button" value="End Black Turn" onclick="stopBlack();"/>
+    </div>
+    <script>
+        const MINUTE = "<REPLACE id='minutes'/>";
+        const SECOND = "<REPLACE id='seconds'/>";
+        var WhiteTimer = new Date(0,0,0,0, parseInt(MINUTE),parseInt(SECOND), 0);
+        var BlackTimer = new Date(0,0,0,0, parseInt(MINUTE),parseInt(SECOND), 0);
+
+        function pad(n, width) {
+            n = n + '';
+            return n.padStart(width, '0');
+        }
+        function printTimer(timer) {
+            return `${pad(timer.getMinutes().toFixed(0), 2)}:${pad(timer.getSeconds().toFixed(0), 2)}.${pad(timer.getMilliseconds().toFixed(0), 3)}`;
+        }
+
+        function setDisplay() {
+            var whiteLbl = document.getElementById("whiteTime")
+            var BlackLbl = document.getElementById("blackTime")
+            var halt = document.getElementById("haltboth");
+            WhiteTimer = new Date(WhiteTimer);
+            BlackTimer = new Date(BlackTimer);
+            whiteLbl.innerText = printTimer(WhiteTimer);
+            BlackLbl.innerText = printTimer(BlackTimer);
+            if(interval === "end") {
+                halt.value = "Game Over!";
+            }
+            else if(interval) {
+                halt.value = "Stop both timers";
+                whiteLbl.style.color = WhiteOrBlack ? "darkred" : "black";
+                BlackLbl.style.color = WhiteOrBlack ? "black" : "darkred";
+            } else {
+                if(WhiteOrBlack)
+                    halt.value = "Restart with White";
+                else
+                    halt.value = "Restart with Black";
+            }
+        }
+        var startTime = Date.now();
+        var interval = "";
+        var WhiteOrBlack = true;
+        function start() {
+            startTime = Date.now();
+            interval = setInterval(function() {
+                setDisplay();
+                var elap = Date.now() - startTime;
+                if(WhiteOrBlack) {
+                    WhiteTimer -= elap;
+                } else {
+                    BlackTimer -= elap;
+                }
+                startTime = Date.now();
+                checkTimers();
+            }, 100);
+        }
+        function isAtEnd(date) {
+            var date = new Date(date);
+            return (date.getMinutes() <= 0 && date.getSeconds() <= 0 && date.getMilliseconds() <= 0)
+                || date.getHours() > 0;
+        }
+        function checkTimers() {
+            WhiteTimer = new Date(WhiteTimer);
+            BlackTimer = new Date(BlackTimer);
+            var whiteLbl = document.getElementById("whiteBtn")
+            var BlackLbl = document.getElementById("blackBtn")
+            var halt = document.getElementById("haltboth");
+            if(isAtEnd(WhiteTimer)) {
+                clearInterval(interval);
+                interval = "end";
+                whiteLbl.value = "LOSER";
+                whiteLbl.style.backgroundColor = "red";
+                BlackLbl.value = "WINNER";
+                BlackLbl.style.backgroundColor = "green";
+                WhiteTimer = new Date(0,0,0,0,0,0,0);
+            } else if (isAtEnd(BlackTimer)) {
+                clearInterval(interval);
+                interval = "end";
+                whiteLbl.value = "WINNER";
+                whiteLbl.style.backgroundColor = "green";
+                BlackLbl.value = "LOSER";
+                BlackLbl.style.backgroundColor = "red";
+                BlackTimer = new Date(0,0,0,0,0,0,0);
+            } else {
+                return;
+            }
+            setDisplay();
+        }
+        function stopBoth() {
+            if(interval === "end")
+                return;
+            if(interval) {
+                clearInterval(interval)
+                interval = "";
+                setDisplay();
+            } else {
+                start();
+            }
+        }
+        function stopWhite() {
+            if(interval === "end")
+                return;
+            if(WhiteOrBlack === true) {
+                WhiteOrBlack = false;
+            }
+        }
+        function stopBlack() {
+            if(interval === "end")
+                return;
+            if(WhiteOrBlack === false) {
+                WhiteOrBlack = true;
+            }
+        }
+    </script>
+</body>
