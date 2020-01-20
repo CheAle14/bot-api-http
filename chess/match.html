@@ -67,7 +67,7 @@
                 .then(function (response) {
                     if(response.ok) {
                         if(response.status === 204) {
-                            response.text().then(function r(t) {alert(t);});
+                            alert("Game added, but must be approved by a Moderator")
                         } 
                         window.location.replace("/chess")
                     } else {
