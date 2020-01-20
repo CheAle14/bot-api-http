@@ -66,6 +66,9 @@
                 )
                 .then(function (response) {
                     if(response.ok) {
+                        if(response.status === 204) {
+                            response.text().then(function r(t) {alert(t);});
+                        } 
                         window.location.replace("/chess")
                     } else {
                         response.text().then(function r(t) {alert(t);});

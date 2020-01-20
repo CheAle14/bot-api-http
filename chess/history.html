@@ -29,5 +29,20 @@
                 })
                 .catch(function(r){alert(r);});
         }
+
+        function approveGame(ref) {
+            fetch(`/chess/api/approve?reference=${ref}`, 
+                    {"method": "PUT"}
+                )
+                .then(function (response) {
+                    if(response.ok) {
+                        window.location.href = "/chess"
+                    } else {
+                        response.text().then(function r(t) {alert(t);});
+                    }
+                })
+                .catch(function(r){alert(r);});
+        }
+
     </script>
 </body>

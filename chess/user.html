@@ -6,10 +6,28 @@
 <body>
     <p>Remove or set user score below:</p>
     <TABLE>
-        <tr><th>User</th><th>Score</th><th>Remove</th><th>Add Note</th></tr>
+        <tr><th>User</th><th>Score</th><th>Remove</th><th>Add Note</th><th>Monitor</th></tr>
         <REPLACE id="table"/>
     </TABLE>
     <script>
+        function toggleMonitor(id) {
+            if(confirm("Are you sure you want to monitor this user? Any games they play will require manual approval")) {
+                fetch("/chess/api/monitor?id=" + id, 
+                    {"method": "PUT"}
+                )
+                .then(function (response) {
+                    if(response.ok) {
+                        setTimeout(function reload() {
+                            window.location.replace(window.location);
+                        }, 100);
+                    } else {
+                        response.text().then(function r(t) {alert(t);});
+                    }
+                })
+                .catch(function(r){alert(r);});
+            }
+        }
+
         function remove(name) {
             if(confirm("Are you sure you want to remove " + name + " from the Leaderboards?")) {
                 fetch("/chess/api/remove?name=" + name, 
