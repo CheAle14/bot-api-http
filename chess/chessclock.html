@@ -5,14 +5,6 @@
         div {
             width: 100%;
         }
-        label {
-            width: 37.5%;
-            height: 100%;
-            display:inline-block;
-            text-align: center;
-            font-weight: bold;
-            font-size: x-large;
-        }
         input {
             height: 100%;
             display: inline-block;
@@ -28,14 +20,24 @@
         body {
             height: 100%;
         }
+        label {
+            background-color: -interal-root-color;
+            width: 37%;
+            height: 100%;
+            display: block;
+            text-align: center;
+            line-height: 100px;
+            font-weight: bold;
+            font-size: x-large;
+        }
     </style>
 </head>
 <body style="width: 100%; margin-left: 0; height:100%" onload="setDisplay()">
     <!-- This needs to be designed such that it displays horizontally -->
-    <div style="height: 20%; padding-left: 8;" >
-        <label id='whiteTime'>05:00.000</label>
-        <input id='haltboth' style="width: 24%;" type="button" value="Halt Both" onclick="stopBoth();"/>
-        <label id="blackTime">05:00.000</label>
+    <div style="height: 20%; padding-left: 8;" id='split'>
+        <label id='whiteTime' style='float: left'>05:00.000</label>
+        <input id='haltboth' style="width: 24%; float:left; margin-left: 3px;" type="button" value="Halt Both" onclick="stopBoth();"/>
+        <label id="blackTime" style='float: right'>05:00.000</label>
     </div>
     <div style="height: 80%">
         <input id='whiteBtn' class='lrg' type="button" value="End White Turn" onclick="stopWhite();"/>
@@ -70,6 +72,8 @@
                 halt.value = "Stop both timers";
                 whiteLbl.style.color = WhiteOrBlack ? "darkred" : "black";
                 BlackLbl.style.color = WhiteOrBlack ? "black" : "darkred";
+                whiteLbl.style.backgroundColor = WhiteOrBlack ? "darkgrey" : "white";
+                BlackLbl.style.backgroundColor = WhiteOrBlack ? "white" : "darkgrey";
             } else {
                 if(WhiteOrBlack)
                     halt.value = "Restart with White";

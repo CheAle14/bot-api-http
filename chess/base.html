@@ -16,10 +16,40 @@
         div p {
             width: 100%;
             height: 100%;
+            margin-top: 0;
+            text-align: center;
+        }
+        #popupmain {
+            position:fixed;
+            padding:0;
+            margin:0;
+            text-align: center;
+            top:1%;
+            left:1%;
+
+            width: 98%;
+            height: 98%;
+            background:rgb(255, 136, 0);
+        }
+        #popupmain p {
+            width: 100%;
+            height: 50px;
         }
     </style>
 </head>
 <body>
+    <div id='popupmain'>
+        <h1>Notice of Official Rule Change</h1>
+        <h2>This Leaderboard now uses the offical FIDE Laws of Chess</h2>
+        <p>These rules are as expected similar to how you would have played before, but some are ignored, for example:</p>
+        <ul>
+            <li>The use of a chessclock is not required though it is encouraged to speed up play.</li>
+            <li>The use of a scoresheet is not required, an issue may be raised to any Tournament Moderator at any time</li>
+        </ul>
+        <p>Other exemptions are in the Terms and Conditions.</p>
+        <br/>
+        <a href="#" onclick="setHideCookie('main');">Click here to close, once majority have read</a>
+    </div>
     <div style="height: 35px;display: grid;grid-auto-flow: column;grid-template-columns: 25% 50% 25%;">
         <label class="header">Chess Leaderboard</label>
         <div id="admin" style="display: <REPLACE id='admin'/>;vertical-align: middle;align-items: center;justify-content: center;">
@@ -29,14 +59,19 @@
         </div>
         <REPLACE id='loginBtn'/>
     </div>
-    <div id="popup" style="background: lightsalmon; width:100%; height:50px; border: 2px black solid; padding: 2px;">
+    <div id="popup1" style="background: lightsalmon; width:100%; height:50px; border: 2px black solid; padding: 2px;">
         <p><strong><a href="/chess/terms">Chess Terms and Conditions are now in affect</a></strong>
-            <br><a href="#" onclick="document.getElementById('popup').style.display='none';">Click here to close</a>
+            <br><a href="#" onclick="setHideCookie('1');">Click here to close</a>
         </p>
     </div>
     <div id="popup2" style="margin-top:10px; background: lightgreen; width:100%; height:50px; border: 2px black solid; margin-bottom: 10px;">
         <p><strong><a href="/chess/coa">Chess Court of Appeals is now open to hear any issues</a></strong>
-            <br><a href="#" onclick="document.getElementById('popup2').style.display='none';">Click here to close</a>
+            <br><a href="#" onclick="setHideCookie('2');">Click here to close</a>
+        </p>
+    </div>
+    <div id="popup3" style="margin-top:10px; background: rgb(0, 225, 255); width:100%; height:50px; border: 2px black solid; margin-bottom: 10px;">
+        <p><strong><a href="/chess/clock">A Chess Clock is available for use on a horizonal phone screen</a></strong>
+            <br><a href="#" onclick="setHideCookie('3');">Click here to close</a>
         </p>
     </div>
     <table>
@@ -84,5 +119,55 @@
         function moduser() {
             window.location.replace("/chess/userlist");
         }
+
+        function setCookie(cname, cvalue, exdays) {
+            var d = new Date();
+            d.setTime(d.getTime() + (exdays*24*60*60*1000));
+            var expires = "expires="+ d.toUTCString();
+            document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
+        }
+
+        function setHideCookie(id) {
+            document.getElementById("popup" + id).style.display = "none";
+            setCookie(id, "hide-popup", 180);
+        }
+
+        function getCookie(cname) {
+            var name = cname + "=";
+            var decodedCookie = decodeURIComponent(document.cookie);
+            var ca = decodedCookie.split(';');
+            for(var i = 0; i <ca.length; i++) {
+                var c = ca[i];
+                while (c.charAt(0) == ' ') {
+                c = c.substring(1);
+                }
+                if (c.indexOf(name) == 0) {
+                return c.substring(name.length, c.length);
+                }
+            }
+            return "";
+        }
+
+        function hideOtherPopups() {
+            var x = document.cookie.split(";");
+            console.log(x);
+            for(var i = 0; i < x.length; i++) {
+                var full = x[i];
+                var start = 0;
+                if(full[0] === " ")
+                    start = 1;
+                var name = full.substring(start, full.indexOf("="));
+                var value = getCookie(name);
+                console.log(name)
+                console.log(value)
+                if(value === "hide-popup") {
+                    var thing = document.getElementById("popup" + name);
+                    if(thing) {
+                        thing.style.display = "none";
+                    }
+                }
+            }
+        }
+        hideOtherPopups();
     </script>
 </body>
