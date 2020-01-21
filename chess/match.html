@@ -26,6 +26,10 @@
             height: 30px;
             margin: 3px;
         }
+        .banned {
+            color: red;
+            text-decoration: line-through;
+        }
     </style>
 </head>
 <body>
@@ -59,8 +63,8 @@
         function submit() {
             var winner = document.getElementById("winner");
             var loser = document.getElementById("loser");
-            var winnerName = winner.options[winner.selectedIndex].text;
-            var loserName = loser.options[loser.selectedIndex].text;
+            var winnerName = winner.options[winner.selectedIndex].value;
+            var loserName = loser.options[loser.selectedIndex].value;
             fetch(`/chess/api/match?winner=${winnerName}&loser=${loserName}&draw=${DRAW}`, 
                     {"method": "PUT"}
                 )

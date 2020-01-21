@@ -6,10 +6,32 @@
 <body>
     <p>Remove or set user score below:</p>
     <TABLE>
-        <tr><th>User</th><th>Score</th><th>Remove</th><th>Add Note</th><th>Monitor</th></tr>
+        <tr><th>User</th><th>Score</th><th>Remove</th><th>Add Note</th><th>Monitor</th><th>Ban</th></tr>
         <REPLACE id="table"/>
     </TABLE>
     <script>
+        function banUser(id) {
+            window.location.href = "/chess/ban?id=" + id;
+        }
+
+        function unBanUser(id) {
+            if(confirm("Are you sure you want to unban this user?")) {
+                fetch("/chess/api/unban?id=" + id, 
+                    {"method": "PUT"}
+                )
+                .then(function (response) {
+                    if(response.ok) {
+                        setTimeout(function reload() {
+                            window.location.replace(window.location);
+                        }, 100);
+                    } else {
+                        response.text().then(function r(t) {alert(t);});
+                    }
+                })
+                .catch(function(r){alert(r);});
+            }
+        }
+
         function toggleMonitor(id) {
             if(confirm("Are you sure you want to monitor this user? Any games they play will require manual approval")) {
                 fetch("/chess/api/monitor?id=" + id, 

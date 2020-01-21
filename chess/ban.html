@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<head>
+    <title>Ban <REPLACE id='target.name'/></title>
+    <style>
+    input {
+        width: 100%;
+        margin-bottom: 5px;
+    }
+    .txt {
+        width: 100%;
+    }
+    </style>
+</head>
+<body>
+    <h1>Warning!</h1>
+    <h3>You are about to ban <REPLACE id='target.name'/> from the Chess Leaderboard</h3>
+    <p>This will prevent any games that they take part in from being admitted to the LB, 
+        but would not and cannot prevent them from still coming to Chess Club.</p>
+    <p>Banning players should only happen for the most severe of circumstance</p>
+    <p>If your ban is found to be unreasonable, it can be appealed and overturned by the Court of Appeals</p>
+    <hr>
+    <label>Reason: (only visible to other Moderators/Justices, unless appeal made) </label><input class='txt' type="text" id='reason'/> <br/>
+    <label>Expires at: (must be at least one week; must be a Friday)</label><input type="date" id="expires"/><br/>
+    <input type="button" value='Submit' onclick="doBan()"/>
+
+    <script>
+        const USER_ID = "<REPLACE id='target.id'/>"
+        function doBan() { 
+            var rsn = document.getElementById("reason").value;
+            var expr = document.getElementById("expires").value;
+            console.log(rsn);
+            console.log(expr);
+            if(rsn.length > 256) {
+                alert("Reason is too long, must be fewer than 256 charactors")
+                return;
+            }
+            if(rsn.length < 16) {
+                alert("Reason is too short, or empty!");
+                return;
+            }
+            var date = new Date(expr);
+            if(date <= Date.now()) {
+                alert("Date is before now!");
+                return;
+            }
+            fetch(`/chess/api/ban?id=${USER_ID}&reason=${encodeURIComponent(rsn)}&expires=${encodeURIComponent(expr)}`, 
+                    {"method": "PUT"}
+                )
+                .then(function (response) {
+                    if(response.ok) {
+                        setTimeout(function reload() {
+                            window.location.href = "/chess"
+                        }, 1000);
+                    } else {
+                        response.text().then(function r(t) {alert(t);});
+                    }
+                })
+                .catch(function(r){alert(r);});
+        }
+    </script>
+</body>
