@@ -74,7 +74,7 @@
             var intExpires = parseInt(expires);
             if(intExpires && intExpires <= 31) {
                 if(note) {
-                    fetch(`/chess/api/note?id=${id}&note=${note}&expires=${intExpires}`, 
+                    fetch(`/chess/api/note?id=${id}&note=${encodeURIComponent(note)}&expires=${intExpires}`, 
                     {"method": "PUT"}
                     )
                     .then(function (response) {

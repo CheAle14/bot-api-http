@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<head>
+
+    <title>Debug AddMatch</title>
+    <style>
+    </style>
+</head>
+<body>
+    <!-- This page allows me to add previous games played by players, that were purged due to 'incidents' -->
+    <input id="cb" type="checkbox" onclick="toggledraw(this);"/><label>Is Draw? </label>
+    <br>
+    <label id="winlbl">Winner: </label><select id="winner">
+        <REPLACE id="playerlist"/>
+    </select>
+    <label id="loslbl">Loser:  </label><select id="loser">
+        <REPLACE id="playerlist"/>
+    </select>
+    <label>Date of Match:</label> <input id='date' type="date">
+
+    <br>
+    <input id="submit" type="button" onclick="submit()" value="Submit" />
+
+    <script>
+        var DRAW = false;
+        function toggledraw(cb) {
+            DRAW = cb.checked;
+            var winner = document.getElementById("winlbl");
+            var loser = document.getElementById("loslbl");
+            if(DRAW) {
+                winner.innerHTML = "Player 1 Name";
+                loser.innerHTML = "Player 2 Name";
+            } else {
+                winner.innerHTML = "Winner Name";
+                loser.innerHTML = "Loser Name";
+            }
+        }
+
+        function submit() {
+            var winner = document.getElementById("winner");
+            var loser = document.getElementById("loser");
+            var winnerName = winner.options[winner.selectedIndex].value;
+            var loserName = loser.options[loser.selectedIndex].value;
+            var date = document.getElementById("date").value;
+            fetch(`/chess/api/previous?p1=${winnerName}&p2=${loserName}&date=${encodeURIComponent(date)}&draw=${DRAW}`, 
+                    {"method": "PUT"}
+                )
+                .then(function (response) {
+                    if(response.ok) {
+                        if(response.status === 204) {
+                            alert("Game added, but must be approved by a Moderator")
+                        } 
+                        window.location.replace("/chess")
+                    } else {
+                        response.text().then(function r(t) {alert(t);});
+                    }
+                })
+                .catch(function(r){alert(r);});
+        }
+    </script>
+
+    <footer>
+        <hr>
+        <label><a href="/chess">Return to Leaderboard</a></label>
+    </footer>
+</body>
