@@ -5,9 +5,11 @@
         div {
             width: 100%;
         }
+        button,
         input {
             height: 100%;
             display: inline-block;
+            font-size: large;
         }
         .lrg {
             height: 100%;
@@ -36,7 +38,7 @@
     <!-- This needs to be designed such that it displays horizontally -->
     <div style="height: 20%; padding-left: 8;" id='split'>
         <label id='whiteTime' style='float: left'>05:00.000</label>
-        <input id='haltboth' style="width: 24%; float:left; margin-left: 3px;" type="button" value="Halt Both" onclick="stopBoth();"/>
+        <button id='haltboth' style="width: 24%; float:left; margin-left: 3px;" type="button" onclick="stopBoth();"></button>
         <label id="blackTime" style='float: right'>05:00.000</label>
     </div>
     <div style="height: 80%">
@@ -44,10 +46,11 @@
         <input id='blackBtn' class='lrg' style="color:white; background-color: black; float:right;" type="button" value="End Black Turn" onclick="stopBlack();"/>
     </div>
     <script>
-        const MINUTE = "<REPLACE id='minutes'/>";
-        const SECOND = "<REPLACE id='seconds'/>";
+        const MINUTE = "2";
+        const SECOND = "0";
         var WhiteTimer = new Date(0,0,0,0, parseInt(MINUTE),parseInt(SECOND), 0);
         var BlackTimer = new Date(0,0,0,0, parseInt(MINUTE),parseInt(SECOND), 0);
+        var MOVES = 0;
 
         function pad(n, width) {
             n = n + '';
@@ -66,20 +69,21 @@
             whiteLbl.innerText = printTimer(WhiteTimer);
             BlackLbl.innerText = printTimer(BlackTimer);
             if(interval === "end") {
-                halt.value = "Game Over!";
+                halt.innerHTML = "Game Over!";
             }
             else if(interval) {
-                halt.value = "Stop both timers";
+                halt.innerHTML = "Stop both timers";
                 whiteLbl.style.color = WhiteOrBlack ? "darkred" : "black";
                 BlackLbl.style.color = WhiteOrBlack ? "black" : "darkred";
                 whiteLbl.style.backgroundColor = WhiteOrBlack ? "darkgrey" : "white";
                 BlackLbl.style.backgroundColor = WhiteOrBlack ? "white" : "darkgrey";
             } else {
                 if(WhiteOrBlack)
-                    halt.value = "Restart with White";
+                    halt.innerHTML = "Restart with White";
                 else
-                    halt.value = "Restart with Black";
+                    halt.innerHTML = "Restart with Black";
             }
+            halt.innerHTML += "<br/>Moves: " + MOVES.toString();
         }
         var startTime = Date.now();
         var interval = "";
@@ -153,6 +157,7 @@
                 return;
             if(WhiteOrBlack === false) {
                 WhiteOrBlack = true;
+                MOVES++;
             }
         }
     </script>
