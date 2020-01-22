@@ -46,8 +46,8 @@
         <input id='blackBtn' class='lrg' style="color:white; background-color: black; float:right;" type="button" value="End Black Turn" onclick="stopBlack();"/>
     </div>
     <script>
-        const MINUTE = "2";
-        const SECOND = "0";
+        const MINUTE = "<REPLACE id='minutes'/>";
+        const SECOND = "<REPLACE id='seconds'/>";
         var WhiteTimer = new Date(0,0,0,0, parseInt(MINUTE),parseInt(SECOND), 0);
         var BlackTimer = new Date(0,0,0,0, parseInt(MINUTE),parseInt(SECOND), 0);
         var MOVES = 0;
