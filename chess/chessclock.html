@@ -46,10 +46,12 @@
         <input id='blackBtn' class='lrg' style="color:white; background-color: black; float:right;" type="button" value="End Black Turn" onclick="stopBlack();"/>
     </div>
     <script>
-        const MINUTE = "<REPLACE id='minutes'/>";
-        const SECOND = "<REPLACE id='seconds'/>";
-        var WhiteTimer = new Date(0,0,0,0, parseInt(MINUTE),parseInt(SECOND), 0);
-        var BlackTimer = new Date(0,0,0,0, parseInt(MINUTE),parseInt(SECOND), 0);
+        const W_MINUTE = "<REPLACE id='w_minutes'/>";
+        const W_SECOND = "<REPLACE id='w_seconds'/>";
+        const B_MINUTE = "<REPLACE id='b_minutes'/>";
+        const B_SECOND = "<REPLACE id='b_seconds'/>";
+        var WhiteTimer = new Date(0,0,0,0, parseInt(W_MINUTE),parseInt(W_SECOND), 0);
+        var BlackTimer = new Date(0,0,0,0, parseInt(B_MINUTE),parseInt(B_SECOND), 0);
         var MOVES = 0;
 
         function pad(n, width) {
