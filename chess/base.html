@@ -31,7 +31,7 @@
             height: 98%;
             background:rgb(255, 136, 0);
         }
-        @media (min-width: 0px){
+        @media screen and (min-width: 0px){
             #popupmain {
                 font-size: 400%;
             }
@@ -72,11 +72,7 @@
     </div>
     <div style="height: 35px;display: grid;grid-auto-flow: column;grid-template-columns: 25% 50% 25%;">
         <label class="header">Chess Leaderboard</label>
-        <div id="admin" style="display: <REPLACE id='admin'/>;vertical-align: middle;align-items: center;justify-content: center;">
-            <input type="button" value="Create New User" onclick="newuser();" style="margin-left: 5px; width: 30%; height: 20px;">
-            <input type="button" value="Modify User" onclick="moduser();" style="margin-left: 5px; width: 30%; height: 20px;">
-            <input type="button" value="Update Rankings" onclick="matchend();" style="width: 30%; height: 20px;">
-        </div>
+        <REPLACE id='admin'/>
         <REPLACE id='loginBtn'/>
     </div>
     <div id="popup1" style="background: lightsalmon; width:100%; height:50px; border: 2px black solid; padding: 2px;">

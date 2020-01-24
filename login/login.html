@@ -33,18 +33,15 @@
 </head>
 <body>
     <div id="login">
-        <button class="openbtn" onclick="openNav()">&#9776; Open Sidebar</button>
-        <p>Please login by providing your Discord username, OR your id</p>
+        <p>Please login by providing your login username (typically Discord username), OR your id</p>
         <p>If you have set up a bypass password, you can enter that too</p>
-        <p style="color: red;">You must provide one, or the other.</p>
-        <input id="username" type="text" placeholder="Discord Username"/>
+        <input id="username" type="text" placeholder="Login Username"/>
         <br>
-        <input id="number" type="number" placeholder="Discord ID"/>
+        <label>Password (otherwise leave empty) </label><br/><input id="password" type="password" placeholder="(Bot) Password (must provide user)" />
         <br>
         <input type="button" onclick="submit();" value="Submit" />
         <br>
-        <label>Password is set via '/bot token pass' command </label><br/><input id="password" type="password" placeholder="(Bot) Password (must provide user)" />
-        <br>
+        <input id="number" type="number" placeholder="Discord ID"/><br>
         <p id="fb" style="display: none; color: darkred; font-weight: bold;">Feedback....</p>
     </div>
 
