@@ -19,56 +19,76 @@
             margin-top: 0;
             text-align: center;
         }
-        #popupmain {
+        .full_popup {
             position:fixed;
-            padding:0;
+            padding: 0 0 0 1%;
             margin:0;
-            text-align: center;
-            top:1%;
-            left:1%;
+            top:0;
+            left:0;
 
-            width: 98%;
-            height: 98%;
-            background:rgb(255, 136, 0);
+            width: 100%;
+            height: 100%;
+            background: rgb(255,0,0);
+            background: linear-gradient(180deg, rgba(255,0,0,1) 0%, rgba(255,157,0,1) 20%, rgba(241,255,0,1) 40%, rgba(0,138,27,1) 60%, rgba(7,0,255,1) 80%, rgba(123,0,255,1) 100%);
         }
         @media screen and (min-width: 0px){
-            #popupmain {
+            .full_popup {
                 font-size: 400%;
             }
         }
         @media (min-width: 150px) {
-            #popupmain {
+            .full_popup {
                 font-size: 300%;
             }
         }
         @media (min-width: 300px) {
-            #popupmain {
+            .full_popup {
                 font-size: 200%;
             }
         }
         @media (min-width:600px) {
-            #popupmain {
+            .full_popup {
                 font-size: 150%;
             }
         }
-        #popupmain p {
+        .full_popup p {
             width: 100%;
-            height: 50px;
+            height: 25px;
+            text-align: left;
+        }
+        .full_popup h1,
+        .full_popup h2,
+        .full_popup a {
+            text-align: center;
         }
     </style>
 </head>
 <body>
-    <div id='popupmain'>
-        <h1>Notice of Official Rule Change</h1>
-        <h2>This Leaderboard now uses the offical FIDE Laws of Chess</h2>
-        <p>These rules are as expected similar to how you would have played before, but some are ignored, for example:</p>
+    <div id='popupmod' class='full_popup'>
+        <h1>Tournament Moderators</h1>
+        <p>The following people are considered Tournament Moderators:</p>
         <ul>
-            <li>The use of a chessclock is not required though it is encouraged to speed up play.</li>
-            <li>The use of a scoresheet is not required, an issue may be raised to any Tournament Moderator at any time</li>
+            <li>Akshaya A.</li>
+            <li>Mrs Doran</li>
+            <li>Reece B.</li>
+            <li>Troy S.</li>
         </ul>
-        <p>Other exemptions are in the Terms and Conditions.</p>
+        <p>These individuals have the power to:</p>
+        <ul>
+            <li>Under Section I, Act 2 - Penalise any Member for unsportsmanlike conduct, or cheating</li>
+            <li>Under Section I, Act 5 - Forcefully end any game through capture-points if beyond time limit</li>
+            <li>Under Section I, Act 6 - Preside over rematches that are played</li>
+            <li>Under Section I, Act 7 - Be present during any game that involves a Chessclock</li>
+            <li>Under Section II, Act 3 - Make changes to any Members score, rating, or ranking</li>
+            <li>Under Section II, Act 5 - Penalise any Member for fraudulently adding games</li>
+            <li>Under Section II, Act 7 - Ban Member's from the Leaderboard for serious misconduct</li>
+            <li>Under Section II, Act 8 - Set any Member to be monitored, requiring their games be approved</li>
+            <li>Under Section III, Act 2.2 - Broad authority to ensure the integrity of the Leaderboard</li>
+        </ul>
         <br/>
+        <p>Also note that pursuant to Section III, Act 3.3, Justices of the Court of Appeal may excercise the powers listed above.</p>
         <a href="#" onclick="setHideCookie('main');">Click here to close, once majority have read</a>
+        <p>Not sure if anyone even reads this so hi random person</p>
     </div>
     <div style="height: 35px;display: grid;grid-auto-flow: column;grid-template-columns: 25% 50% 25%;">
         <label class="header">Chess Leaderboard</label>
