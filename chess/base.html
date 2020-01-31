@@ -166,6 +166,22 @@
             }
         }
 
+        function doMarkPresent(id) {
+                fetch("/chess/api/present?id=" + id, 
+                    {"method": "PUT"}
+                )
+                .then(function (response) {
+                    if(response.ok) {
+                        setTimeout(function reload() {
+                            window.location.replace(window.location);
+                        }, 1000);
+                    } else {
+                        response.text().then(function r(t) {alert(t);});
+                    }
+                })
+                .catch(function(r){alert(r);});
+        }
+
         function matchend() {
             window.location.replace("/chess/match");
         }
