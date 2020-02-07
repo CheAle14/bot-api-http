@@ -50,9 +50,9 @@
             }
         }
 
-        function remove(name) {
-            if(confirm("Are you sure you want to remove " + name + " from the Leaderboards?")) {
-                fetch("/chess/api/remove?name=" + name, 
+        function remove(name, id) {
+            if(confirm("Are you sure you want to remove/re-add " + name + " from the Leaderboard?")) {
+                fetch("/chess/api/remove?id=" + id, 
                     {"method": "PUT"}
                 )
                 .then(function (response) {
