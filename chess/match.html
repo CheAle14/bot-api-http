@@ -72,7 +72,9 @@
                     if(response.ok) {
                         if(response.status === 204) {
                             alert("Game added, but must be approved by a Moderator")
-                        } 
+                        } else if (response.status === 202) {
+                            alert("One of players requires use of Chessclock - moderator must approve.");
+                        }
                         window.location.replace("/chess")
                     } else {
                         response.text().then(function r(t) {alert(t);});
