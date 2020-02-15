@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<head>
+    <title>Registration</title>
+    <style>
+        .text {
+            margin-right: 15px;
+        }
+        .btn {
+            width: 100%;
+            height: 30px;
+        }
+    </style>
+</head>
+<body>
+    <p>Type a '/' to mark Member as present; leave blank for not here</p>
+    <table>
+        <tr><th>Member</th><th>Previously Registered On</th></tr>
+        <REPLACE id='table'/>
+    </table>
+    <input type="button" class='btn' onclick='submit()' value='Submit'/>
+    <script>
+        var PRESENT = []
+        addEventListener("load", () => {
+            document.getElementById("i-0").focus();
+        })
+
+        function removeIfThere(id) {
+            for(var i = 0; i < PRESENT.length; i++) {
+                if(PRESENT[i] === id) {
+                    PRESENT.splice(i, 1);
+                    break;
+                }
+            }
+        }
+
+        function isEmpty(str){
+            return str === null || str.length === 0;
+        }
+
+        function addPresent(event, thing, id) {
+            if(event.isComposing)
+                return;
+            console.log(event);
+            console.log(thing);
+            var code = event.which || event.keyCode;
+            var nextDirection = 1; // defaultForwards
+            if(code === 8) {
+                // backspace
+                console.log(thing.placeholder);
+                if(isEmpty(thing.placeholder)) {
+                    // already blank, go backwards
+                    nextDirection = -1;
+                }
+                removeIfThere(id);
+                thing.placeholder = "";
+                thing.value = "";
+                if(nextDirection === 1)
+                    return;
+            } else if (code === 13) {
+                thing.placeholder = "";
+                thing.value = "";
+                removeIfThere(id);
+            } else if (code === 191) {
+                thing.placeholder = "/";
+                thing.value = "/";
+                PRESENT.push(id);
+            } else {
+                thing.placeholder = "/";
+                thing.value = "/";
+                PRESENT.push(id);
+            }
+            var ownId = thing.id.split('-')[1];
+            console.log(ownId);
+            var asInteger = parseInt(ownId);
+            console.log(asInteger);
+            var nxt = document.getElementById("i-" + (asInteger + nextDirection).toString());
+            console.log(nxt);
+            if(nxt) {
+                nxt.focus();
+            }
+        }
+
+        function submit() {
+            console.log(PRESENT);
+            var text = "";
+            for(var i = 0; i < PRESENT.length; i++) {
+                text += PRESENT[i] + ",";
+            }
+            if(text.length > 0)
+                text = text.substring(0, text.length - 1);
+            alert(text);
+            fetch(`/chess/api/register?list=${encodeURIComponent(text)}`, 
+                    {"method": "PUT"}
+                )
+                .then(function (response) {
+                    if(response.ok) {
+                        window.location.replace("/chess/recommend")
+                    } else {
+                        response.text().then(function r(t) {alert(t);});
+                    }
+                })
+                .catch(function(r){alert(r);});
+        }
+    </script>
+</body>
