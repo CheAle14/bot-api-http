@@ -27,6 +27,30 @@
             text-align: -webkit-match-parent;
         }
 
+        .future {
+            border-top: dotted 6px red;
+            border-bottom: dotted 6px red;
+            border-right: dotted 6px red;
+            counter-increment: item -1;
+        }
+
+        .future::after {
+            content: "Rule not yet in force";
+            width: 4.8em;
+            margin-left: 1em;
+            color: red;
+        }
+
+        li.future::before {
+            content: "Act TBD.";
+            color: red;
+        }
+
+        li.future ol li::before {
+            content: "Act.";
+            color: red;
+        }
+
     </style>
 </head>
 <body>
@@ -65,6 +89,7 @@
                 <uli>"Present" is to be defined as being within the confounds of 322 during Chess Club, for no less than 5 minutes</uli>
             </ul>
         </li>
+        <li class='future'>Games may be exempted from time and location requirements if played using the 'Online Chess' functionality</li>
         <li>Any games which are invalid shall not be entered into the Leaderboard</li>
         <li>Any games that take place between one or more non-Members may be valid, but only if the non-Member is added to the Leaderboard within the same session</li>
         <li>These Terms shall not be held to invalidate any Coundon Court policies, rules; nor any legislation or law.</li>
@@ -134,6 +159,29 @@
                 </li>
             </ol>
         </li>
+        <li class='future'>
+            <a id='online'></a>Games which use the 'Online Chess' functionality at <a href='https://ml-api.uk.ms/chess/online'>https://ml-api.uk.ms/chess/online</a> shall obey the following:
+            <ol>
+                <li>There shall only be one online game at once</li>
+                <li>Each player shall not play more than one online game per day</li>
+                <li>Score changes from online matches are considered half of normal change</li>
+                <li>By using this system, Members consent to the installation of a program which:
+                    <ol>
+                        <li>Is distributed as-is, with any bugs and without warranty.</li>
+                        <li>Has anti-cheating mechanisms, such as searching your computer's current processes, and taking images of your desktop and displaying it to approved Moderators</li>
+                    </ol>
+                </li>
+                <li>Whilst a Member's right to privacy is acknowledged, they accept to the above mechanisms.<br/>
+                The Chief Justice has complete access to desktop images, and may release redacted images to Moderators or Justices to their discretion; redaction is when any personal or irrelevant details have been removed first.<br/>
+                The Court of Appeals is entitled to viewing both redacted and, upon order, raw desktop images.
+                </li>
+                <li>Online Games can be ended, in accordance to FIDE rules, by any spectating Justice</li>
+                <li>If an Online Game is ended without due accordance with such rules, the CoA may hear the petition, and is entitled to all bot logs involving the games.</li>
+                <li>At the start of such an Appeal, the Chief Justice shall hand over game logs in relation to the game, and shall hand over the redacted desktop images of both players.</li>
+                <li>The Court may, with a majority, order the Chief Justice to hand over the raw images prior to any redactions</li>
+                <li>If an error occurs that, in the Chief Justice's opinion, would jeopardise the integrity of the Leaderboard should the game be allowed to enter it, then the game is forfeit and rendered null and void.</li>
+            </ol>
+        </li>
     </ol>
     <ol class="s2">
         <h3>Section II - Leaderboard</h3>
@@ -154,8 +202,8 @@
         <br><em>Moderators may use discretion in the application of the above</em></li>
         <li>Deductions automatically apply, with player's score not dropping below 100.
             <ol>
-                <li>Members that are not present for three consecutive weeks will have their score reduced by 25 for each week after and including the third missed</li>
-                <li>Members that do not play any games for three consecutive weeks will have their score reduced by 15 for each week after and including the third missed</li>
+                <li>Members that are not present for three consecutive weeks will have their score reduced by 15 for each week after and including the third missed</li>
+                <li>Members that do not play any games for three consecutive weeks will have their score reduced by 5 for each week after and including the third missed</li>
                 <li>If a Member has a valid reason for their absence, they may file an appeal to the Court as though the matter were a technical modification made by the Chief Justice</li>
             </ol>
         </li>
@@ -311,8 +359,9 @@
     </ol>
     <hr>
     <table>
-        <tr><td colspan='2'>Last Updated 13th Feb 2020</td></tr>
+        <tr><td colspan='2'>Last Updated 22th Feb 2020</td></tr>
         <tr><td>Previous versions:</td><td>Changes</td></tr>
+        <tr><td>2.4 - 22th Feb 20</td><td>Introduced online chess</td></tr>
         <tr><td>2.3 - 13th Feb 20</td><td>Added penalty to not playing yet being present</td></tr>
         <tr><td>2.2 - 7th Feb 20</td><td>Clarified effects of removing Members</td></tr>
         <tr><td>2.1 - 7th Feb 20</td><td>Given Chief Justice powers to require use of a chessclock</td></tr>
