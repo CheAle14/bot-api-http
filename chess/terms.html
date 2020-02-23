@@ -41,14 +41,27 @@
             color: red;
         }
 
+
         li.future::before {
             content: "Act TBD.";
             color: red;
+            content: "Act " counters(tbd, ".") ". ";
+            counter-increment: tbd;
+        }
+
+        li.future {
+            counter-reset: tbd -1;
+        }
+
+        li.future ol {
+            counter-reset: tbd;
         }
 
         li.future ol li::before {
             content: "Act.";
             color: red;
+            content: "Act " counters(tbd, ".") ". ";
+            counter-increment: tbd;
         }
 
     </style>
