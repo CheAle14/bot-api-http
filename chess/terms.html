@@ -41,6 +41,23 @@
             color: red;
         }
 
+        ol:target,
+        li:target {
+            animation-name: bgc;
+            animation-duration: 2s;
+        }
+        /* The animation code */
+        @keyframes bgc {
+            0% {
+                background-color: white;
+            }
+            50% {
+                background-color: rgba(255, 166, 0, 0.623);
+            }
+            100% {
+                background-color: white;
+            }
+        }
 
         li.future::before {
             content: "Act TBD.";
@@ -84,7 +101,7 @@
             specifically any appeal on the penalties given by Moderators
     </p>
     <hr>
-    <ol class="s0">
+    <ol class="s0" id="s0">
         <h3>Jurisdiction of these Terms and the Court of Appeals</h3>
         <li>The Long Title for these Terms is: <em>Friday Chess Club Leaderboard Terms, Conditions and Rules</em></li>
         <li>The Short Title for these Terms is: <em>Chess Terms and Conditions</em></li>
@@ -108,7 +125,7 @@
         <li>These Terms shall not be held to invalidate any Coundon Court policies, rules; nor any legislation or law.</li>
         <li>These Terms shall not be held to constraint any Coundon Staff's ability to conduct and discharge their official duties.</li>
     </ol>
-    <ol class="s1">
+    <ol class="s1" id="s1">
         <h3>Section I - Rules in Game</h3>
         <li>This Leaderboard follows the <a href='https://handbook.fide.com/chapter/E012018'>FIDE laws of chess</a>.<br/>
         Except in FIDE 4.2: Adjusting a piece requires no verbal communication so long as it is clear, but must be performed during your turn<br/>
@@ -172,8 +189,8 @@
                 </li>
             </ol>
         </li>
-        <li>
-            <a id='online'></a>Games which use the 'Online Chess' functionality at <a href='https://ml-api.uk.ms/chess/online'>https://ml-api.uk.ms/chess/online</a> shall obey the following:
+        <li id='online'>
+            <!--<a id='online'></a>-->Games which use the 'Online Chess' functionality at <a href='https://ml-api.uk.ms/chess/online'>https://ml-api.uk.ms/chess/online</a> shall obey the following:
             <ol>
                 <li>There shall only be one online game at once</li>
                 <li>Each player shall not play more than one online game per day</li>
@@ -200,7 +217,7 @@
             </ol>
         </li>
     </ol>
-    <ol class="s2">
+    <ol class="s2" id="s2">
         <h3>Section II - Leaderboard</h3>
         <li>Any student is freely permitted to join the Leaderboard with an initial score of 100</li>
         <li>A score below 100 is not permitted</li>
@@ -274,7 +291,7 @@
             </ol>
         </li>
     </ol>
-    <ol class="s3">
+    <ol class="s3" id="s3">
         <h3>Section III - Administration</h3>
         <li>The Leaderboard is Hosted and Administered by <a href="mailto:cheale14@coundoncourt.org?subject=Chess%20Leaderboard">Alex C</a></li>
         <li>
@@ -366,7 +383,7 @@
             </ol>
         </li>
     </ol>
-    <ol class="s4">
+    <ol class="s4" id="s4">
         <h3>Section IV - Modification to these Terms</h3>
         <li>These Terms may be unilaterally changed by the Chief Justice at any time</li>
         <li>Any new Terms apply as soon as the website is updated</li>
@@ -375,7 +392,7 @@
         <li>Moderators and Justices are entitled to <a href='https://github.com/CheAle14/bot-api-http/blob/master/chess/terms.html'>submit pull requests to these Terms</a>, though their acceptance is not guaranteed</li>
     </ol>
     <hr>
-    <table>
+    <table id="changes">
         <tr><td colspan='2'>Last Updated 22th Feb 2020</td></tr>
         <tr><td>Previous versions:</td><td>Changes</td></tr>
         <tr><td>2.4 - 22th Feb 20</td><td>Introduced online chess</td></tr>
