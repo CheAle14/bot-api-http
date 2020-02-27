@@ -59,6 +59,12 @@
             }
         }
 
+        p.future {
+            border-top: dotted 3px red;
+            border-bottom: dotted 3px red;
+            border-right: dotted 3px red;
+        }
+
         li.future::before {
             content: "Act TBD.";
             color: red;
@@ -157,6 +163,7 @@
             A rematched game is final, a second rematch cannot be performed.<br/>
             A rematch <i>must</i> have a Moderator or Justice overseeing the game to adjudicate the game.<br/>
             Unless exempted by the Moderator adjudicating the game, all rematches must be time limited to 5 minutes each, with a chessclock preferred.
+            <p class='future'>If both Players consent, a rematch may take place using the <a href='#online'>online system</a>. A Moderator must be spectating throughout.</p>
         </li>
         <li>
             If a chessclock is used, the following shall apply:
@@ -198,19 +205,21 @@
                 <li>By using this system, Members consent to the installation of a program which:
                     <ol>
                         <li>Is distributed as-is, with any bugs and without warranty.</li>
-                        <li>Has anti-cheating mechanisms, such as searching your computer's current processes</li>
+                        <li>Has anti-cheating mechanisms, such as searching your computer's current processes or, upon request, taking screenshots of current screen</li>
                         <li>Includes other anti cheat systems which, for security purposes, are not listed here.</li>
                     </ol>
                 </li>
                 <li>Whilst a Member's right to privacy is acknowledged, they accept to the above mechanisms.<br/>
                 The Chief Justice has complete access to any information gathered, and may release redacted information to Moderators or Justices to their discretion; redaction is when any personal or irrelevant details have been removed first.<br/>
                 The Court of Appeals is entitled to viewing both redacted and, upon order, raw information gathered by any mechanisms.<br/>
-                It is expressly forbidden for the Chief Justice, or any Justice of the Court, or any Member who was disclosed such, to spread, distribute, share, or otherwise communicate, in any capacity, such information, either raw or redacted.<br/>
+                </li>
+                <li>Anti-cheat mechanisms transfer any evidence over HTTPS, and are as such encrypted; these mechanisms only act or transfer data upon request, or in some cases automatic triggering</li>
+                <li>It is forbidden for the Chief Justice, or any Justice of the Court, or any Member who was disclosed such, to spread, distribute, share, or otherwise communicate, in any capacity, such information, either raw or redacted.<br/>
                 Breaching this Act shall result in an immediate removal of any Roles the Member may have, and, to the discretion of the Chief Justice, banning of the Member.
                 </li>
                 <li>Online Games can be ended, in accordance to FIDE rules, by any spectating Justice</li>
                 <li>If an Online Game is ended without due accordance with such rules, the CoA may hear the petition, and is entitled to all bot logs involving the games.</li>
-                <li>At the start of such an Appeal, the Chief Justice shall hand over game logs in relation to the game, and shall hand over the redacted desktop images of both players.</li>
+                <li>At the start of such an Appeal, the Chief Justice shall hand over game logs in relation to the game, and shall hand over any redacted desktop images of either players.</li>
                 <li>The Court may, with a majority, order the Chief Justice to hand over the raw images prior to any redactions</li>
                 <li>If an error occurs that, in the Chief Justice's opinion, would jeopardise the integrity of the Leaderboard should the game be allowed to enter it, then the game is forfeit and rendered null and void.</li>
                 <li><strong>Note:</strong> Chess Online does not yet allow castling</li>
@@ -294,6 +303,7 @@
     <ol class="s3" id="s3">
         <h3>Section III - Administration</h3>
         <li>The Leaderboard is Hosted and Administered by <a href="mailto:cheale14@coundoncourt.org?subject=Chess%20Leaderboard">Alex C</a></li>
+        <li>The Chief Justice is Alex C; this appointed is permanent and can only be removed by resignation. No Act shall be interpreted to deprive the Chief Justice of their position</li>
         <li>
             Tournament Moderators are appointed by the Chief Justice to immediately resolve issues
             <ol>
