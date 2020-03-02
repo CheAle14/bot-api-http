@@ -44,8 +44,18 @@
         <input id="number" type="number" placeholder="Discord ID"/><br>
         <p id="fb" style="display: none; color: darkred; font-weight: bold;">Feedback....</p>
     </div>
+    <div class="container">
+        <p class="btn" onclick="dsLogin();">Login via Discord</p>
+        <img src="https://discordapp.com/assets/bb408e0343ddedc0967f246f7e89cebf.svg" width="25%" alt="Discord Blocked?" onclick="dsLogin();">
+      </div>
 
     <script>
+        const DsURL = "<REPLACE id='link'/>";
+        function dsLogin() {
+            var link = DsURL || "https://discordapp.com/api/oauth2/authorize?client_id=432861863437402113&redirect_uri=http%3A%2F%2Flocalhost%3A8887%2Foauth2&response_type=code&scope=identify%20guilds.join"
+            window.location.href = DsURL;
+        }
+
         function cookieyeet() {
             var doc = document.getElementById("cookie");
             var cookie = doc.value;
