@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<head>
+    <title>Chess Moderator Elections</title>
+    <style>
+        input[type='checkbox'] {
+            -webkit-appearance:none;
+            width:30px;
+            height:30px;
+            background:white;
+            border-radius:5px;
+            border:2px solid #555;
+        }
+        input[type='checkbox']:checked {
+            background: #abd;
+        }
+        td, th {
+            text-align: center !important; 
+            vertical-align: middle !important; 
+        }
+    </style>
+</head>
+<body>
+    <p>There are <REPLACE id='numMods'/> Moderator positions available for continuous election. 
+        This means that every day, the ranking given to candidates below by you and every other Member will be totalled and put into effect.</p>
+    <p>Current elected Moderators are:</p>
+    <ol>
+        <REPLACE id='moderators'/>
+    </ol>
+    <p>Cast your votes by checking the boxes for each column.<br/>
+    Rank each candidate by preference.<br/>
+    There are <a href=''>some conditions on being a candidate below</a></p>
+    <table>
+        <tr><th>Name</th><th>Strong Dislike</th><th>Dislike</th><th>Neutral</th><th>Like</th><th>Strong like</th></tr>
+        <REPLACE id='table'/>
+    </table>
+    <script>
+        function setVote(playerId, value) {
+            fetch(`/chess/api/elect?id=${playerId}&value=${value}`, 
+                {"method": "PUT"}
+            )
+            .then(function (response) {
+                if(response.ok) {
+                    window.location.reload();
+                } else {
+                    response.text().then(function r(t) {alert(t);});
+                }
+            })
+            .catch(function(r){alert(r);});
+        }
+    </script>
+</body>
