@@ -32,6 +32,11 @@
     </style>
 </head>
 <body>
+    <div class="container">
+        <p class="btn" onclick="dsLogin();">If you have a Discord account, you can login using that by clicking on the below image.<br/>
+        Otherwise, continue to the form - you must leave this browser tab open until told login is complete.</p>
+        <img src="https://discordapp.com/assets/bb408e0343ddedc0967f246f7e89cebf.svg" width="25%" alt="Discord Blocked?" onclick="dsLogin();">
+    </div>
     <div id="login">
         <p>Please login by providing your login username (typically Discord username), OR your id</p>
         <p>If you have set up a bypass password, you can enter that too</p>
@@ -44,10 +49,6 @@
         <input id="number" type="number" placeholder="Discord ID"/><br>
         <p id="fb" style="display: none; color: darkred; font-weight: bold;">Feedback....</p>
     </div>
-    <div class="container">
-        <p class="btn" onclick="dsLogin();">Login via Discord</p>
-        <img src="https://discordapp.com/assets/bb408e0343ddedc0967f246f7e89cebf.svg" width="25%" alt="Discord Blocked?" onclick="dsLogin();">
-      </div>
 
     <script>
         const DsURL = "<REPLACE id='link'/>";
