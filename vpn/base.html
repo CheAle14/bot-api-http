@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<head>
+    <title>ML-API</title>
+    <style>
+        
+    html, body {
+        width: 100%;
+        height: 100%;
+    }
+    body {
+        line-height: 1;
+        margin: 0;
+        padding: 0;
+        font-family: Whitney,Helvetica Neue,Helvetica,Arial,sans-serif;
+        overflow: hidden;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+        background: transparent;
+    }
+    a, abbr, acronym, address, applet, big, blockquote, body, caption, cite, code, dd, del, dfn, div, dl, dt, em, fieldset, form, h1, h2, h3, h4, h5, h6, html, iframe, img, ins, kbd, label, legend, li, object, ol, p, pre, q, s, samp, small, span, strike, strong, table, tbody, td, tfoot, th, thead, tr, tt, ul, var {
+        margin: 0;
+        padding: 0;
+        border: 0;
+        font-weight: inherit;
+        font-style: inherit;
+        font-family: inherit;
+        font-size: 100%;
+        vertical-align: baseline;
+    }
+    :root {
+        --header-primary:#fff;--header-secondary:#b9bbbe;--text-normal:#dcddde;--text-muted:#72767d;--text-link:#00b0f4;--channels-default:#8e9297;--interactive-normal:#b9bbbe;--interactive-hover:#dcddde;--interactive-active:#fff;--interactive-muted:#4f545c;--background-primary:#36393f;--background-secondary:#2f3136;--background-secondary-alt:#292b2f;--background-tertiary:#202225;--background-accent:#4f545c;--background-floating:#18191c;--background-mobile-primary:#36393f;--background-mobile-secondary:#2f3136;--background-modifier-hover:rgba(79,84,92,0.16);--background-modifier-active:rgba(79,84,92,0.24);--background-modifier-selected:rgba(79,84,92,0.32);--background-modifier-accent:hsla(0,0%,100%,0.06);--background-mentioned:rgba(250,166,26,0.05);--background-mentioned-hover:rgba(250,166,26,0.08);--background-message-hover:rgba(4,4,5,0.07);--elevation-stroke:0 0 0 1px rgba(4,4,5,0.15);--elevation-low:0 1px 0 rgba(4,4,5,0.2),0 1.5px 0 rgba(6,6,7,0.05),0 2px 0 rgba(4,4,5,0.05);--elevation-medium:0 4px 4px rgba(0,0,0,0.16);--elevation-high:0 8px 16px rgba(0,0,0,0.24);--logo-primary:#fff;--guild-header-text-shadow:0 1px 1px rgba(0,0,0,0.4);--channeltextarea-background:#40444b;--activity-card-background:#202225;--textbox-markdown-syntax:#8e9297;--deprecated-card-bg:rgba(32,34,37,0.6);--deprecated-card-editable-bg:rgba(32,34,37,0.3);--deprecated-store-bg:#36393f;--deprecated-quickswitcher-input-background:#72767d;--deprecated-quickswitcher-input-placeholder:hsla(0,0%,100%,0.3);--deprecated-text-input-bg:rgba(0,0,0,0.1);--deprecated-text-input-border:rgba(0,0,0,0.3);--deprecated-text-input-border-hover:#040405;--deprecated-text-input-border-disabled:#202225;--deprecated-text-input-prefix:#dcddde}
+
+    .container {
+        background-color: var(--background-tertiary);
+    }
+    .guilds {
+        position: absolute;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        overflow: hidden;
+        display: flex;
+        width: 72px;
+        -webkit-box-orient: vertical;
+        -webkit-box-direction: normal;
+        flex-direction: column;
+        flex-shrink: 0;
+        position: relative;
+        background-color: var(--background-tertiary);
+        height: 100%;
+    }
+
+    .guild-entry-main {
+        position: relative;
+        margin: 0 0 8px;
+        display: -webkit-box;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-box-pack: center;
+        -ms-flex-pack: center;
+        justify-content: center;
+        width: 72px;
+    }
+    .sidebar-channels {
+        border-radius: 8px 0 0;
+        overflow: hidden;
+        flex-direction: column;
+        min-height: 0;
+        width: 240px;
+        -webkit-box-flex: 0;
+        -ms-flex: 0 0 auto;
+        flex: 0 0 auto;
+        background: var(--background-secondary);
+    }
+    .container {
+        position: relative;
+        overflow: hidden;
+        width: 100%;
+        height: 100%;
+    }
+    .base, .sidebar-channels {
+        display: -webkit-box;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-box-orient: vertical;
+        -webkit-box-direction: normal;
+        -ms-flex-direction: column;
+        overflow: hidden;
+    }
+    .base {
+        flex-direction: column;
+        position: absolute;
+        top: 0;
+        left: 72px;
+        right: 0;
+        bottom: 0;
+    }
+    .content {
+        display: -webkit-box;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-box-align: stretch;
+        -ms-flex-align: stretch;
+        align-items: stretch;
+        -webkit-box-pack: start;
+        -ms-flex-pack: start;
+        justify-content: flex-start;
+        min-width: 0;
+        min-height: 0;
+        -webkit-box-flex: 1;
+        -ms-flex: 1 1 auto;
+        flex: 1 1 auto;
+    }
+    .chat {
+        min-width: 0;
+        min-height: 0;
+        display: -webkit-box;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-box-orient: vertical;
+        -webkit-box-direction: normal;
+        -ms-flex-direction: column;
+        flex-direction: column;
+        -webkit-box-flex: 1;
+        -ms-flex: 1 1 auto;
+        flex: 1 1 auto;
+        overflow: hidden;
+        background: var(--background-primary);
+    }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="container guilds">
+            <div class="guild-entry-main">
+                <REPLACE id='guilds'/>
+            </div>
+        </div>
+        <div class="base">
+            <div class="content">
+                <div class="sidebar-channels">
+                    <REPLACE id='channels'/>
+                </div>
+                <div class="chat">
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
