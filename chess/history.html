@@ -21,8 +21,8 @@
         <p><a href="/chess">Return to Leaderboard</a></p>
     </footer>
     <script>
-        function dispute(day, year, user, against, index, state) {
-            fetch(`/chess/api/dispute?day=${day}&year=${year}&user=${user}&against=${against}&index=${index}&state=${state}`, 
+        function dispute(day, year, user, entry) {
+            fetch(`/chess/api/dispute?day=${day}&year=${year}&user=${user}&entryId=${entry}`, 
                     {"method": "PUT"}
                 )
                 .then(function (response) {
