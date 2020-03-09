@@ -3,8 +3,8 @@
 <head>
     <title>ML-API</title>
     <meta charset="utf-8">
-    <link rel="stylesheet" type="text/css" href="style.css">
     <link rel="stylesheet" type="text/css" href="/vpn/style">
+    <link rel="stylesheet" type="text/css" href="/vpn/theme">
 </head>
 <body>
     <div class='appMount-3lHmkl'>
@@ -75,8 +75,41 @@
         const GUILD_ID = "<REPLACE id='guildid'/>";
         const CHANNEL_ID = "<REPLACE id='chnlid'/>";
 
+        /**
+        * @param {String} HTML representing any number of sibling elements
+        * @return {NodeList} 
+        */
+        function htmlToElements(html) {
+            var template = document.createElement('template');
+            template.innerHTML = html;
+            return template.content.childNodes;
+        }
+
         function loadMore(msg) {
-            document.location.href = `/vpn?guild=${GUILD_ID}&channel=${CHANNEL_ID}&msg=${msg}`
+            fetch(`/vpn/messages?guild=${GUILD_ID}&channel=${CHANNEL_ID}&before=${msg}`,
+            {
+                method: "GET"
+            }).then(function(res) {
+                if(res.ok) {
+                    res.text().then(function (str) {
+                        var elems = htmlToElements(str);
+                        var btn = document.getElementById("loadMoreBtn");
+                        for(var i = 0; i < elems.length; i++) {
+                            btn.parentElement.insertBefore(elems[i], btn.parentElement.childNodes[i]);
+                        }
+                        var offset = btn.offsetTop;
+                        btn.parentElement.scrollTop = offset;
+                        btn.parentElement.removeChild(btn);
+                    });
+                } else {
+                    res.text().then(function (r) {
+                        console.log(res);
+                        console.log(r);
+                    })
+                }
+            }).catch(function (r){
+                console.log(r);
+            });
         }
 
         function sendMsg() {
