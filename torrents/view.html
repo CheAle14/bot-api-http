@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <head>
+    <meta charset="utf-8">
     <title>Torrent(s)</title>
     <style>
         .qt-QueuedDL {
@@ -17,6 +18,12 @@
         .qt-StalledDL {
             background-color: rgba(255, 0, 0, 0.4);
         }
+        img {
+            width: 24px;
+        }
+        a, img {
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
@@ -24,4 +31,26 @@
         <tr><th>Type</th><th>Size</th><th>Name</th><th>Added On</th><th>Progress</th><th>ETA</th></tr>
         <REPLACE id='table'/>
     </table>
+    <script>
+        function apiReq(type, hash) {
+            fetch(`/torrents/set_${type}?hash=${hash}`, 
+                {"method": "PUT"}
+            )
+            .then(function (response) {
+                if(response.ok) {
+                    window.location.replace(window.location)
+                } else {
+                    response.text().then(function r(t) {alert(t);});
+                }
+            })
+            .catch(function(r){alert(r);});
+        }
+
+        function queueUp(hash) {
+            apiReq("up", hash);
+        }
+        function queueTop(hash) {
+            apiReq("top", hash);
+        }
+    </script>
 </body>
