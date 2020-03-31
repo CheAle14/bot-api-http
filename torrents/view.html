@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<head>
+    <title>Torrent(s)</title>
+    <style>
+        .qt-QueuedDL {
+            background-color: rgb(3, 126, 143, 0.3);
+        }
+        .qt-MetaDL {
+            background-color: rgba(255, 166, 0, 0.3);
+        }
+        .qt-Downloading {
+            background-color: rgba(0, 128, 0, 0.3);
+        }
+        .qt-PausedUP {
+            background-color: rgba(10, 82, 1, 0.3);
+        }
+        .qt-StalledDL {
+            background-color: rgba(255, 0, 0, 0.4);
+        }
+    </style>
+</head>
+<body>
+    <table>
+        <tr><th>Type</th><th>Size</th><th>Name</th><th>Added On</th><th>Progress</th><th>ETA</th></tr>
+        <REPLACE id='table'/>
+    </table>
+</body>
