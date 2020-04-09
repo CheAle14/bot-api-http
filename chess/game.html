@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Online Game</title>
+        <link rel="stylesheet"
+        href="/_/css/chessboard-1.0.0.css">
+        <style>
+            label {
+                font-weight: bold;
+            }
+        </style>
+    </head>
+    <body>
+        <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+        <script src="/_/js/chessboard-1.0.0.js"></script>
+        <script src="/_/js/chess.js"></script>
+        <h2>Online Chess Game</h2>
+        
+        <div id='btns'>
+            <input id='btnJoin' type="button" value='Join' onclick="tryConnect('join')"/>
+            <input id='btnSpec' type="button" value='Spectate' onclick="tryConnect('spectate')"/>
+        </div>
+        <div id="myBoard" style="width: 400px"></div>
+        <label>Status:</label>
+        <div id="status">Choose either Join or Spectate</div>
+        <label>FEN:</label>
+        <div id="fen"></div>
+        <label>PGN:</label>
+        <div id="pgn"></div>
+        <div id='whiteName'>White:</div>
+        <div id='blackName'>Black:</div>
+
+        <script>
+            var $ = window.jQuery
+            var SIDE = "<REPLACE id='side'/>"
+            var WHITE = "<REPLACE id='white'/>"
+            var BLACK = "<REPLACE id='black'/>"
+            var TOKEN = "<REPLACE id='token'/>"
+            var GAME_FEN = "<REPLACE id='game_fen'/>"
+            var board = null
+            var socket = null
+            var game = new Chess()
+            var $status = $('#status')
+            var $fen = $('#fen')
+            var $pgn = $('#pgn')
+            var players = {};
+            var SELF = null;
+            var _mode = null;
+            var GAME_INFO = null;
+
+            function onDragStart (source, piece, position, orientation) {
+                if ((orientation === 'white' && piece.search(/^w/) === -1) ||
+                    (orientation === 'black' && piece.search(/^b/) === -1)) {
+                    return false
+                }
+                // do not pick up pieces if the game is over
+                if (game.game_over()) return false
+
+                // only pick up pieces for the side to move
+                if ((game.turn() === 'w' && piece.search(/^b/) !== -1) ||
+                    (game.turn() === 'b' && piece.search(/^w/) !== -1)) {
+                    return false
+                }
+            }
+
+            function onDrop (source, target) {
+                // see if the move is legal
+                var move = game.move({
+                    from: source,
+                    to: target,
+                    promotion: 'q' // NOTE: always promote to a queen for example simplicity
+                })
+
+                // illegal move
+                if (move === null) return 'snapback'
+
+                game.undo(); // since we need to check.
+
+                var req = {
+                    id: "MoveRequest",
+                    content: {
+                        from: source,
+                        to: target,
+                    }
+                };
+
+                socket.send(JSON.stringify(req));
+                return "snapback";
+            }
+
+            // update the board position after the piece snap
+            // for castling, en passant, pawn promotion
+            function onSnapEnd () {
+                board.position(game.fen())
+            }
+
+            function updateStatus () {
+                var status = ''
+
+                var moveColor = 'White'
+                if (game.turn() === 'b') {
+                    moveColor = 'Black'
+                }
+
+                // checkmate?
+                if (game.in_checkmate()) {
+                    status = 'Game over, ' + moveColor + ' is in checkmate.'
+                }
+
+                // draw?
+                else if (game.in_draw()) {
+                    status = 'Game over, drawn position'
+                }
+
+                // game still on
+                else {
+                    status = moveColor + ' to move'
+
+                    // check?
+                    if (game.in_check()) {
+                    status += ', ' + moveColor + ' is in check'
+                    }
+                }
+
+                if(socket) {
+                    $('#btns').hide();
+                    if(BLACK) {
+                        $status.html(status)
+                        $fen.html(game.fen())
+                        $pgn.html(game.pgn())
+                    } else {
+                        $status.html("Waiting for players")
+                    }
+                } else {
+                    $status.html("Please either join or spectate")
+                }
+                $('#whiteName').html("White: " + WHITE)
+                $('#blackName').html("Black: " + BLACK)
+            }
+
+            function onOpen(event) {
+                console.log(event);
+                var conn = {
+                    id: 0,
+                    content: {
+                        token: TOKEN,
+                        mode: _mode,
+                        cheat: false
+                    }
+                };
+                socket.send(JSON.stringify(conn));
+            }
+
+            function onError(event) {
+                console.log(event);
+                alert(event.data);
+            }
+
+            function addPlayer(player) {
+                players[player.id] = player;
+                if(player.side === 1) {
+                    WHITE = player.name;
+                    if(SELF.id === player.id)
+                        SIDE = "w"
+                } else if(player.side === 2) {
+                    BLACK = player.name;
+                    if(SELF.id === player.id)
+                        SIDE = "b"
+                }
+            }
+
+            function onMessage(event) {
+                var obj = JSON.parse(event.data);
+                console.log(obj);
+                var id = obj["id"];
+                var content = JSON.parse(obj["content"]);
+                console.log(content);
+                if(id === "ConnectionMade") {
+                    var player = content["player"];
+                    if(!SELF) {
+                        SELF = player;
+                        console.log("We are");
+                        console.log(SELF);
+                        console.log("------");
+                    }
+                    addPlayer(player);
+                } else if (id === "GameStatus") {
+                    GAME_INFO = content;
+                    var plyw = players[GAME_INFO["white"]];
+                    var plyb = players[GAME_INFO["black"]];
+                    if(plyw)
+                        WHITE = plyw.name;
+                    if(plyb)
+                        BLACK = plyb.name;
+                    GAME_FEN = GAME_INFO["fen"];
+                    game = new Chess(GAME_FEN);
+                    var config = {
+                        draggable: true,
+                        position: GAME_FEN,
+                        onDragStart: onDragStart,
+                        onDrop: onDrop,
+                        onSnapEnd: onSnapEnd
+                    }
+                    if(SIDE === "b") {
+                        config["orientation"] = 'black'
+                    }
+                    board = new Chessboard("myBoard", config);
+                    updateStatus();
+                } else if(id=== "PlayerIdent") {
+                    addPlayer(content["player"]);
+                } else if(id === "MoveMade") {
+                    var moveObj = {
+                        from: content["from"],
+                        to: content["to"]
+                    }
+                    if(content.promote)
+                        moveObj["promotion"] = content.promote;
+                    game.move(moveObj);
+                    onSnapEnd();
+                }
+            }
+
+
+            function tryConnect(_mode_) {
+                if(socket)
+                    return;
+                _mode = _mode_;
+                socket = new WebSocket("ws://localhost:4650/chess");
+                socket.onopen = onOpen;
+                socket.onmessage = onMessage;
+                socket.onerror = onError;
+                
+            }
+
+
+            $(document).ready(function() {
+                if(GAME_FEN) {
+                    board = Chessboard("myBoard", GAME_FEN)
+                }
+                if(WHITE) {
+                    $('#whiteName').html("White: " + WHITE)
+                }
+                if(BLACK) {
+                    $('#blackName').html("Black: " + BLACK)
+                }
+            });
+
+
+        </script>
+    </body>
+</html>

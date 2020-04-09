@@ -109,13 +109,43 @@
             }
         }
 
-        function change(name) {
-            var thing = prompt("Enter new score for " + name + ". Cannot be below 100");
+        function change(id) {
+            var thing = prompt("Make technical modification for " + id + ". Cannot be below 100");
             if(thing !== null) {
                 if(thing.length > 0) {
                     if(!isNaN(thing)) {
                         var number = parseInt(thing);
-                        fetch(`/chess/api/score?name=${name}&value=${number}`, 
+                        fetch(`/chess/api/score?id=${id}&value=${number}`, 
+                            {"method": "PUT"}
+                        )
+                        .then(function (response) {
+                            if(response.ok) {
+                                setTimeout(function reload() {
+                                    window.location.replace(window.location);
+                                }, 100);
+                            } else {
+                                response.text().then(function r(t) {alert(t);});
+                            }
+                        })
+                        .catch(function(r){alert(r);});
+                        return;
+                    } else {
+                        alert("Input was not a number")
+                    }
+                } else {
+                    alert("Input was empty (zero length string)")
+                }
+            } else {
+                alert("No input was provided");
+            }
+        }
+        function changemod(id) {
+            var thing = prompt("Enter new score buff or penalty for this player. Refer to Conduct Regulations for lawful values");
+            if(thing !== null) {
+                if(thing.length > 0) {
+                    if(!isNaN(thing)) {
+                        var number = parseInt(thing);
+                        fetch(`/chess/api/scoremod?id=${id}&value=${number}`, 
                             {"method": "PUT"}
                         )
                         .then(function (response) {

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<head>
+    <title>Permissions</title>
+    <style>
+        .level-1 
+        {
+            border: solid black 1px;
+            margin-bottom: 5px;
+        }
+        .level-0 {
+            padding-left: 0;
+        }
+        p {
+            margin-top: 0;
+            margin-bottom: 3px;
+            font-size: large;
+            font-weight: bold;
+        }
+        label {
+            padding-left: 2px;
+        }
+        div {
+            padding-left: 15px;
+        }
+        .high-361 {
+            background-color: red;
+        }
+    </style>
+</head>
+<body>
+    <p>Permissions for <REPLACE id='name'/></p>
+    <REPLACE id='perms'/>
+
+    <script>
+        const USER = "<REPLACE id='usr'/>"
+        function hoverp(label) {
+            var id = label.getAttribute("data-change");
+            var elem = document.getElementById(id);
+            elem.classList.add("high-361")
+        }
+        function nohover(label) {
+            var id = label.getAttribute("data-change");
+            var elem = document.getElementById(id);
+            elem.classList.remove("high-361")
+        }
+        function changep(cb) {
+            var node = cb.id.substring(3);
+            fetch(`/bot/permissions?user=${USER}&node=${node}&value=${cb.checked}`, 
+                {"method": "POST"}
+            )
+            .then(function (response) {
+                if(response.ok) {
+                    window.location.reload();
+                } else {
+                    response.text().then(function r(t) {alert(t);});
+                }
+            })
+            .catch(function(r){alert(r);});
+        }
+    </script>
+</body>

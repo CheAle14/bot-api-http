@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<head>
+    <title>Logs</title>
+    <style>
+        .Verbose, .Debug {
+            color:rgb(97, 97, 97);
+        }
+        .Warning {
+            background-color: rgba(255, 187, 0, 0.5);
+        }
+        .Error {
+            background-color: rgba(255, 0, 0, 0.5);
+        }
+        .Critical {
+            background-color: red;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <table>
+        <tr>
+            <th>Time</th>
+            <th>Location</th>
+            <th>Severity</th>
+            <th>Content</th>
+        </tr>
+        <REPLACE id='table'/>
+    </table>
+    <script>
+        function clicked(row) {
+            
+        }
+    </script>
+</body>

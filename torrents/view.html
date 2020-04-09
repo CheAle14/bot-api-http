@@ -3,26 +3,61 @@
     <meta charset="utf-8">
     <title>Torrent(s)</title>
     <style>
-        .qt-QueuedDL {
-            background-color: rgb(3, 126, 143, 0.3);
+        .qt-QueuedDL td::after {
+            background-color: rgb(3, 126, 143);
         }
-        .qt-MetaDL {
-            background-color: rgba(255, 166, 0, 0.3);
+        .qt-MetaDL td::after  {
+            background-color: rgba(255, 166, 0);
         }
-        .qt-Downloading {
-            background-color: rgba(0, 128, 0, 0.3);
+        .qt-Downloading td::after  {
+            background-color: rgba(0, 128, 0);
         }
-        .qt-PausedUP {
-            background-color: rgba(10, 82, 1, 0.3);
+        .qt-PausedUP td::after  {
+            background-color: rgba(10, 82, 1);
         }
-        .qt-StalledDL {
-            background-color: rgba(255, 0, 0, 0.4);
+        .qt-StalledDL td::after  {
+            background-color: rgba(255, 0, 0);
+        }
+        .qt td::after {
+            content: ''; 
+            width: 100%; 
+            height: 100%;
+            opacity: 0.2; 
+            position: absolute; 
+            top: 0; 
+            left: 0;
+            z-index: -1;
+        }
+        .qt td {
+            position: relative;
         }
         img {
             width: 24px;
         }
         a, img {
             cursor: pointer;
+        }
+
+        .perc-0-25 td::after {
+            opacity: 0.25;
+        }
+        .perc-25-40 td::after {
+            opacity: 0.30;
+        }
+        .perc-40-60 td::after {
+            opacity: 0.35;
+        }
+        .perc-60-70 td::after {
+            opacity: 0.40;
+        }
+        .perc-70-80 td::after {
+            opacity: 0.45;
+        }
+        .perc-80-90 td::after {
+            opacity: 0.50;
+        }
+        .perc-90 td::after {
+            opacity: 0.55;
         }
     </style>
 </head>
