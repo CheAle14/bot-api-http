@@ -38,11 +38,10 @@
         <img src="https://discordapp.com/assets/bb408e0343ddedc0967f246f7e89cebf.svg" width="25%" alt="Discord Blocked?" onclick="dsLogin();">
     </div>
     <div id="login">
-        <p>Please login by providing your login username (typically Discord username), OR your id</p>
-        <p>If you have set up a bypass password, you can enter that too</p>
+        <p>Login now requires either the above Oauth flow, or a pre-set password</p>
         <input id="username" type="text" placeholder="Login Username"/>
         <br>
-        <label>Password (otherwise leave empty) </label><br/><input id="password" type="password" placeholder="(Bot) Password (must provide user)" />
+        <label>Password </label><br/><input id="password" type="password" placeholder="(Bot) Password (must provide user)" />
         <br>
         <input type="button" onclick="submit();" value="Submit" />
         <br>
@@ -55,14 +54,6 @@
         function dsLogin() {
             var link = DsURL || "https://discordapp.com/api/oauth2/authorize?client_id=432861863437402113&redirect_uri=http%3A%2F%2Flocalhost%3A8887%2Foauth2&response_type=code&scope=identify%20guilds.join"
             window.location.href = DsURL;
-        }
-
-        function cookieyeet() {
-            var doc = document.getElementById("cookie");
-            var cookie = doc.value;
-            setCookie("token", cookie, 3);
-            display("Cookie set to " + cookie);
-            window.location.replace("/");
         }
 
         function setCookie(cname, cvalue, exdays) {
@@ -90,20 +81,26 @@
             var uname = document.getElementById("username");
             var id = document.getElementById("number");
             var pwd = document.getElementById("password");
-            var nonce = rnd(0, 10000);
             display("Submitting: " + uname.value.toString() + " " + id.value.toString());
-            var username = uname.value;
-            if(!username)
-                username = "null"
-            var ulong = id.value;
-            if(!ulong)
-                ulong = "0";
-            var password = pwd.value;
-            if(!password)
-                password = "null";
-            setCookie("login_attempt", `name-${username}&id-${ulong}&nonce-${nonce}&pwd-${password}`, 3);
-            var uri = `/login/attempt?name=${username}&id=${ulong}&pwd=${password}&nonce=${nonce}`;
-            window.location.replace(uri);
+            var iden = id.value || uname.value;
+            fetch("/login",
+            {
+                method: "POST",
+                body: `identifier=${encodeURI(iden)}&password=${pwd.value}`,
+            })
+            .then(function(res)
+            { 
+                if(res.ok) {
+                    window.location.href = "/";
+                } else {
+                    console.log(res);
+                    res.text().then(function(t) {
+                        display("Failed to log in: " + t);
+                        console.log(t) 
+                    });
+                }
+            })
+            .catch(function(res){ console.log(res) })
         }
     </script>
 </body>
