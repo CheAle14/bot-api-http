@@ -22,11 +22,14 @@
             border-radius: 3px;
         }
         input:read-only {
-            background: grey;
-            color: grey;
+            background: rgba(128, 128, 128, 0.4);
+            color: rgba(128, 128, 128, 0.4);
         }
         input::placeholder {
-            color: grey;
+            color: rgba(128, 128, 128, 0.4);
+        }
+        .guildsep {
+            background-color: #00000080;
         }
     </style>
 </head>
@@ -87,7 +90,7 @@
             .catch(function(error) {
                 doing = false;
                 console.log(error);
-                alert("Errored in sending request, check console for details.");
+                alert("Error in sending request, check console for details.");
             });
         }
 

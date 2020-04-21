@@ -48,7 +48,7 @@
 </head>
 <body>
     <table id='tTable'>
-        <tr><th>Name</th><th>Token</th><th>Scopes</th></tr>
+        <tr><th>Name</th><th>Token</th></tr>
         <REPLACE id="tokentable"/>
     </table>
     
@@ -57,48 +57,7 @@
         <input type='text' onkeyup="submitNewToken(this, event);" placeholder="Token name.."/>
     </div>
 
-    <div>
-        <p>Calculate the scopes needed:</p>
-        <input id='output' type='number' readonly placeholder="Toggle checkboxes.."/>
-        <table id='sTable'>
-            <tr><th colspan="3">User scopes</th></tr>
-            <tr>
-                <td><input class='user' onclick="changedScopes('user', this);" type='checkbox' id='1'/><p>Read</p></td>
-                <td><input class='user' onclick="changedScopes('user', this);" type='checkbox' id='3'/><p>Write</p></td>
-                <td><input class='user' onclick="changedScopes('user', this);" type='checkbox' id='7'/><p>Admin</p></td>
-            </tr>
-            <tr><th colspan="3">Store scopes</th></tr>
-            <tr>
-                <td><input class='store' onclick="changedScopes('store', this);" type='checkbox' id='8'/><p>Read</p></td>
-                <td><input class='store' onclick="changedScopes('store', this);" type='checkbox' id='24'/><p>Write</p></td>
-                <td><input class='store' onclick="changedScopes('store', this);" type='checkbox' id='56'/><p>Admin</p></td>
-            </tr>
-        </table>
-    </div>
-
     <script>
-        function submitScope(input, event) {
-            if(event.key != 'Enter') {
-                return;
-            }
-            var scopeName = input.id.replace(/scope-/g, "");
-            console.log(scopeName);
-            fetch(`/user/tokens/scope?name=${scopeName}&scope=${input.value}`, {"method": "PUT"})
-            .then(function(response) {
-                if(response.ok) {
-                    alert("Scope has been updated");
-                    window.location.replace(window.location);
-                } else {
-                    input.classList.add("error");
-                    response.text().then(function(text) {
-                        alert(text);
-                    });
-                }
-            }).catch(function(reason) {
-                alert("Error:" + reason);
-            });
-        }
-        
         function submitNewToken(input, event) {
             if(event.key != "Enter") {
                 return;
@@ -122,33 +81,6 @@
             }).catch(function(reason) {
                 alert("Error:" + reason);
             });
-        }
-
-        function calc() {
-            let SCOPE = 0;
-            var docs = document.getElementsByTagName("input");
-            for(let element of docs) {
-                if(element.type === "checkbox") {
-                    console.log(element);
-                    if(element.checked) {
-                        SCOPE = SCOPE ^ parseInt(element.id);
-                    }
-                }
-            }
-            document.getElementById("output").value = SCOPE;
-        }
-
-        function changedScopes(type, input) {
-            var checkboxes = document.getElementsByClassName(type);
-            console.log(checkboxes);
-            console.log(checkboxes.length);
-            for(element of checkboxes) {
-                console.log(element);
-                if(element.id != input.id) {
-                    element.checked = false;
-                }
-            }
-            calc();
         }
     </script>
 </body>
