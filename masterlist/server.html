@@ -4,12 +4,11 @@
 </head>
 <body>
     <h2><REPLACE id="server.name"/></h2>
-    <p>Game Type: <REPLACE id="server.game"/></p>
-    <p>Internal IP: <REPLACE id="server.internalip"/></p>
-    <p>External IP: <REPLACE id="server.externalip"/></p>
-    <p>Has Password <REPLACE id="server.password"/></p>
-    <p>Players: <REPLACE id="server.currentplayers"/> / <REPLACE id="server.maximumplayers"/></p>
-    <br>
-    <p><em>Last heartbeat: <REPLACE id="server.lastheartbeat"/></em></p>
-    <p><em>If you are in same Network as server, use the Internal IP to connect; else use external</em></p>
+    <p>Game: <REPLACE id="server.gamename"/></p>
+    <p>Online: <REPLACE id="server.online"/></p>
+    <REPLACE id="connection"/>
+    <p>Private: <REPLACE id="server.isprivate"/></p>
+    
+    <h3>Players</h3>
+    <REPLACE id="players"/>
 </body>
