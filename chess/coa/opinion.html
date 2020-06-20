@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Opinion for <REPLACE id='hearing.title'/></title>
+        <style>
+            html, body, form {
+                width: 100%;
+                height: 100%;
+                margin: 0;
+                padding: 2px;
+            }
+        </style>
+    </head>
+    <body>
+        <form action="/chess/coa/rule?num=$REPLACE id='hearing.casenumber'/$" method="POST">
+            <label for="title">A one-word descriptor of your opinion, such as "Dismiss", "Uphold", "Overturn" etc.</label><br>
+            <input type="text" id="ftitle" name="title"><br>
+            <label for="body">A link to your opinion<br>
+                This opinion should justify your reasoning, explaining clearly and logically how you came to make the decisions you did.<br>
+                If possible, you should refer to specific wording of the Terms and Conditions, the Conduct Regulations, and any previous applicable cases.<br>
+                This needs to be done so that any future Court of Appeals cases can look to this ruling, and your opinion, for understanding, precedent, and consistency.</label><br>
+            <input type="url" name="url" id="furl">
+            <input type="submit" value="Submit">
+        </form>
+    </body>
+</html>

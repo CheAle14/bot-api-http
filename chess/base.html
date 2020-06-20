@@ -87,8 +87,8 @@
     </div>
     <div id="popuplogin" style="margin-top:10px; background: rgb(183, 0, 255); width:100%; height:125px; border: 2px black solid; margin-bottom: 10px;">
         <p><strong>It is possible to <a href='/login'>login</a> using the following account details:</strong>
-            <br/>Name - <em>ClassRoom</em>
-            <br/>Password - <em>fridaylunchtime</em>
+            <br/>Name - <em>Friday Lunch</em>
+            <br/>Password - <em>fridayclassroom</em>
             <br/>It is unneeded to specific the Id.
             <br/>This account may add games only during Friday
             <br><a href="#" onclick="setHideCookie(this);">Click here to close</a>
@@ -125,18 +125,29 @@
                 // cancelled
             } else {
                 fetch("/chess/api/player?name=" + name, 
-                    {"method": "PUT"}
+                    {"method": "PUT", "redirect": "manual" }
                 )
                 .then(function (response) {
+                    console.log(response);
                     if(response.ok) {
                         setTimeout(function reload() {
                             window.location.replace(window.location);
                         }, 1000);
+                    } else if (response.status === 424) {
+                        response.text().then(function (text) {
+                            setCookie("Redirect", "/chess", 1);
+                            alert("You will be redirected to login; try again after you have done so.")
+                            window.location = text;
+                        });
                     } else {
                         response.text().then(function r(t) {alert(t);});
                     }
                 })
-                .catch(function(r){alert(r);});
+                .catch(function(r)
+                {
+                    console.log(r);
+                    alert(r);
+                });
             }
         }
 
@@ -149,6 +160,12 @@
                         setTimeout(function reload() {
                             window.location.replace(window.location);
                         }, 1000);
+                    } else if (response.status === 424) {
+                        response.text().then(function (text) {
+                            setCookie("Redirect", "/chess", 1);
+                            alert("You will be redirected to login; try again after you have done so.")
+                            window.location = text;
+                        });
                     } else {
                         response.text().then(function r(t) {alert(t);});
                     }
