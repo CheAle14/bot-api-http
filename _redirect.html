@@ -4,4 +4,19 @@
 </head>
 <body>
     <p>Please head to <a href='<REPLACE id="url"/>'><REPLACE id="url"/></a></p>
+    <script>
+        let RETURN = "$REPLACE id='return'/$";
+        let URL = "$REPLACE id='url'/$";
+        function setCookie(name,value, age) {
+            var expires = "";
+            document.cookie = name + "=" + (value || "")  + expires + "; max-age=" + (age || 120) + "; path=/";
+        }
+        if(RETURN != "false") {
+            setCookie("redirect", RETURN, 180);
+        } else {
+            setCookie("redirect", null, -99);
+        }
+        console.warn(RETURN);
+        window.location.href = URL;
+    </script>
 </body>

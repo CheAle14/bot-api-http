@@ -97,7 +97,7 @@
             .then(function(res)
             { 
                 if(res.ok) {
-                    var urlA = getCookie("Redirect")
+                    var urlA = getCookie("redirect")
                     window.location.href = urlA || "/";
                 } else {
                     console.log(res);

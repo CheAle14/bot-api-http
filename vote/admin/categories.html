@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Vote Categories</title>
+        <style>
+            form {
+                margin-top: 20px;
+            }
+            .cat-inp {
+                float: right;
+                top: 1%;
+                right: 1%;
+                width: 50px;
+                height: 95%;
+            }
+            form input {
+                width: 90%;
+            }
+            form input[type="submit"] {
+                margin-top: 15px;
+            }
+        </style>
+    </head>
+    <body>
+        <REPLACE id='table'/>
+        <form name="newcat" action="/vote/api/admin/categories" method="POST">
+            <label id="newcatid" style="display: none;">Editing Category Id</label><br/>
+            <input type="number" name="id" value="-1" style="display: none;"><br/>
+            <label id="newcatprompt">New Category Prompt:</label><br/>
+            <input type="text" name="prompt"><br/>
+            <input type="submit">
+        </form>
+
+        <script>
+            function editCategory(input) {
+                row = input.parentElement.parentElement;
+                var label = row.children[0];
+                const ID = label.innerText;
+                var form = document.forms["newcat"];
+                document.getElementById("newcatid").style.display = "inline";
+                document.getElementById("newcatprompt").innerHTML = "Amend Category Prompt";
+                form["id"].value = parseInt(ID);
+                form["id"].style.display = "inline";
+                form["prompt"].value = row.children[1].children[0].innerText;
+            }
+
+        </script>
+    </body>
+</html>

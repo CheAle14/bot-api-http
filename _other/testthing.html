@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Confirmed</title>
+        <meta charset="UTF-8">
+    </head>
+    <body>
+        <p>The following information has been booked:
+            <ul>
+                <li><strong>Location:</strong> <REPLACE id='location'/></li>
+                <li><strong>Duration:</strong> <REPLACE id='duration'/></li>
+                <li><strong>Price:</strong> <REPLACE id='price'/></li>
+            </ul>
+        </p>
+        <hr>
+        <label>To gain access, please </label><input type="button" value="click here" onclick="doThing();">
+
+        <script>
+
+            function doThing() {
+                var code = prompt("Enter Code", null);
+                if(!code)
+                    return;
+
+                fetch(`/testthing?code=${code}`, 
+                    {
+                        method: "PUT",
+                        credentials: 'include' // for cookies etc.
+                    }
+                )
+                .then(response => {
+                    response.text().then(text => {
+                        if(response.ok) {
+                            window.cookie = "session=" + text;
+                            window.location.href = "/chess"; // force redirect to login
+                        } else {
+                            console.warn(response);
+                            console.warn(text);
+                            alert("Error: " + text);
+                        }
+                    })
+                })
+                .catch(err => {
+                    console.log(err);
+                    alert("Could not unlock :(");
+                })
+            }
+
+        </script>
+    </body>
+</html>

@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>
+            User Administration
+        </title>
+        <style>
+            html, body {
+                width: 100%;
+                height: 100%;
+                margin: 0;
+                padding: 0;
+            }
+            #popup {
+                position: fixed;
+                left:0;
+                right:0;
+                width: 100%;
+                height: 100%;
+                background-color: rgba(128, 128, 128, 0.3);
+            }
+            #popup form {
+                margin: 5% auto;
+                width: 50%;
+                height: 50%;
+                padding: 5px;
+                border: 1px solid blue;
+                background-color: white;
+            }
+            #closePopup {
+                float: right;
+                top: 5px;
+                width: 30px;
+                height: 30px;
+            }
+            :target {
+                background-color: rgba(0, 255, 42, 0.5);
+            }
+        </style>
+    </head>
+    <body>
+        <div id="popup" style="display: none;">
+            <form name="main" method="POST" action="/vote/api/admin/users">
+                <input id="closePopup" type="button" onclick="popup(false);" value="X"/>
+                <input type="text" readonly style="display: none;" name="id">
+                <label>UserName</label><br/>
+                <input type="text" name="username"><br/>
+                <label>First Name</label><br/>
+                <input type="text" name="first"><br/>
+                <label>Last Name</label><br/>
+                <input type="text" name="last"><br/>
+                <label>Tutor</label><br/>
+                <input type="text" name="tutor"><br/>
+                <label>Flags</label><br/>
+                <REPLACE id='flagboxes'/>
+                <input type="number" style="display:none;" name="flags" value="0" onkeypress="setFlags()"><br/>
+                <input type="submit" value="Submit"/>
+            </form>
+        </div>
+        <REPLACE id='table'/>
+        <script>
+            function toggleFlag(checkbox) {
+                var flags = document.getElementsByClassName("flag");
+                var value = 0;
+                for(var flag of flags) {
+                    if(flag.checked) {
+                        var flagV = flag.getAttribute("value");
+                        flagV = parseInt(flagV);
+                        value = value | flagV;
+                    }
+                }
+                document.forms["main"]["flags"].value = value;
+            }
+            function setFlags() {
+                var flags = document.getElementsByClassName("flag");
+                var value = document.forms["main"]["flags"].value;
+                for(var flag of flags) {
+                    var flagV = parseInt(flag.getAttribute("value"));
+                    var anded = value & flagV;
+                    flag.checked = anded != 0;
+                }
+            }
+            function popup(toggle) {
+                if(toggle) {
+                    document.getElementById("popup").style.display = "block";
+                } else {
+                    document.getElementById("popup").style.display = "none";
+                }
+            }
+            function editUser(button) {
+                const row = button.parentElement.parentElement;
+                const form = document.forms["main"];
+                form["id"].value = row.childNodes[0].innerText;
+                form["username"].value = row.childNodes[0].innerText;
+                form["first"].value = row.childNodes[1].innerText;
+                form["last"].value = row.childNodes[2].innerText;
+                form["tutor"].value = row.childNodes[3].innerText;
+                form["flags"].value = row.childNodes[4].getAttribute("value");
+                setFlags();
+                popup(true);
+            }
+        </script>
+    </body>
+</html>
