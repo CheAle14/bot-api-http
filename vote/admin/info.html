@@ -22,14 +22,19 @@
         </style>
     </head>
     <body>
-        <REPLACE id='table'/>
-        <form name="newcat" action="/vote/api/admin/categories" method="POST">
+        <h3><REPLACE id='election.title'/></h3>
+        <p>Question categories:</p>
+        <REPLACE id='catTable'/>
+        <form name="newcat" action="/vote/api/admin/$REPLACE id='election.id'/$/categories" method="POST">
             <label id="newcatid" style="display: none;">Editing Category Id</label><br/>
-            <input type="number" name="id" value="-1" style="display: none;"><br/>
+            <input type="number" name="number" value="-1" style="display: none;"><br/>
             <label id="newcatprompt">New Category Prompt:</label><br/>
             <input type="text" name="prompt"><br/>
             <input type="submit">
         </form>
+
+        <p>Local user permissions specific to this election:</p>
+        <REPLACE id='userTable'/>
 
         <script>
             function editCategory(input) {
@@ -39,8 +44,8 @@
                 var form = document.forms["newcat"];
                 document.getElementById("newcatid").style.display = "inline";
                 document.getElementById("newcatprompt").innerHTML = "Amend Category Prompt";
-                form["id"].value = parseInt(ID);
-                form["id"].style.display = "inline";
+                form["number"].value = parseInt(ID);
+                form["number"].style.display = "inline";
                 form["prompt"].value = row.children[1].children[0].innerText;
             }
 

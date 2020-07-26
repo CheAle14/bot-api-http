@@ -10,17 +10,14 @@
     </style>
 </head>
 <body>
-    <p>Current Hearings open:</p>
-    <table>
-        <tr><th>Case No.</th><th>Title</th><th>Justices</th></tr>
-        <REPLACE id='table'/>
-    </table>
-    <p>Current requested hearings</p>
-    <table>
-        <tr><th>Plaintiff</th><th>Defendant</th><th>Description</th><th>Justices Approving</th></tr>
-        <REPLACE id='pending'/>
-    </table>
-    <input type="button" value="Request a hearing" onclick="window.location.href = '/chess/coa/newappeal'"/>
+    <p>Current petitions awaiting writ of certiorari</p>
+    <REPLACE id='awaitingWrit'/>
+    <p>Current petitions awaiting outcome</p>
+    <REPLACE id='receivedWrit'/>
+    <p>Petitions which have reached an outcome</p>
+    <REPLACE id='receivedOutcome'/>
+
+    <input type="button" value="Submit a petition" onclick="window.location.href = '/chess/coa/new'"/>
 
     <script>
     </script>

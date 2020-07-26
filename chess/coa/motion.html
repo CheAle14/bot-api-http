@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title><REPLACE id='hearing.title'/></title>
+        <style>
+            .file {
+                margin-left: 1%;
+                padding-left: 3px;
+                border: 1px black solid;
+                width: 80%;
+                height: 1080px;
+            }
+            .file p {
+                padding: 0;
+                margin-top: 0;
+                margin-bottom: 2px;
+                width: 100%;
+            }
+            iframe {
+                width: 99%;
+                height: 90%;
+            }
+            .denied {
+                border: 1px red solid;
+                color: red;
+            }
+            .granted {
+                border: 1px green solid;
+                color: green;
+            }
+            .cjdo {
+                width: 100%;
+                height: 30px;
+                color: blue;
+            }
+        </style>
+    
+    </head>
+    <body>
+        <h3><REPLACE id='motion.motiontype'/></h3>
+        <p>Moved by <strong><REPLACE id='motion.movant.name'/></strong></p>
+        <p>Moved on <strong><REPLACE id='motion.filed'/></strong></p>
+        <REPLACE id='chief'/>
+        <REPLACE id='mholding'/>
+        <p>All files submitted, by their respective parties:</p>
+        <REPLACE id='files'/>
+        <hr/>
+        <div style="$REPLACE id='canadd'/$">
+            <p>Attach new file yourself:</p>
+            <form action="/chess/coa/api/$REPLACE id='newpath'/$" enctype="multipart/form-data" method="POST">
+                <input type="file" name="file"
+                accept=".txt,.pdf,.doxc,.md plain/text,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                onchange="return checkFile(this);">
+                <input type="submit" value="Upload file to motion">
+            </form>
+        </div>
+
+        <script>
+            const URL = "<REPLACE id='cjDoUrl'/>";
+            function checkFile(input) {
+                var ext = input.value.match(/\.([^\.]+)$/)[1];
+                switch (ext) {
+                    case 'txt':
+                    case 'pdf':
+                    case 'docx':
+                    case "md":
+                        return true;
+                    default:
+                        alert('That file type is not permitted');
+                        this.value = '';
+                        return false;
+                }
+            }
+
+            function doThing() {
+                holding = window.prompt("Provide holding");
+                if(!holding)
+                    return;
+                fetch(URL, {
+                    method: "PATCH",
+                    body: encodeURIComponent(holding)
+                })
+                .then(r => {
+                    window.location.reload();
+                })
+                .catch(er => {
+                    console.log(er);
+                    alert("Error");
+                });
+            }
+        </script>
+    </body>
+</html>

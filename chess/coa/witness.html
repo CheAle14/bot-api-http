@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <head>
-    <title>Witness Selection</title>
+    <title><REPLACE id='witness.witness.name'/></title>
     <style>
         input {
             width: 100%;
@@ -16,30 +16,9 @@
     </style>
 </head>
 <body>
-    <p>For case <REPLACE id='hearing.casestr'/>, <REPLACE id='hearing.title'/></p>
-    <p>Witnesses with Discord in green, others in Red.</p>
-    <p>If prefixed [Judge], they are the justice(s) hearing the case</p>
-    <label>Witness Selected: </label> <select id='witness'><REPLACE id='witness'/></select>
-    <p>Selecting witness for: <REPLACE id='for'/><br/>
-        The caller will question first, then the opponent; then caller again, then opponent again; finally the justices if they desire
+    <p>
+        Witness Testimony of <strong><REPLACE id='witness.witness.name'/></strong>
+        <br/>
+        <REPLACE id='concluded'/>
     </p>
-    <input type="button" onclick="doSet();" value="Call Witness"/>
-    <script>
-        const NUMBER = "<REPLACE id='hearing.casenumber'/>"
-        function doSet() {
-            var d = document.getElementById("witness");
-            var witnessId = d.value;
-            fetch(`/chess/coa/call?num=${NUMBER}&witness=${witnessId}`,
-                {"method": "PUT"}
-            )
-            .then(function (response) {
-                if(response.ok) {
-                    window.location.replace(`/chess/coa/hearing?num=${NUMBER}`)
-                } else {
-                    response.text().then(function r(t) {alert(t);});
-                }
-            })
-            .catch(function(r){alert(r);});
-        }
-    </script>
 </body>

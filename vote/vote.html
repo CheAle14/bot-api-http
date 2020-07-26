@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title><REPLACE id='title'/></title>
+        <style>
+            html, body, .mainContainer {
+                width: 100%;
+                height: 100%;
+                margin: 0;
+            }
+            .mainContainer {
+                display: flex;
+            }
+            .sidebar {
+                height: 100%;
+                width: 15%;
+            }
+            .content {
+                height: 100%;
+                flex-grow: 1;
+            }
+            .pageTop {
+                top: 0;
+                left: 0;
+                padding: 2px;
+                margin: 0;
+                width: calc(100% - 4px);
+                height: 42px;
+            }
+            .pageVote {
+                height: calc(100% - 50px);
+                margin: 0;
+                padding: 2px 2px 2px 5px;
+            }
+            .menuBox {
+                margin-top: 4px;
+            }
+            .voteName {
+                height: 100%;
+                float: right;
+                width: calc(100% - 40px);
+                text-align: center;
+                font-size: xx-large;
+                font-weight: bold;
+            }
+            p {
+                font-size: 16px;
+                font-size: 1.5vw;
+            }
+            h1 {
+                font-size: 32px;
+                font-size: 1.75vw;
+            }
+            #hoverS {
+                float: right;
+            }
+            .full {
+                width: 100%;
+            }
+            table {
+                border-collapse: collapse;
+                width: 100%;
+                border: 1px solid #ddd;
+                font-size: 18px;
+            }
+            th, td {
+                text-align: left;
+                padding: 12px;
+            }
+            tr {
+                border-bottom: 1px solid #ddd;
+            }
+            tr.header, tr:hover {
+                background-color: #f1f1f1;
+            }
+            tr, td {
+                align-content: center;
+            }
+            #popup {
+                position: fixed;
+                left:0;
+                right:0;
+                width: 100%;
+                height: 100%;
+                background-color: rgba(128, 128, 128, 0.3);
+            }
+            #popup .popupInner {
+                position: absolute; 
+                top: 10%; 
+                left: 10%;
+                width: 80%;
+                height: 80%;
+                padding: 5px;
+                border: 1px solid blue;
+                background-color: white;
+            }
+            #closePopup {
+                float: right;
+                top: 5px;
+                width: 30px;
+                height: 30px;
+            }
+            .highlight {
+                background-color: aqua;
+                width: 40px;
+                height: 40px;
+                margin: 2;
+            }
+            .lblUserName {
+                display: inline-block;
+                margin-left: 5px;
+            }
+        </style>
+    </head>
+    <body>
+        <div class='mainContainer'>
+            <div id="popup" style="display: block;">
+                <div class='popupInner'>
+                    <input id="closePopup" type="button" onclick="popup(false);" value="X"/>
+                    <table id='popupTable'>
+                        <tr>
+                            <th>Name</th>
+                            <th>Tutor</th>
+                            <th>Action</th>
+                        </tr>
+                        <tr>
+                            <td>
+                                <input class='full' id="filterName" placeholder="Filter by name" type="text" onkeypress="checkEnterKey(event);">
+                            </td>
+                            <td>
+                                <input class='full' id="filterTutor" placeholder="Filter by tutor" type="text" onkeypress="checkEnterKey();">
+                            </td>
+                            <td style="max-width: 1em;">
+                                <input type="button" class='full' id='sendSearch' value='Search' onclick='startSearch()'>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            <div id='sidebar' class='sidebar'>
+                <REPLACE id='sidebar'>
+            </div>
+            <div id="content" class='content'>
+                <div class='pageTop'>
+                    <svg class='menuBox' viewBox='0 0 10 8' width='40' onclick="set()">
+                        <path d='M1 1h8M1 4h 8M1 7h8' 
+                              stroke='#000' 
+                              stroke-width='2' 
+                              />
+                      </svg>
+                    <div class="voteName">
+                        <span><REPLACE id='title'></span>
+                    </div>
+                </div>
+                <div class='pageVote'>
+                    <h1 id='prompt'>Who is the best dancer?</h1>
+                    <p></p>
+                    <table id='users'>
+                        <tr>
+                            <th>Name</th>
+                            <th>Tutor Group</th>
+                            <th>Vote Share</th>
+                        </tr>
+                        <tr id='tableAddNew'>
+                            <td colspan="3"><input onclick="popup(true);" class='full' type="button" value="Search for person"></td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <script>
+            const VOTING_FOR = {};
+            const USER_CACHE = {};
+            function checkEnterKey(event) {
+                if(event.key === "Enter") {
+                    startSearch();
+                }
+            }
+
+            function clearPopTable() {
+                let doc = document.getElementById("popupTable");
+                for(var i = 0; i < doc.rows.length; i ++) {
+                    console.log(`${i} - ${doc.rows.length}`);
+                    var child = doc.rows[i];
+                    if(child.id) {
+                        console.log(child);
+                        child.remove();
+                        i--;
+                    }
+                }
+            }
+
+            function displaySearch(array) {
+                clearPopTable();
+                var table = document.getElementById("popupTable").tBodies[0];
+                for(var obj of array) {
+                    var row = document.createElement("tr");
+                    row.id = obj["_id"];
+                    var tdName = document.createElement("td");
+                    tdName.innerHTML = obj["FullName"];
+                    var tdTutor = document.createElement("td");
+                    tdTutor.innerHTML = obj["Tutor"];
+                    var tdAction = document.createElement("td");
+                    var action = document.createElement("input");
+                    action.classList.add("full");
+                    action.type = "button";
+                    action.value = "Select";
+                    action.onclick = function() 
+                    {
+                        var userName = this.parentElement.parentElement.id;
+                        console.warn(userName);
+                        var obj = USER_CACHE[userName];
+                        select(obj);
+                    };
+                    tdAction.appendChild(action);
+
+                    row.appendChild(tdName);
+                    row.appendChild(tdTutor);
+                    row.appendChild(tdAction);
+
+                    table.appendChild(row);
+                }
+            }
+
+            function setShares() {
+                var table = document.getElementById("users");
+                let totalVotes = table.rows.length - 2;
+                let voteShare = 1 / totalVotes;
+                let round = Math.round(voteShare * 100);
+
+                for(var row of table.rows) {
+                    var tdShare = row.childNodes[2];
+                    tdShare.innerHTML = round + "%";
+                }
+            }
+
+            function select(user) {
+                console.log(user._id);
+                let existing = VOTING_FOR[user._id];
+                if(existing) {
+                    popup(false);
+                    existing.classList.add("highlight");
+                    return;
+                }
+                var table = document.getElementById("users").tBodies[0];
+                var row = document.createElement("tr");
+                row.id = user._id;
+                var tdName = document.createElement("td");
+
+                var removeItem = document.createElement("input");
+                removeItem.type = "button";
+                removeItem.value = "X";
+                removeItem.setAttribute("data-username", user._id);
+                removeItem.onclick = function() {
+                    var uName = this.getAttribute("data-username");
+                    delete VOTING_FOR[uName];
+                    this.parentElement.parentElement.remove();
+                    setShares();
+                }
+                removeItem.classList.add("removeUser");
+                tdName.appendChild(removeItem);
+
+                var lbl = document.createElement("label");
+                lbl.innerHTML = user.FullName;
+                lbl.classList.add("lblUserName");
+
+                tdName.appendChild(lbl);
+
+                var tdTutor = document.createElement("td");
+                tdTutor.innerHTML = user.Tutor;
+                var tdShare = document.createElement("td");
+                tdShare.innerHTML = "?%";
+
+                row.appendChild(tdName);
+                row.appendChild(tdTutor);
+                row.appendChild(tdShare);
+
+                table.insertBefore(row, document.getElementById("tableAddNew"));
+                VOTING_FOR[user._id] = row;
+                setShares();
+                popup(false);
+            }
+
+            function startSearch() {
+                var name = document.getElementById("filterName").value;
+                var tutor = document.getElementById("filterTutor").value;
+                let args = {
+                    name: name,
+                    tutor: tutor
+                };
+                fetch("/vote/api/search", {
+                    method: "POST",
+                    body: JSON.stringify(args),
+                    accept: "application/json"
+                })
+                .then(response => {
+                    response.text().then(text => {
+                        if(response.ok) {
+                            let array = JSON.parse(text);
+                            for(var obj of array) {
+                                if(!USER_CACHE[obj._id]) {
+                                    USER_CACHE[obj._id] = obj;
+                                }
+                            }
+                            displaySearch(array);
+                        } else {
+                            console.error(response);
+                            alert(text);
+                        }
+                    });
+                })
+                .catch(err => {
+                    console.error(err);
+                    alert("Failed to complete search");
+                });
+            }
+            
+            function popup(toggle) {
+                if(toggle) {
+                    document.getElementById("popup").style.display = "block";
+                } else {
+                    document.getElementById("popup").style.display = "none";
+                }
+            }
+        </script>
+    </body>
+</html>

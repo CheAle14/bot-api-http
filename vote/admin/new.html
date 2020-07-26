@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>
+            New Election
+        </title>
+    </head>
+    <body>
+        <form action="/vote/api/admin/new" method="POST">
+            <label>Main name of the vote</label><br/>
+            <input type="text" placeholder="eg, Y11 Awards" name="title"><br/>
+            <label>Local sysop</label><br/>
+            <input type="text" placeholder="Username of local sysop, blank if none." name="sysop"><br/>
+            <label>Local helpers</label><br/>
+            <input type="text" placeholder="Usernames of local helpers, comma seperated, blank if none" name="helpers"><br/>
+
+            <input type="submit" value="Submit">
+        </form>
+    </body>
+</html>

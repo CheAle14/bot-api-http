@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title><REPLACE id='exam.reference'/></title>
+        <style>
+        .text, .can {
+            top: 0;
+            left: 0;
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            border: 0;
+        }
+        .text {
+            padding: 2px;
+            background-color: transparent;
+        }
+        .can {
+            z-index: -1;
+        }
+        .container {
+            width: 1000px;
+            height: 500px;
+            position: relative;
+            border: 1px solid black;
+        }
+        .marks {
+            right: 0;
+            text-align: left;
+            font-style: italic;
+            font-size: 20px;
+        }
+        .marks::before {
+            content: "(";
+        }
+        .marks::after {
+            content: ")"
+        }
+        #floater {
+            position: fixed;
+            bottom: 2px;
+            left: 0;
+            height: 24px;
+            width: 98%;
+            margin: 0;
+            padding: 1px;
+        }
+        #swapBtn {
+            width: 40%;
+            height: 100%;
+        }
+        #saveBtn {
+            width: 40%;
+            height: 100%;
+            right: 0;
+        }
+        </style>
+    </head>
+    <body onload="init();">
+        <script src='../_/js/drawcanvas.js'>
+        </script>
+        <script>
+            function save() {
+                var url = getUrl();
+                var text = document.getElementById("text").innerText;
+                fetch("/exam/perform", {
+                    method: "PUT",
+                    body: `text=${encodeURIComponent(text)}&img=${url}`
+                })
+                .then(function(response) {
+                    console.log(response);
+                })
+                .catch(function(error){
+                    console.log(error);
+                });
+            }
+        </script>
+        <h2><REPLACE id='exam.reference'/></h2>
+        <div id='questionInfo'>
+            <REPLACE id='info'/>
+        </div>
+        <br/>
+        <div id='floater'>
+            <input id='swapBtn' type="button" value="Draw" onclick="swap(this);">
+            <input id='saveBtn' type='button' value='Next Question' onclick='save();'>
+        </div>
+    </body>
+</html>
