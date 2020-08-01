@@ -4,13 +4,38 @@
 </head>
 <body>
     <p>Remove or set user score below:</p>
-    <TABLE>
-        <tr><th>User</th><th>Score</th><th>Remove</th><th>Add Note</th><th>Monitor</th><th>Timing</th><th>Ban</th></tr>
-        <REPLACE id="table"/>
-    </TABLE>
+    <REPLACE id="table"/>
     <script>
         function banUser(id) {
             window.location.href = "/chess/ban?id=" + id;
+        }
+
+        function modUser(elem) {
+            let id = elem.id;
+            let mod = elem.checked;
+            let name = elem.getAttribute("data-name");
+            if(mod) {
+                if(!confirm(`Are you sure you wish to remove ${name} from having Moderator?`)) {
+                    return;
+                }
+            } else {
+                if(!confirm(`Are you sure you wish to appoint ${name} to being a Moderator?`)) {
+                    return;
+                }
+            }
+            fetch("/chess/api/moderator?id=" + id, 
+                    {"method": "PUT"}
+                )
+                .then(function (response) {
+                    if(response.ok) {
+                        setTimeout(function reload() {
+                            window.location.replace(window.location);
+                        }, 100);
+                    } else {
+                        response.text().then(function r(t) {alert(t);});
+                    }
+                })
+                .catch(function(r){alert(r);});
         }
 
         function unBanUser(id) {

@@ -29,6 +29,11 @@
         <tr><th>Name</th><th>Strong Disapprove</th><th>Disapprove</th><th>Neutral</th><th>Approve</th><th>Strong Approve</th></tr>
         <REPLACE id='table'/>
     </table>
+    <hr>
+    <p>The following are players <strong>who are ineligible to be the Arbiter</strong>:</p>
+    <ul>
+        <REPLACE id='inelig'/>
+    </ul>
     <script>
         function setVote(playerId, value) {
             fetch(`/chess/api/elect?id=${playerId}&value=${value}`, 

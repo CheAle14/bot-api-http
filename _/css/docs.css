@@ -1,0 +1,40 @@
+.docsMethod {
+    padding: .2em .6em .3em;
+    font-size: 125%;
+    font-weight: 700;
+    line-height: 1;
+    color: rgb(0, 0, 0);
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: baseline;
+    border: 1px solid black;
+    border-radius: .25em;
+    margin-right: 5px;
+    margin-bottom: 50px;
+}
+.docsMethod-GET {
+    border-color: green;
+}
+.docsPath {
+    font-size: 125%;
+    font-weight: 700;
+    line-height: 1;
+}
+.docsTable {
+    margin-top: 10px;
+}
+code.inline {
+    width: auto;
+    height: auto;
+    padding: .2em;
+    margin: -.2em 0;
+    border-radius: 3px;
+    font-size: 85%;
+    font-family: Consolas,Andale Mono WT,Andale Mono,Lucida Console,Lucida Sans Typewriter,DejaVu Sans Mono,Bitstream Vera Sans Mono,Liberation Mono,Nimbus Mono L,Monaco,Courier New,Courier,monospace;
+    text-indent: 0;
+    border: none;
+    white-space: pre-wrap;
+    line-height: 1.125rem;
+    background-color: #494c53;
+    color: #fff;
+}
