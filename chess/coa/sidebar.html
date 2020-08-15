@@ -1,36 +1,19 @@
-<hr/>
-<table>
-    <tr class="topB">
-        <td colspan='4'><REPLACE id='claimant'/></td>
-        <th class="leftB">Case No.</th>
-        <td><REPLACE id='casen'/></td>
-    </tr>
-    <tr>
-        <td></td>
-        <td></td>
-        <td>Claimant(s)</td>
-        <td></td>
-        <th class="leftB">Filed Date</td>
-        <td><REPLACE id='filed'/></td>
-    </tr>
-    <tr>
-        <td></td>
-        <td colspan='2'><strong>v.</strong></td>
-        <td></td>
-        <th class="leftB">Commenced</th>
-        <td><REPLACE id='commenced'/></td>
-    </tr>
-    <tr>
-        <td colspan='4'><REPLACE id='respondent'/></td>
-        <th class="leftB">Closed</th>
-        <td><REPLACE id='closed'/></td>
-    </tr>
-    <tr class="bottomB">
-        <td></td>
-        <td></td>
-        <td>Respondent(s)</td>
-        <td></td>
-        <td class="leftB" colspan="2"><REPLACE id='holding'/></td>
-    </tr>
-</table>
-<hr>
+<div class='coaSidebar'>
+    <h1><REPLACE id='venue'/></h1>
+    <p>FOR THE COUNDON COURT CHESS CLUB</p>
+    <hr>
+    <REPLACE id='container'/>
+    <p>No. <REPLACE id='casen'/></p>
+    <p>
+        <REPLACE id='claimant'/>,<br/>
+        <REPLACE id='cType'/>
+    </p>
+    <p>v.</p>
+    <p>
+        <REPLACE id='respondent'/>,<br/>
+        <REPLACE id='rType'/>
+    </p>
+    <hr/>
+    <REPLACE id='appealInfo'/>
+    <REPLACE id='holding'/>
+</div>

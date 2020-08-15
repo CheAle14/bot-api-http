@@ -27,12 +27,12 @@
             var j1 = document.getElementById("j1").value;
             var j2 = document.getElementById("j2").value;
             var j3 = document.getElementById("j3").value;
-            fetch(`/chess/coa/select?num=${NUMBER}&first=${j1}&second=${j2}&third=${j3}`,
+            fetch(`/chess/select?num=${NUMBER}&first=${j1}&second=${j2}&third=${j3}`,
                 {"method": "PUT"}
             )
             .then(function (response) {
                 if(response.ok) {
-                    window.location.href = "/chess/coa/hearing?num=" + NUMBER;
+                    window.location.href = "/chess/hearing?num=" + NUMBER;
                 } else {
                     response.text().then(function r(t) {alert(t);});
                 }

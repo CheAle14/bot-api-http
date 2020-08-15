@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>New Ruling for #<REPLACE id='hearing.casenumber'/></title>
+        <style>
+            .file {
+                margin-left: 1%;
+                padding-left: 3px;
+                border: 1px black solid;
+                width: 80%;
+                height: 1080px;
+            }
+            .file p {
+                padding: 0;
+                margin-top: 0;
+                margin-bottom: 2px;
+                width: 100%;
+            }
+            iframe {
+                width: 99%;
+                height: 90%;
+            }
+            .denied {
+                border: 1px red solid;
+                color: red;
+            }
+            .granted {
+                border: 1px green solid;
+                color: green;
+            }
+            .cjdo {
+                width: 100%;
+                height: 30px;
+                color: blue;
+            }
+        </style>
+    </head>
+    <body>
+        <form action="/chess/api/cases/$REPLACE id='hearing.casenumber'/$/rulings" enctype="multipart/form-data" method="POST">
+            <p>Upload file of the Court's opinion</p>
+            <input type="file" name="file"
+            accept=".txt,.pdf,.doxc,.md plain/text,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+            onchange="return checkFile(this);"><br/>
+            <label>Please provide a <strong>short</strong> description of what you think this Court should do (eg, dismiss)</label>
+            <input type="text" name="desc">
+            <input type="submit" value="Submit opinion">
+        </form>
+    </body>
+</html>

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Appeal to the Arbiter</title>
+    </head>
+    <body>
+        <p>This form allows you to submit an appeal to the Arbiter, pursuant to <a href='/chess/terms#section-14B'>Section 14B of the Chess Terms and Conditions</a></p>
+        <p>These appeals are <strong>only</strong> to request the Arbiter review the actions of a Moderator. For any other matter, you should <a href='/chess/new?type=coa'>petition the Court of Appeals</a></p>
+        <form action="/chess/api/cases?type=arbiter" method="POST" id='main' enctype="multipart/form-data">
+            <h3>Respondents</h3>
+            <label>Please select the names of the Moderators to whom this petition seeks relief from:</label>
+            <REPLACE id='players'/>
+            <input type="text" name="respondents" readonly style="display: none;" id="playerInp">
+            <h3>Description of Appeal</h3>
+            <label>This document should briefly describe what your appeal is about</label>
+            <input type="file" name="writ"
+                accept=".txt,.pdf,.doxc,.md plain/text,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                onchange="return checkFile(this);">
+            <input type="submit" value="Submit new petition">
+        </form>
+    
+        <script>
+            function checkFile(input) {
+                var ext = input.value.match(/\.([^\.]+)$/)[1];
+                switch (ext) {
+                    case 'txt':
+                    case 'pdf':
+                    case 'docx':
+                    case "md":
+                        return true;
+                    default:
+                        alert('That file type is not permitted');
+                        this.value = '';
+                        return false;
+                }
+            }
+            let respondents = [];
+            function toggle(input) {
+                var id = input.id.split('-')[1];
+                console.log(input);
+                let index = respondents.indexOf(id);
+                if(index === -1) {
+                    respondents.push(id);
+                } else {
+                    respondents.splice(index, 1);
+                }
+                console.log(respondents);
+                document.getElementById("playerInp").value = respondents.join();
+            }
+    
+        </script>
+    </body>
+</html>

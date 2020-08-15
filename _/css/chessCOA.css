@@ -1,0 +1,36 @@
+.coaSidebar hr {
+    width: 5%;
+    margin-right: auto;
+    margin-left: auto;
+    background-color: black;
+    border: 1px solid black;
+ }
+ .coaSidebar h1, .coaSidebar p {
+    text-align: center;
+ }
+ .coaSidebar h1 {
+     margin-bottom: 3px;
+ }
+ .coaSidebar p {
+     margin-top: 3px;
+ }
+ .coaSidebar .column {
+    float: left;
+ }
+ .coaSidebar .column-1 {
+     width: 100%;
+ }
+ .coaSidebar .column-2 {
+     width: 50%;
+ }
+ .coaSidebar .column-3 {
+     width: 33%;
+ }
+ .coaSidebar .column-4 {
+     width: 25%;
+ }
+ iframe.coaDoc {
+    width: 100%;
+    max-width: 900px;
+    height: 1000px;
+ }

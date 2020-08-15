@@ -35,12 +35,12 @@
         const NUMBER = "<REPLACE id='hearing.casenumber'/>";
         const WITNESS = "<REPLACE id='witness.id'/>";
         function moveNext() {
-            fetch(`/chess/coa/stage?num=${NUMBER}&wit=${WITNESS}`,
+            fetch(`/chess/stage?num=${NUMBER}&wit=${WITNESS}`,
                 {"method": "PUT"}
             )
             .then(function (response) {
                 if(response.ok) {
-                    window.location.href = "/chess/coa/hearing?num=" + NUMBER;
+                    window.location.href = "/chess/hearing?num=" + NUMBER;
                 } else {
                     response.text().then(function r(t) {alert(t);});
                 }

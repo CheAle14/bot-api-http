@@ -21,23 +21,44 @@
         .red {
             color: red;
         }
+        p.warn {
+            font-size: xx-large;
+            border: 1px solid black;
+            background-color: red;
+            color: white;
+        }
     </style>
 </head>
 <body>
+    <REPLACE id='actions'/>
     <p>Motions put forth:</p>
+    <REPLACE id='notice'/>
     <REPLACE id='motions'/>
     <p>Witnesses:</p>
     <REPLACE id='witnesses'/>
     <hr>
-    <REPLACE id='judge'/>
+    <REPLACE id='outcomes'/>
     <script>
         function grantAppeal(num) {
-            fetch(`/chess/coa/allow_enbanc?num=${num}`,
+            fetch(`/chess/allow_enbanc?num=${num}`,
                 {"method": "PUT"}
             )
             .then(function (response) {
                 if(response.ok) {
                     window.location.replace("/chess/coa")
+                } else {
+                    response.text().then(function r(t) {alert(t);});
+                }
+            })
+            .catch(function(r){alert(r);});
+        }
+        function appealHearing(num) {
+            fetch(`/chess/api/appeal/${num}`,
+                {"method": "PUT"}
+            )
+            .then(function (response) {
+                if(response.ok) {
+                    window.location.replace(response.headers["Location"]);
                 } else {
                     response.text().then(function r(t) {alert(t);});
                 }

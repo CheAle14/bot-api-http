@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <head>
-    <title>Request an Appeal</title>
+    <title>Appeal to the Court of Appeals</title>
     <style>
     input {
         width: 100%;
@@ -19,17 +19,15 @@
     </style>
 </head>
 <body>
-    <p>PLEASE NOTE: If your petition would target a Moderator, you <strong>must</strong> submit your petition first with the Arbiter. Once the Arbiter has came to their decision, you may submit an appeal here.</p>
+    <p>If you wish for the actions of a Moderator to be reviewed, you must submit <a href='/chess/new?type=arbiter'>an appeal to the Arbiter</a></p>
     <p>If you are petitioning an action by the Arbiter, or any other matter not covered above, you may make it here.</p>
-    <form action="/chess/coa/api/cases" method="POST" id='main' enctype="multipart/form-data">
+    <form action="/chess/api/cases?type=coa" method="POST" id='main' enctype="multipart/form-data">
         <h3>Respondents</h3>
         <label>Please select the names of the people to whom this petition seeks relief from:</label>
         <REPLACE id='players'/>
-        <input type="text" name="respondents" readonly id="playerInp">
-        <h3>Motion for Writ of Certiorari</h3>
-        <label>For petitions for appeals, this should explain why the Court of Appeals should agree to hear this case.<br/>
-        For petitions by right, this document should <em>briefly</em> outline what the petition is about<br/>
-        <a target="_blank" href='/chess/coa/files/writ_template'>Click here for an example</a></label>
+        <input type="text" name="respondents" readonly style="display: none;" id="playerInp">
+        <h3>Description of Appeal</h3>
+        <label>This document should <em>briefly</em> outline what the petition is about</label>
         <input type="file" name="writ"
             accept=".txt,.pdf,.doxc,.md plain/text,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
             onchange="return checkFile(this);">

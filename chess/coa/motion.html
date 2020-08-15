@@ -47,7 +47,7 @@
         <hr/>
         <div style="$REPLACE id='canadd'/$">
             <p>Attach new file yourself:</p>
-            <form action="/chess/coa/api/$REPLACE id='newpath'/$" enctype="multipart/form-data" method="POST">
+            <form action="/chess/api/$REPLACE id='newpath'/$" enctype="multipart/form-data" method="POST">
                 <input type="file" name="file"
                 accept=".txt,.pdf,.doxc,.md plain/text,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
                 onchange="return checkFile(this);">
