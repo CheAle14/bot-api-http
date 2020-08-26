@@ -60,7 +60,6 @@ class TimedGame {
         let o = {
             id: id,
             content: data,
-            time: new Date(Date.now())
         };
         this.socket.send(JSON.stringify(o));
     }
