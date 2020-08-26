@@ -276,7 +276,7 @@
                     text: `${game.White} vs ${game.Black}\n${TimedGame.printTimer(game.WhiteTime)}\n${TimedGame.printTimer(game.BlackTime)}`,
                     duration: -1,
                     position: "left",
-                    destination: `/chess/clock?id=${game.ID}`,
+                    destination: `/chess/clock?id=${client.ID}`,
                     newWindow: true,
                     gap: 35
                 });
