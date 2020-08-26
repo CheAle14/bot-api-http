@@ -70,6 +70,10 @@
             margin-bottom: 10px;
         }
     </style>
+    <link rel="stylesheet" href="/_/css/toastify.css">
+    <script src="/_/js/toastify.js"></script>
+    <script src="/_/js/chess-monitor.js"></script>
+    <script src="/_/js/chess-timer.js"></script>
 </head>
 <body>
     <div style="height: 35px;display: grid;grid-auto-flow: column;grid-template-columns: 25% 50% 25%;">
@@ -111,20 +115,10 @@
         <li><a href='/chess/terms'>Chess Terms and Conditions</a></li>
         <li><a href='/chess/register'>Take the Register</a></li>
         <li><a href='/chess/coa'>Chess Court of Appeals - Appeal a punishment, technical modification or something else</a></li>
-        <li><a href='/chess/clock?seconds=300&black=300'>Chess Clock - 5 minutes each player</a>
-            <ul>
-                <li><a href='/chess/clock?seconds=420&black=420'>Chess Clock - 7 minutes each player</a></li>
-                <li><a href='/chess/clock?seconds=600&black=600'>Chess Clock - 10 minutes each player</a></li>
-            </ul>
-        </li>
-        <li><a href='/chess/clock?seconds=300&black=360'>Chess Clock - 5 minutes white, 6 minutes black</a>
-            <ul>
-                <li><a href='/chess/clock?seconds=420&black=540'>Chess Clock - 7 minutes white, 9 minutes black</a></li>
-                <li><a href='/chess/clock?seconds=600&black=720'>Chess Clock - 10 minutes white, 12 minutes black</a></li>
-            </ul>
-        </li>
+        <li><a href='/chess/clock'>Chess Clock - Timed game between you and another, custom time</a></li>
     </ul>
 
+    <script src="/_/js/chess-monitor.js"></script>
     <script>
         function newuser() {
             var name = prompt("Enter new person's name");
@@ -239,6 +233,103 @@
                 }
             }
         }
-        hideOtherPopups();
+        let timedGames = {};
+        function wsMessage(event) {
+            console.log(`[message] Data received from server: ${event.data}`);
+            if(event.data.startsWith("reload")) {
+                var myToast = Toastify({
+                    text: `Change detected, reloading`,
+                    backgroundColor: "linear-gradient(135deg, #ff4c4c, #ff0000)",
+                    duration: 3000,
+                    onClick: function() {
+                        document.location.reload();
+                    },
+                    callback: function() {
+                        document.location.reload();
+                    }
+                });
+                myToast.showToast();
+            } else if (event.data.startsWith("msg:")) {
+                let content = event.data.substring("msg:".length);
+                var myToast = Toastify({
+                    text: content,
+                    duration: -1,
+                    close: true
+                });
+                myToast.showToast();
+            } else if (event.data.startsWith("newGame:")) {
+                let id = event.data.substring("newGame:".length);
+                var game = new TimedGame(id);
+                game.onUpdate = updateGameInfo;
+                timedGames[id] = {
+                    client: game,
+                    info: {}
+                };
+                game.Init();
+                setLoop();
+            }
+        };
+        function setDisplay(client, game) {
+            client.toast = client.toast ?? null;
+            if(client.toast === null) {
+                client.toast = Toastify({
+                    text: `${game.White} vs ${game.Black}\n${TimedGame.printTimer(game.WhiteTime)}\n${TimedGame.printTimer(game.BlackTime)}`,
+                    duration: -1,
+                    position: "left",
+                    destination: `/chess/clock?id=${game.ID}`,
+                    newWindow: true,
+                    gap: 35
+                });
+                client.toast.showToast();
+                console.log(client.toast.toastElement.offsetHeight);
+            }
+            if(game.Ended)
+                client.toast.toastElement.innerText = `${game.White} vs ${game.Black}\nWinner is ${(game.Side === 'white' ? game.White : game.Black)}`;
+            else
+                client.toast.toastElement.innerText = `${game.White} vs ${game.Black}\n${(game.Side === 'white' ? "> " : "")}${TimedGame.printTimer(game.WhiteTime)}\n${(game.Side === 'black' ? "> " : "")}${TimedGame.printTimer(game.BlackTime)}`;
+        }
+        function doDeductions(client, game, elap) {
+            if(game.Paused === false) {
+                if(game.Side === "white") {
+                    game.WhiteTime -= elap;
+                } else {
+                    game.BlackTime -= elap;
+                }
+            }
+            setDisplay(client, game);
+        }
+        function setLoop() {
+            lastTickTime = Date.now();
+            interval = setInterval(function() {
+                var elap = Date.now() - lastTickTime;
+                for(let id in timedGames) {
+                    let {client, info} = timedGames[id];
+                    doDeductions(client, info, elap);
+                }
+                lastTickTime = Date.now();
+            }, 100);
+        }
+        let interval = null;
+        let lastTickTime = Date.now();
+        function updateGameInfo(game) {
+            if (game.Ended) {
+                delete timedGames[this.ID];
+                if(timedGames.length === 0)
+                    clearInterval(interval);
+                this.socket.close();
+            } else {
+                timedGames[this.ID] =  {
+                    client: this,
+                    info: game
+                };
+            }
+            console.log(game);
+            setDisplay(this, game);
+        }
+        function runs() {
+            hideOtherPopups();
+            WSC.initWS(wsMessage);
+        }
+        runs();
     </script>
 </body>

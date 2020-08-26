@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Timed Chess Game</title>
+    </head>
+    <body>
+        <div class='container'>
+            <div class='column'>
+                <h1>Player for White</h1>
+                <REPLACE id='selectp1'/>
+                <p>Time for White, in seconds:</p>
+                <input type="number" value="300" id="timep1">
+            </div>
+            <div class='column'>
+                <h1>Player for Black</h1>
+                <REPLACE id='selectp2'/>
+                <p>Time for Black, in seconds:</p>
+                <input type="number" value="300" id="timep2">
+            </div>
+        </div>
+        <hr/>
+        <p>Note: the below button doesn't actually start the timers, you'll have to tap/click the white player's button to do begin.</p>
+        <input type="button" value="Open timer" onclick="navig();">
+
+        <script>
+            const authedId = "<REPLACE id='player.id'/>";
+            function getIdFromSelect(select) {
+                return select.options[select.selectedIndex].value;
+            }
+            function navig() {
+                let p1 = getIdFromSelect(document.getElementById("player1"));
+                let p2 = getIdFromSelect(document.getElementById("player2"));
+                if(p1 == null || p2 == null)
+                    return;
+                if(!(p1 == authedId || p2 == authedId)) {
+                    alert("One of the players must be you!");
+                    return;
+                }
+                let p1Time = parseInt(document.getElementById("timep1").value);
+                let p2Time = parseInt(document.getElementById("timep2").value);
+                let url = `/chess/clock?wsec=${p1Time}&bsec=${p2Time}&wp=${p1}&bp=${p2}`;
+                document.location.href = url;
+            }
+        </script>
+    </body>
+</html>

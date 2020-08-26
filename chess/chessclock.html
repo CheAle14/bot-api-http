@@ -33,8 +33,9 @@
             font-size: x-large;
         }
     </style>
+    <script src="/_/js/chess-timer.js"></script>
 </head>
-<body style="width: 100%; margin-left: 0; height:100%" onload="setDisplay()">
+<body style="width: 100%; margin-left: 0; height:100%">
     <!-- This needs to be designed such that it displays horizontally -->
     <div style="height: 20%; padding-left: 8;" id='split'>
         <label id='whiteTime' style='float: left'>05:00.000</label>
@@ -46,30 +47,73 @@
         <input id='blackBtn' class='lrg' style="color:white; background-color: black; float:right;" type="button" value="End Black Turn" onclick="stopBlack();"/>
     </div>
     <script>
-        const W_MINUTE = "<REPLACE id='w_minutes'/>";
-        const W_SECOND = "<REPLACE id='w_seconds'/>";
-        const B_MINUTE = "<REPLACE id='b_minutes'/>";
-        const B_SECOND = "<REPLACE id='b_seconds'/>";
-        var WhiteTimer = new Date(0,0,0,0, parseInt(W_MINUTE),parseInt(W_SECOND), 0);
-        var BlackTimer = new Date(0,0,0,0, parseInt(B_MINUTE),parseInt(B_SECOND), 0);
-        var MOVES = 0;
-
-        function pad(n, width) {
-            n = n + '';
-            return n.padStart(width, '0');
-        }
-        function printTimer(timer) {
-            return `${pad(timer.getMinutes().toFixed(0), 2)}:${pad(timer.getSeconds().toFixed(0), 2)}.${pad(timer.getMilliseconds().toFixed(0), 3)}`;
+        "use strict";
+        const WS_ID = "<REPLACE id='wsId'/>";
+        var GAME_INFO = 
+        {
+            WhiteTime: 300,
+            BlackTime: 300,
+            Side: 'white',
+            Paused: true,
+            HalfMoves: 0
         }
 
+        function setLoop() {
+            lastTickTime = Date.now();
+            interval = setInterval(function() {
+                if(GAME_INFO.Paused === false) {
+                    var elap = Date.now() - lastTickTime;
+                    if(GAME_INFO.Side === "white") {
+                        GAME_INFO.WhiteTime -= elap;
+                    } else {
+                        GAME_INFO.BlackTime -= elap;
+                    }
+                    lastTickTime = Date.now();
+                }
+                setDisplay();
+            }, 100);
+        }
+        function start() {
+            if(interval === "end")
+                return;
+            setLoop();
+            GAME_INFO.Paused = false;
+            TMR.Start();
+        }
+        function stopBoth() {
+            if(interval === "end")
+                return;
+            if(interval) {
+                GAME_INFO.Paused = true;
+                clearInterval(interval)
+                interval = "";
+                setDisplay();
+                TMR.Pause();
+            } else {
+                start();
+            }
+        }
+        function stopWhite() {
+            if(GAME_INFO.Paused || GAME_INFO.Ended)
+                return;
+            GAME_INFO.Side = "black";
+            TMR.Switch();
+        }
+        function stopBlack() {
+            if(GAME_INFO.Paused || GAME_INFO.Ended)
+                return;
+            GAME_INFO.Side = "white";
+            TMR.Switch();
+        }
         function setDisplay() {
             var whiteLbl = document.getElementById("whiteTime")
             var BlackLbl = document.getElementById("blackTime")
             var halt = document.getElementById("haltboth");
-            WhiteTimer = new Date(WhiteTimer);
-            BlackTimer = new Date(BlackTimer);
-            whiteLbl.innerText = printTimer(WhiteTimer);
-            BlackLbl.innerText = printTimer(BlackTimer);
+            var WhiteOrBlack = GAME_INFO.Side === "white";
+            GAME_INFO.WhiteTime = new Date(GAME_INFO.WhiteTime);
+            GAME_INFO.BlackTime = new Date(GAME_INFO.BlackTime);
+            whiteLbl.innerText = TimedGame.printTimer(GAME_INFO.WhiteTime);
+            BlackLbl.innerText = TimedGame.printTimer(GAME_INFO.BlackTime);
             if(interval === "end") {
                 halt.innerHTML = "Game Over!";
             }
@@ -85,82 +129,45 @@
                 else
                     halt.innerHTML = "Restart with Black";
             }
-            halt.innerHTML += "<br/>Moves: " + MOVES.toString();
+            halt.innerHTML += "<br/>Moves: " + Math.floor(GAME_INFO.HalfMoves / 2).toString();
+            setEndDisplay();
         }
-        var startTime = Date.now();
-        var interval = "";
-        var WhiteOrBlack = true;
-        function start() {
-            startTime = Date.now();
-            interval = setInterval(function() {
-                setDisplay();
-                var elap = Date.now() - startTime;
-                if(WhiteOrBlack) {
-                    WhiteTimer -= elap;
-                } else {
-                    BlackTimer -= elap;
-                }
-                startTime = Date.now();
-                checkTimers();
-            }, 100);
-        }
-        function isAtEnd(date) {
-            var date = new Date(date);
-            return (date.getMinutes() <= 0 && date.getSeconds() <= 0 && date.getMilliseconds() <= 0)
-                || date.getHours() > 0;
-        }
-        function checkTimers() {
-            WhiteTimer = new Date(WhiteTimer);
-            BlackTimer = new Date(BlackTimer);
+        function setEndDisplay() {
+            if(!GAME_INFO.Ended)
+                return;
             var whiteLbl = document.getElementById("whiteBtn")
             var BlackLbl = document.getElementById("blackBtn")
             var halt = document.getElementById("haltboth");
-            if(isAtEnd(WhiteTimer)) {
-                clearInterval(interval);
-                interval = "end";
+            if(GAME_INFO.Side === "white") {
                 whiteLbl.value = "LOSER";
                 whiteLbl.style.backgroundColor = "red";
                 BlackLbl.value = "WINNER";
                 BlackLbl.style.backgroundColor = "green";
-                WhiteTimer = new Date(0,0,0,0,0,0,0);
-            } else if (isAtEnd(BlackTimer)) {
-                clearInterval(interval);
-                interval = "end";
+            } else {
                 whiteLbl.value = "WINNER";
                 whiteLbl.style.backgroundColor = "green";
                 BlackLbl.value = "LOSER";
                 BlackLbl.style.backgroundColor = "red";
-                BlackTimer = new Date(0,0,0,0,0,0,0);
-            } else {
-                return;
+            }
+        }
+        
+        let interval = null;
+        let lastTickTime = null;
+        let TMR = new TimedGame(WS_ID);
+        TMR.onUpdate = function(game) {
+            GAME_INFO = game;
+            if(GAME_INFO.Paused === false && interval === null) {
+                setLoop();
+            } else if (GAME_INFO.Ended) {
+                if(interval)
+                clearInterval(interval);
+                interval =  "end";
+            } else if (GAME_INFO.Paused) {
+                clearInterval(interval);
+                interval = null;
             }
             setDisplay();
         }
-        function stopBoth() {
-            if(interval === "end")
-                return;
-            if(interval) {
-                clearInterval(interval)
-                interval = "";
-                setDisplay();
-            } else {
-                start();
-            }
-        }
-        function stopWhite() {
-            if(interval === "end")
-                return;
-            if(WhiteOrBlack === true) {
-                WhiteOrBlack = false;
-            }
-        }
-        function stopBlack() {
-            if(interval === "end")
-                return;
-            if(WhiteOrBlack === false) {
-                WhiteOrBlack = true;
-                MOVES++;
-            }
-        }
+        TMR.Init();
     </script>
 </body>
