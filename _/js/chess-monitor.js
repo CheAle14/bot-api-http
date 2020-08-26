@@ -1,9 +1,9 @@
 let WSC = {}
 WSC.initWS = function (msgCallback) {
     console.log("Starting WS");
-    this.isLocal = document.location.protocol === "http:";
-    let prot = this.isLocal ? "ws" : "wss";
-    this.socket = new WebSocket(prot + "://" + document.location.hostname + ":4650/chess-monitor");
+    let prot = document.location.protocol === "http:" ? "ws" : "wss";
+    let host = prot === "wss" ? document.location.hostname : `${document.location.hostname}:4650`;
+    this.socket = new WebSocket(`${prot}://${host}/chess-monitor`);
     this.socket.onopen = function(e) {
         console.log("[open] Connection established");
     };

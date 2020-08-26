@@ -23,7 +23,9 @@ class TimedGame {
         return `${TimedGame.pad(minutes.toFixed(0), 2)}:${TimedGame.pad(seconds.toFixed(0), 2)}.${TimedGame.pad(ms.toFixed(0), 2)}`;
     }
     Init() {
-        this.socket = new WebSocket(`${(document.location.protocol === "http:" ? "ws" : "wss")}://${document.location.hostname}:4650/chess-timer?id=${this.ID}`);
+        let prot = document.location.protocol === "http:" ? "ws" : "wss";
+        let host = prot === "wss" ? document.location.hostname : `${document.location.hostname}:4650`;
+        this.socket = new WebSocket(`${prot}://${host}/chess-timer?id=${this.ID}`);
         this.socket.parent = this;
         this.socket.onopen = function() {
         };
