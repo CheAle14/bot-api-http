@@ -59,7 +59,7 @@ class TimedGame {
             return;
         let o = {
             id: id,
-            content: data,
+            content: data
         };
         this.socket.send(JSON.stringify(o));
     }
