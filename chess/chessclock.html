@@ -80,9 +80,14 @@
             GAME_INFO.Paused = false;
             TMR.Start();
         }
+        function logTimes() {
+            console.log(GAME_INFO);
+            console.log(`${Date.now()} :: White: ${parseInt(GAME_INFO.WhiteTime)}\nBlack: ${parseInt(GAME_INFO.BlackTime)}`)
+        }
         function stopBoth() {
             if(interval === "end")
                 return;
+            logTimes();
             if(interval) {
                 GAME_INFO.Paused = true;
                 clearInterval(interval)
@@ -96,12 +101,14 @@
         function stopWhite() {
             if(GAME_INFO.Paused || GAME_INFO.Ended)
                 return;
+            logTimes();
             GAME_INFO.Side = "black";
             TMR.Switch();
         }
         function stopBlack() {
             if(GAME_INFO.Paused || GAME_INFO.Ended)
                 return;
+            logTimes();
             GAME_INFO.Side = "white";
             TMR.Switch();
         }
@@ -110,8 +117,6 @@
             var BlackLbl = document.getElementById("blackTime")
             var halt = document.getElementById("haltboth");
             var WhiteOrBlack = GAME_INFO.Side === "white";
-            GAME_INFO.WhiteTime = new Date(GAME_INFO.WhiteTime);
-            GAME_INFO.BlackTime = new Date(GAME_INFO.BlackTime);
             whiteLbl.innerText = TimedGame.printTimer(GAME_INFO.WhiteTime);
             BlackLbl.innerText = TimedGame.printTimer(GAME_INFO.BlackTime);
             if(interval === "end") {

@@ -34,8 +34,9 @@ class TimedGame {
             console.log(jobj);
             if(jobj.id === "Status") {
                 let GAME_INFO = {};
-                GAME_INFO.WhiteTime = jobj.content.wt * 1000;
-                GAME_INFO.BlackTime = jobj.content.bt * 1000;
+                GAME_INFO.WhiteTime = jobj.content.wt;
+                GAME_INFO.BlackTime = jobj.content.bt;
+
                 if(GAME_INFO.WhiteTime < 0)
                     GAME_INFO.WhiteTime = 0;
                 if(GAME_INFO.BlackTime < 0)
@@ -59,6 +60,7 @@ class TimedGame {
             return;
         let o = {
             id: id,
+            t: Date.now(),
             content: data
         };
         this.socket.send(JSON.stringify(o));
