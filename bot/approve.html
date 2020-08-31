@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Approve Users</title>
+    </head>
+    <body>
+        <REPLACE id='table'/>
+
+        <script>
+            function callT(id, type) {
+                fetch(`/bot/approve?id=${id}&approved=${type}`, {
+                    "method": "POST"
+                })
+                .then(function(response) {
+                    document.location.reload();
+                })
+                .catch(function(err) {
+                    console.error(err);
+                    alert("Error! See console.")
+                })
+            }
+            function approve(id) {
+                callT(id, true);
+            }
+            function deny(id) {
+                callT(id, false);
+            }
+        </script>
+    </body>
+</html>
