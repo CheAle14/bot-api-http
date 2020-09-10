@@ -2,6 +2,11 @@
 <html>
     <head>
         <title>Appeal to the Arbiter</title>
+        <style>
+            .even {
+                background-color: grey;
+            }
+        </style>
     </head>
     <body>
         <p>This form allows you to submit an appeal to the Arbiter, pursuant to <a href='/chess/terms#section-14B'>Section 14B of the Chess Terms and Conditions</a></p>
@@ -14,7 +19,7 @@
             <h3>Description of Appeal</h3>
             <label>This document should briefly describe what your appeal is about</label>
             <input type="file" name="writ"
-                accept=".txt,.pdf,.doxc,.md plain/text,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                accept=".txt,.pdf,.md plain/text,application/pdf"
                 onchange="return checkFile(this);">
             <input type="submit" value="Submit new petition">
         </form>
@@ -25,7 +30,6 @@
                 switch (ext) {
                     case 'txt':
                     case 'pdf':
-                    case 'docx':
                     case "md":
                         return true;
                     default:

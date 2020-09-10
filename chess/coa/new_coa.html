@@ -16,6 +16,9 @@
         margin-bottom: 25px !important;
         margin-top: 25px !important;
     }
+    .even {
+        background-color: grey;
+    }
     </style>
 </head>
 <body>
@@ -29,7 +32,7 @@
         <h3>Description of Appeal</h3>
         <label>This document should <em>briefly</em> outline what the petition is about</label>
         <input type="file" name="writ"
-            accept=".txt,.pdf,.doxc,.md plain/text,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+            accept=".txt,.pdf,.md plain/text,application/pdf"
             onchange="return checkFile(this);">
         <input type="submit" value="Submit new petition">
     </form>
@@ -40,7 +43,6 @@
             switch (ext) {
                 case 'txt':
                 case 'pdf':
-                case 'docx':
                 case "md":
                     return true;
                 default:
