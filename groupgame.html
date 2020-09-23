@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Group Game.</title>
+        <style>
+            html, body {
+                width: 100%;
+                height: 100%;
+                margin: 0;
+                padding: 0;
+            }
+        </style>
+    </head>
+    <body>
+        <div style="float: left; width: 50%; height:100%">
+            <input id="btnDiscuss" type="button" onclick="WS.send('toggle');" value="DISCUSSION" style="width: 100%; height: 75%;">
+            <input id="btnDead" type="button" onclick="WS.send('dead');" value="Mark yourself dead" style="width: 100%; height: 24%;">
+        </div>
+        <div style="float: right; width: 49%; height:100%">
+            <div id='userList' style="width: 100%; height: 60%;">
+                
+            </div>
+            <input id="endGame" type="button" onclick="WS.send('end');" value="End game" style="width: 100%; height: 40%;">
+        </div>
+
+        <script>
+            var Game = {
+                discuss: true,
+                dead: false,
+                users: []
+            };
+            var btnDiscuss = document.getElementById("btnDiscuss");
+            var btnDead = document.getElementById("btnDead");
+            var userList = document.getElementById("userList");
+            let url = "ws://localhost:4650/group-game";
+            console.log(window.location.protocol);
+            if(window.location.protocol === "https:")
+                url = "wss://ml-api.uk.ms/group-game";
+            var WS = new WebSocket(url);
+            WS.onopen = function(e) {
+                console.log("[WS] Connection establised.");
+            };
+            WS.onmessage = function(e) {
+                var jobj = JSON.parse(e.data);
+                console.log(jobj);
+                Game = jobj;
+                updateUI();
+            }
+
+            function toggleDead(input) {
+                var userId = input.parentElement.parentElement.id;
+                WS.send("kill:" + userId);
+            }
+
+            function updateUI() {
+                btnDiscuss.value = Game.discuss ? "End discussion" : "Start discussion";
+                btnDead.value = Game.dead ? "Mark yourself alive" : "Mark yourself dead";
+                var newContent = "<table><tr><th>Name</th><th>Status</th></tr>";
+                for (let i = 0; i < Game.users.length; i++) {
+                    let element = Game.users[i];
+                    var row = `<tr id='${element.id}'><td>${element.name}</td><td><input type='checkbox' onclick='toggleDead(this);' `;
+                    if(element.dead) 
+                        row += "checked"
+                    row += "></td></tr>";
+                    newContent += row;
+                }
+                console.log(newContent);
+                userList.innerHTML = newContent;
+            }
+
+        </script>
+    </body>
+
+</html>
