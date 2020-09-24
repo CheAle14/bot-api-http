@@ -46,6 +46,10 @@
                 Game = jobj;
                 updateUI();
             }
+            WS.onclose = function(e) {
+                console.log(e);
+                alert(e.reason);
+            }
 
             function toggleDead(input) {
                 var userId = input.parentElement.parentElement.id;
@@ -54,8 +58,11 @@
 
             function updateUI() {
                 btnDiscuss.value = Game.discuss ? "End discussion" : "Start discussion";
+                btnDiscuss.style.backgroundColor = Game.discuss ? "blue" : "";
                 btnDead.value = Game.dead ? "Mark yourself alive" : "Mark yourself dead";
-                var newContent = "<table><tr><th>Name</th><th>Status</th></tr>";
+                btnDead.style.backgroundColor = Game.dead ? "white" : "black";
+                btnDead.style.color = Game.dead ? "black" : "white";
+                var newContent = "<table><tr><th>Name</th><th>Dead?</th></tr>";
                 for (let i = 0; i < Game.users.length; i++) {
                     let element = Game.users[i];
                     var row = `<tr id='${element.id}'><td>${element.name}</td><td><input type='checkbox' onclick='toggleDead(this);' `;
