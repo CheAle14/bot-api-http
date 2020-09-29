@@ -118,6 +118,18 @@
         <li><a href='/chess/clock'>Chess Clock - Timed game between you and another, custom time</a></li>
     </ul>
 
+    
+    <script>
+        this._oldLog = console.log;
+        console.log = function(data) {
+            this._oldLog(data);
+            if(typeof(data) === "object") {
+                alert(JSON.stringify(data));
+            } else {
+                alert(data);
+            }
+        }
+    </script>
     <script src="/_/js/chess-monitor.js"></script>
     <script>
         function newuser() {
