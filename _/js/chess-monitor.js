@@ -23,6 +23,6 @@ WSC.initWS = function (msgCallback) {
     
     this.socket.onerror = function(error) {
         console.error(`[error] ${error}`);
-        alert(error);
+        alert(JSON.stringify(error););
     };
 }
