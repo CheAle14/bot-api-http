@@ -5,10 +5,13 @@ WSC.initWS = function (msgCallback) {
     let host = prot === "wss" ? document.location.hostname : `${document.location.hostname}:4650`;
     this.socket = new WebSocket(`${prot}://${host}/chess-monitor`);
     this.socket.onopen = function(e) {
+        alert("Established: " + JSON.stringify(e));
         console.log("[open] Connection established");
     };
     
-    this.socket.onmessage = msgCallback;
+    this.socket.onmessage = function(e) }
+        alert(JSON.stringify(e));
+    };
     
     this.socket.onclose = function(event) {
         console.warn(`${event.code} ${event.reason}`);
