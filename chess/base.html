@@ -120,9 +120,9 @@
 
     
     <script>
-        this._oldLog = console.log;
+        window._oldLog = console.log;
         console.log = function(data) {
-            this._oldLog(data);
+            window._oldLog(data);
             if(typeof(data) === "object") {
                 alert(JSON.stringify(data));
             } else {
