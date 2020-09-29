@@ -9,7 +9,7 @@ WSC.initWS = function (msgCallback) {
         console.log("[open] Connection established");
     };
     
-    this.socket.onmessage = function(e) }
+    this.socket.onmessage = function(e) {
         alert(JSON.stringify(e));
     };
     
