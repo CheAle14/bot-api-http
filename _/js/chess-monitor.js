@@ -3,7 +3,9 @@ WSC.initWS = function (msgCallback) {
     console.log("Starting WS");
     let prot = document.location.protocol === "http:" ? "ws" : "wss";
     let host = prot === "wss" ? document.location.hostname : `${document.location.hostname}:4650`;
-    this.socket = new WebSocket(`${prot}://${host}/chess-monitor`);
+    let fullUrl = `${prot}://${host}/chess-monitor`;
+    alert(fullUrl);
+    this.socket = new WebSocket(fullUrl);
     console.log(JSON.stringify(this.socket));
     this.socket.onopen = function(e) {
         alert("Established: " + JSON.stringify(e));
