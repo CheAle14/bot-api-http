@@ -4,6 +4,7 @@ WSC.initWS = function (msgCallback) {
     let prot = document.location.protocol === "http:" ? "ws" : "wss";
     let host = prot === "wss" ? document.location.hostname : `${document.location.hostname}:4650`;
     this.socket = new WebSocket(`${prot}://${host}/chess-monitor`);
+    console.log(JSON.stringify(this.socket));
     this.socket.onopen = function(e) {
         alert("Established: " + JSON.stringify(e));
         console.log("[open] Connection established");
@@ -14,6 +15,7 @@ WSC.initWS = function (msgCallback) {
     };
     
     this.socket.onclose = function(event) {
+        alert(JSON.stringify(event));
         console.warn(`${event.code} ${event.reason}`);
         if (event.wasClean) {
             alert(`[close] Connection closed cleanly, code=${event.code} reason=${event.reason}`);
