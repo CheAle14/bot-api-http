@@ -67,7 +67,9 @@
             var userId = split[1];
             var content = encodeURIComponent(input.value);
             var url = `/user/nickchange?guildId=${guildId}&userId=${userId}&newnick=${content}`;
-            fetch(url)
+            fetch(url, {
+                method: "PATCH"
+            })
             .then(
                 function(response) {
                     console.log(response);
