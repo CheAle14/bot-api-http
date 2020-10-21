@@ -25,6 +25,10 @@ a, abbr, acronym, address, applet, big, blockquote, body, caption, cite, code, d
     vertical-align: baseline;
 }
 
+.message-deleted {
+    border: 2px red solid !important;
+}
+
 .container {
     background-color: var(--background-tertiary);
 }
