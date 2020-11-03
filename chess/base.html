@@ -119,17 +119,6 @@
     </ul>
 
     
-    <script>
-        window._oldLog = console.log;
-        console.log = function(data) {
-            window._oldLog(data);
-            if(typeof(data) === "object") {
-                alert(JSON.stringify(data));
-            } else {
-                alert(data);
-            }
-        }
-    </script>
     <script src="/_/js/chess-monitor.js"></script>
     <script>
         function newuser() {
