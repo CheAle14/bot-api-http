@@ -4,6 +4,7 @@
     <title>ML-API</title>
     <meta charset="utf-8">
     <link rel="stylesheet" type="text/css" href="/_/css/vpn/style.css">
+    <link rel="stylesheet" type="text/css" href="/_/css/vpn/fromDs.css">
     <link rel="stylesheet" type="text/css" href="/_/css/vpn/theme.css">
 </head>
 <body>
@@ -15,46 +16,50 @@
                         <div class="container-2lgZY8">
                             <nav class='wrapper-1Rf91z guilds-1SWlCJ' aria-label="Servers">
                                 <div class='unreadMentionsIndicatorTop-gA6RCh'></div>
-                                <div class='scrollerWrap-2lJEkd scrollerWrap-1IAIlv'>
-                                    <div class='scroller-2FKFPG systemPad-3UxEGl scroller-2TZvBN'>
-                                        <REPLACE id='guilds'/>
-                                    </div>
+                                <div class='scroller-2TZvBN none-2Eo-qx scrollerBase-289Jih'>
+                                    <REPLACE id='guilds'/>
                                 </div>
                             </nav>
                             <div class="base-3dtUhz">
                                 <div class="content-98HsJk">
                                     <div class='sidebar-2K8pFh'>
-                                        <div class='container-PNkimc'>
-                                            <div class="scrollerWrap-2lJEkd">
-                                                <div class="scroller-2wx7Hm scroller-2FKFPG">
-                                                    <REPLACE id='channels'/>
-                                                </div>
-                                            </div>  
+                                        <div class='container-3w7J-x'>
+                                            <div class="scroller-RmtA4e thin-1ybCId scrollerBase-289Jih fade-2kXiP2"
+                                            style="overflow: hidden scroll; padding-right: 0px;">
+                                                <REPLACE id='channels'/>
+                                            </div>
                                         </div>
                                     </div>
                                     <div class="chat-3bRxxu">
                                         <div class='title-3qD0b- container-1r6BKw themed-ANHk51'></div>
                                         <div class="content-yTz4x3">
                                             <div class='chatContent-a9vAAp'>
-                                                <div class='messagesWrapper-3lZDfY group-spacing-16'>
-                                                    <div id='msgs' class='scroller-2FKFPG systemPad-3UxEGl messages-3amgkR scroller-3sQKXg'>
+                                                <div class='messagesWrapper-3lZDfY group-spacing-0'>
+                                                    <div id='msgs' class='scroller-2LSbBU auto-Ge5KZx scrollerBase-289Jih disableScrollAnchor-3V9UtP'
+                                                    dir="ltr" data-jump-section="global" tabindex="-1" style="overflow: hidden scroll; padding-right: 0px;">
                                                         <REPLACE id='chat'/>
                                                     </div>
                                                 </div>
-                                                <div class="form-2fGMdU">
-                                                    <div class='channelTextArea-rNsIhG channelTextArea-2VhZ6z'>
-                                                        <div class='webkit-HjD9Er'>
-                                                            <div class='inner-MADQqc'>
-                                                                <textarea id='msgContent' style="min-height: 48px; max-width: 100%; width: 100%; border: 0; padding: 0; height: 100%; background-color: var(--background-secondary-alt); color: var(--text-normal);"></textarea>
-                                                                <button onclick="sendMsg()" style="width: 48px; height: 48px;">Send</button>
+                                                <!--
+                                                <form class="form-2fGMdU">
+                                                    <div class='popout_3726'>
+                                                        <div class='channelTextArea-rNsIhG channelTextArea-2VhZ6z'>
+                                                            <div class='scrollableContainer-2NUZem webkit-HjD9Er'>
+                                                                <div class="textArea-12jD-V textAreaSlate-1ZzRVj slateContainer-3Qkn2x">
+                                                                    <div class="markup-2BOw-j slateTextArea-1Mkdgw fontSize16Padding-3Wk7zP">
+                                                                        <textarea id='msgContent' style="min-height: 48px; max-width: 100%; width: 100%; border: 0; padding: 0; height: 100%; background-color: var(--background-secondary-alt); color: var(--text-normal);"></textarea>
+                                                                        <button onclick="sendMsg()" style="width: 48px; height: 48px;">Send</button>
+                                                                    </div>
+                                                                </div>
                                                             </div>
                                                         </div>
                                                     </div>
-                                                </div>
+                                                </form>-->
                                             </div>
                                             <div class='membersWrap-2h-GB4 hiddenMembers-2dcs_q'>
-                                                <div class='scrollerWrap-2lJEkd scrollerThemed-2oenus themeGhostHairline-DBD-2d scrollerFade-1Ijw5y'>
-                                                    <div class='scroller-2FKFPG systemPad-3UxEGl members-1998pB'>
+                                                <div class='members-1998pB thin-1ybCId scrollerBase-289Jih fade-2kXiP2'
+                                                orientation="vertical" style="overflow: hidden scroll; padding-right: 0px;">
+                                                    <div class='content-3YMskv'>
                                                         <REPLACE id='users'/>
                                                     </div>
                                                 </div>
@@ -134,6 +139,48 @@
                     })
                     .catch(function(res){ console.log(res) })
                 }
+            }
+        }
+
+        function fallbackCopyTextToClipboard(text) {
+            var textArea = document.createElement("textarea");
+            textArea.value = text;
+            
+            // Avoid scrolling to bottom
+            textArea.style.top = "0";
+            textArea.style.left = "0";
+            textArea.style.position = "fixed";
+
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+
+            try {
+                var successful = document.execCommand('copy');
+                var msg = successful ? 'successful' : 'unsuccessful';
+                console.log('Fallback: Copying text command was ' + msg);
+            } catch (err) {
+                console.error('Fallback: Oops, unable to copy', err);
+            }
+
+            document.body.removeChild(textArea);
+        }
+        function copyTextToClipboard(text) {
+            if (!navigator.clipboard) {
+                fallbackCopyTextToClipboard(text);
+                return;
+            }
+            navigator.clipboard.writeText(text).then(function() {
+                console.log('Async: Copying to clipboard was successful!');
+            }, function(err) {
+                console.error('Async: Could not copy text: ', err);
+            });
+        }
+
+        function ctrlPopupId(item, event) {
+            if(event.ctrlKey) {
+                copyTextToClipboard(item.id);
+                alert(`The following has been copied to clipboard\r\n${item.id}`);
             }
         }
     </script>
