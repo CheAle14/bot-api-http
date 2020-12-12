@@ -24,7 +24,7 @@
         <REPLACE id='table'/>
     </table>
     <script>
-        const NUMBER = "<REPLACE id='hearing.casenumber'/>";
+        const NUMBER = "<REPLACE id='hearing.id'/>";
         function votefor(rulingId) {
             fetch(`/chess/rule/${rulingId}?num=${NUMBER}`,
                 {"method": "PUT"}

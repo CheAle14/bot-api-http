@@ -20,8 +20,8 @@
         <p><a href="/chess">Return to Leaderboard</a></p>
     </footer>
     <script>
-        function dispute(day, year, user, entry) {
-            fetch(`/chess/api/dispute?day=${day}&year=${year}&user=${user}&entryId=${entry}`, 
+        function dispute(id) {
+            fetch(`/chess/api/dispute?gameId=${id}`, 
                     {"method": "PUT"}
                 )
                 .then(function (response) {
@@ -35,7 +35,7 @@
         }
 
         function approveGame(ref) {
-            fetch(`/chess/api/approve?reference=${ref}`, 
+            fetch(`/chess/api/approve?id=${ref}`, 
                     {"method": "PUT"}
                 )
                 .then(function (response) {

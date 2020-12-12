@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title>New Exhibit for #<REPLACE id='hearing.casenumber'/></title>
+        <title>New Exhibit for #<REPLACE id='hearing.id'/></title>
         <style>
             .file {
                 margin-left: 1%;
@@ -36,7 +36,7 @@
         </style>
     </head>
     <body>
-        <form action="/chess/api/cases/$REPLACE id='hearing.casenumber'/$/exhibits" enctype="multipart/form-data" method="POST">
+        <form action="/chess/api/cases/$REPLACE id='hearing.id'/$/exhibits" enctype="multipart/form-data" method="POST">
             <p>Upload new exhibit</p>
             <input type="file" name="file"
             accept=".txt,.pdf,.md plain/text,application/pdf"

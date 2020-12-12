@@ -32,7 +32,7 @@
     <strong>Witness Testimony of <REPLACE id='witness.name'/> follows:</strong>
     <REPLACE id="testimony"/>
     <script>
-        const NUMBER = "<REPLACE id='hearing.casenumber'/>";
+        const NUMBER = "<REPLACE id='hearing.id'/>";
         const WITNESS = "<REPLACE id='witness.id'/>";
         function moveNext() {
             fetch(`/chess/stage?num=${NUMBER}&wit=${WITNESS}`,

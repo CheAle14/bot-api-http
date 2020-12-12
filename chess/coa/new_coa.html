@@ -28,7 +28,7 @@
         <h3>Respondents</h3>
         <label>Please select the names of the people to whom this petition seeks relief from:</label>
         <REPLACE id='players'/>
-        <input type="text" name="respondents" readonly style="display: none;" id="playerInp">
+        <input type="text" name="respondents" readonly style="display: inline;" id="playerInp">
         <h3>Description of Appeal</h3>
         <label>This document should <em>briefly</em> outline what the petition is about</label>
         <input type="file" name="writ"
@@ -51,19 +51,26 @@
                     return false;
             }
         }
-        let respondents = [];
-        function toggle(input) {
-            var id = input.id.split('-')[1];
-            console.log(input);
-            let index = respondents.indexOf(id);
-            if(index === -1) {
-                respondents.push(id);
-            } else {
-                respondents.splice(index, 1);
+        function setText() {
+            var rows = document.getElementsByTagName("tr");
+            var text = "";
+            for(let i =0; i < rows.length; i++) {
+                if(rows[i].id) {
+                    var id = rows[i].id;
+                    var cbMark = document.getElementById(`cb-${id}`);
+                    var ctMark = document.getElementById(`ct-${id}`);
+                    if(cbMark.checked) {
+                        if(ctMark.checked) {
+                            text += `${id}:a,`;
+                        } else {
+                            text += `${id},`
+                        }
+                    }
+                }
             }
-            console.log(respondents);
-            document.getElementById("playerInp").value = respondents.join();
+            if(text)
+                text = text.substring(0, text.length - 1);
+            document.getElementById("playerInp").value = text;
         }
-
     </script>
 </body>

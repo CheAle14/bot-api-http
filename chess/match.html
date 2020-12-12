@@ -34,6 +34,8 @@
 <body>
     <input id="cb" type="checkbox" onclick="toggledraw(this);"/><label>Is Draw? </label>
     <br>
+    <input id="ext" type="checkbox" onclick="toggleExt(this);"/><label>Was this game hosted externally (i.e. on chess.com or similar)? </label>
+    <br>
     <label id="winlbl">Winner: </label><select id="winner">
         <REPLACE id="playerlist"/>
     </select>
@@ -46,6 +48,7 @@
 
     <script>
         var DRAW = false;
+        var EXTERNAL = false;
         function toggledraw(cb) {
             DRAW = cb.checked;
             var winner = document.getElementById("winlbl");
@@ -58,13 +61,17 @@
                 loser.innerHTML = "Loser Name";
             }
         }
+        function toggleExt(ext) {
+            EXTERNAL = ext.checked;
+        }
 
         function submit() {
             var winner = document.getElementById("winner");
             var loser = document.getElementById("loser");
             var winnerName = winner.options[winner.selectedIndex].value;
+            console.log(winner.options[winner.selectedIndex]);
             var loserName = loser.options[loser.selectedIndex].value;
-            fetch(`/chess/api/match?winner=${winnerName}&loser=${loserName}&draw=${DRAW}`, 
+            fetch(`/chess/api/match?winner=${winnerName}&loser=${loserName}&draw=${DRAW}&external=${EXTERNAL}`, 
                     {"method": "PUT"}
                 )
                 .then(function (response) {
@@ -73,6 +80,8 @@
                             alert("Game added, but must be approved by a Moderator")
                         } else if (response.status === 202) {
                             alert("One of players requires use of Chessclock - moderator must approve.");
+                        } else if(response.status === 203) {
+                            alert("Game added, but must be approved by both players who played it.")
                         }
                         window.location.replace("/chess")
                     } else {

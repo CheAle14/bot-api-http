@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title>New Ruling for #<REPLACE id='hearing.casenumber'/></title>
+        <title>New Ruling for #<REPLACE id='hearing.id'/></title>
         <style>
             .file {
                 margin-left: 1%;
@@ -36,7 +36,7 @@
         </style>
     </head>
     <body>
-        <form action="/chess/api/cases/$REPLACE id='hearing.casenumber'/$/rulings" enctype="multipart/form-data" method="POST">
+        <form action="/chess/api/cases/$REPLACE id='hearing.id'/$/rulings" enctype="multipart/form-data" method="POST">
             <p>Upload file of the Court's opinion</p>
             <input type="file" name="file"
             accept=".txt,.pdf,.doxc,.md plain/text,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
