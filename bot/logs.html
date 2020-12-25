@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Bot Logs | Live!</title>
+        <style>
+            html, body, div {
+                background-color: black;
+            }
+            p {
+                color: white;
+                font-family: monospace;
+                margin-top: 1px;
+                margin-bottom: 1px;
+            }
+        </style>
+    </head>
+    <body>
+        <input type="checkbox" id="doScroll" style="position: fixed; top: 0; right: 5px;" checked>
+        <div id="messages">
+            <p>Messages will appear here.</p>
+        </div>
+    </body>
+    <script>
+        var logs = document.getElementById("messages");
+        var scrl = document.getElementById("doScroll");
+        function addMessage(msg) {
+            var para = document.createElement("p");
+            para.innerText = msg.message;
+            para.style.color = msg.colour;
+            logs.appendChild(para);
+            if(scrl.checked)
+                logs.scrollIntoView({behavior: "smooth", block: "end"});
+        }
+        var WS = null;
+        function openWs() {
+            let prot = document.location.protocol === "http:" ? "ws" : "wss";
+            let host = prot === "wss" ? document.location.hostname : `${document.location.hostname}:4650`;
+            let fullUrl = `${prot}://${host}/log`;
+            WS = new WebSocket(fullUrl);
+            WS.onopen = opened;
+            WS.onclose = closed;
+            WS.onmessage = messaged;
+        }
+
+        function opened() {
+            addMessage({message: "Opened websocket connection", colour: "blue"});
+        }
+        function closed() {
+            addMessage({message: "Websocket connected has CLOSED", colour: "red"});
+            setTimeout(function() {
+                addMessage({message: "Attempting re-connect...", colour: "blue"});
+                openWs();
+            }, 5000);
+        }
+        function messaged() {
+            var json = JSON.parse(event.data);
+            addMessage(json);
+        }
+    </script>
+</html>
