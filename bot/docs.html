@@ -1,136 +1,25 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>MLAPI Documentation</title>
-    <style>
-        :root {
-            --sidebar-width: 15%;
-            --colour-sidebar: rgb(145, 145, 145);
-            --colour-main: white;
-        }
-        html, body, .page {
-            width: 100%;
-            height: 100%;
-            margin: 0;
-            padding: 0;
-        }
-        .page {
-            position: relative;
-            overflow: hidden;
-        }
-        .leftside {
-            position: absolute;
-            top:0;
-            left:0;
-            bottom:0;
-            width: var(--sidebar-width);
-            background-color: var(--colour-sidebar);
-            padding-left: 3px;
-        }
-        .material {
-            background-color: var(--colour-main);
-        }
-        div {
-            margin: 0;
-        }
-        .material {
-            position: absolute;
-            flex-direction: column;
-            left: var(--sidebar-width);
-            top: 0;
-            right: 0;
-            bottom: 0;
-        }
-        .scroller {
-            width: 100%;
-            height: 100%;
-            max-height: 100vh;
-            margin: 4px, 4px;
-            padding: 4px;
-            overflow-x: hidden;
-            overflow-y: scroll;
-            text-align: justify;
-        }
-        .msgBox {
-            width: 90%;
-            margin: 0;
-            display: block;
-            padding: 24px 24px calc(1px / 10) 50px;
-            position: relative;
-            margin-top: 8px;
-            border-left: 4px solid;
-            border-radius: 3px;
-            margin-bottom: 16px;
-            background-color: #F5F7F9;
-        }
-        p {
-            margin-top: 1px;
-        }
-        .warn {
-            border-color: orangered;
-        }
-        .error {
-            border-color: red;
-        }
-        .info {
-            border-color: blue;
-        }
-        .pre {
-            margin-bottom: 1em;
-            padding: 12px 8px;
-            width: auto;
-            max-height: 600px;
-            overflow: auto;
-            font-family: Consolas,Menlo,Monaco,Lucida Console,Liberation Mono,DejaVu Sans Mono,Bitstream Vera Sans Mono,Courier New,monospace,sans-serif;
-            font-size: 13px;
-            background-color: rgb(239, 240, 241);
-            border-radius: 3px;
-        }
-        pre code {
-            white-space: inherit;
-            padding: 0;
-        }
-
-        pre code {
-            background-color: transparent;
-        }
-        code {
-            white-space: pre-wrap;
-            padding: 1px 5px;
-        }
-        code {
-            font-family: Consolas,Menlo,Monaco,Lucida Console,Liberation Mono,DejaVu Sans Mono,Bitstream Vera Sans Mono,Courier New,monospace,sans-serif;
-            background-color: rgb(239, 240, 241);
-        }
-        .paramr {
-            color: red;
-        }
-        .paramo {
-            color: orange;
-        }
-        .paramtype {
-            color: blue;
-        }
-        div.cmd {
-            padding: 8px;
-            margin-bottom: 5px;
-            border: 1px dashed black;
-        }
-    </style>
+    <title>Documentation</title>
+    <link rel="stylesheet" type="text/css" href="/_/css/docs.css">
 </head>
 <body>
-    <div class='page'>
-        <div class='leftside'>
-            <div class='scroller'>
-                <h2>Commands</h2>
-                <REPLACE id='commands'/>
-                <h2>API Routes</h2>
-                <REPLACE id='modules'/>
-            </div>
-        </div>
-        <div class='material'>
-            <div class='scroller'>
-                <REPLACE id='content'/>
+    <div id="app-mount">
+        <div class="wrapper-1A34pp">
+            <div class="shakeShake-2hLFSH">
+                <div class="content-Cehfnq">
+                    <REPLACE id="sideContent"/>
+                    <div class="contentWrapper-3RaMY1 contentWrapper-1Wul4w">
+                        <div class="scrollerWrap-2lJEkd scrollerThemed-2oenus themeGhost-28MSn0">
+                            <div class="scroller-2FKFPG page-content-scrolling-container scroller-2URUGO">
+                                <div class="contentWrapperInner-15LzPz">
+                                    <REPLACE id="mainContent"/>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
