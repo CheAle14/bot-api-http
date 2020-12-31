@@ -11,6 +11,7 @@
                 font-family: monospace;
                 padding-bottom: 2px;
                 margin-bottom: 3px;
+                margin-top: 0;
             }
         </style>
     </head>
@@ -23,6 +24,7 @@
     <script>
         var logs = document.getElementById("messages");
         var scrl = document.getElementById("doScroll");
+        var connecting = true;
         function addMessage(msg) {
             var para = document.createElement("p");
             para.innerText = msg.message;
@@ -43,10 +45,13 @@
         }
 
         function opened() {
+            connecting = false;
             addMessage({message: "Opened websocket connection", colour: "blue"});
         }
         function closed() {
-            addMessage({message: "Websocket connected has CLOSED", colour: "red"});
+            var aa = connecting ? "WebSocket failed to connect, retrying.." : "WebSocket connection has CLOSED";
+            addMessage({message: aa, colour: "red"});
+            connecting = true;
             setTimeout(function() {
                 addMessage({message: "Attempting re-connect...", colour: "blue"});
                 openWs();
