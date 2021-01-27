@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Appeal Ban from <REPLACE id="guild.name"/></title>
+        <link rel="stylesheet" type="text/css" href="/_/css/vpn/fromDs.css">
+        <link rel="stylesheet" type="text/css" href="/_/css/vpn/theme.css">
+    </head>
+    <body>
+        <div class='appMount-3lHmkl'>
+            <div class='app-1q1i1E'>
+                <div class='app-2rEoOp'>
+                    <div class='layers-3iHuyZ layers-3q14ss'>
+                        <div aria-hidden="false" class='layer-3QrUeG baseLayer-35bLyl'>
+                            <div class="container-2lgZY8">
+                                <nav class='wrapper-1Rf91z guilds-1SWlCJ' aria-label="Servers">
+                                    <div class='unreadMentionsIndicatorTop-gA6RCh'></div>
+                                    <div class='scroller-2TZvBN none-2Eo-qx scrollerBase-289Jih'>
+                                        <REPLACE id='guilds'/>
+                                    </div>
+                                </nav>
+                                <div class="base-3dtUhz">
+                                    <div class="content-98HsJk">
+                                        <!--<div class='sidebar-2K8pFh'>
+                                            <div class='container-3w7J-x'>
+                                                <div class="scroller-RmtA4e thin-1ybCId scrollerBase-289Jih fade-2kXiP2"
+                                                style="overflow: hidden scroll; padding-right: 0px;">
+                                                    <REPLACE id='channels'/>
+                                                </div>
+                                            </div>
+                                        </div>-->
+                                        <div class="chat-3bRxxu">
+                                            <div class='title-3qD0b- container-1r6BKw themed-ANHk51'></div>
+                                            <div class="content-yTz4x3">
+                                                <div class='chatContent-a9vAAp'>
+                                                    <div class='messagesWrapper-1sRNjr group-spacing-0'>
+                                                        <div id='messages' class='scroller-2LSbBU auto-Ge5KZx scrollerBase-289Jih disableScrollAnchor-3V9UtP'
+                                                        dir="ltr" data-jump-section="global" tabindex="-1" style="overflow: hidden scroll; padding-right: 0px;">
+                                                            <REPLACE id='messages'/>
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    <form class="form-2fGMdU" style="">
+                                                        <div class='popout_3726'>
+                                                            <div class='channelTextArea-rNsIhG channelTextArea-2VhZ6z'>
+                                                                <div class='scrollableContainer-2NUZem webkit-HjD9Er'>
+                                                                    <div class="textArea-12jD-V textAreaSlate-1ZzRVj slateContainer-3Qkn2x">
+                                                                        <textarea onkeypress="maybeSend(event)" id='msgContent' style="width:90%; border: 0; padding: 3px; height: 100%; background-color: var(--background-secondary-alt); color: var(--text-normal);"></textarea>
+                                                                        <button id="submitMsg" onclick="sendMsg()" style="position: absolute; right: 0px; top: 0px; border: 0; width: 10%; margin: 0; height: 48px;">Send</button>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                                <!--<div class='membersWrap-2h-GB4 hiddenMembers-2dcs_q'>
+                                                    <div class='members-1998pB thin-1ybCId scrollerBase-289Jih fade-2kXiP2'
+                                                    orientation="vertical" style="overflow: hidden scroll; padding-right: 0px;">
+                                                        <div class='content-3YMskv'>
+                                                            <REPLACE id='users'/>
+                                                        </div>
+                                                    </div>
+                                                </div>-->
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            let msgList = document.getElementById("messages");
+            let textBtn = document.getElementById("submitMsg");
+            var area = document.getElementById("msgContent");
+            function getTimestamp(snowflake) {
+                return (BigInt(snowflake) >> 22n) + 1420070400000n
+            }
+            function frm(date) {
+                return `${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`;
+            }
+            function scrollEnd() {
+                msgList.lastElementChild.scrollIntoView({
+                    behavior: "smooth",
+                    block: "end"
+                });
+            }
+            function addMessage(message) {
+                var text = "";
+                if(message.text)
+                    text = `<p>${message.text}</p>`;
+                else
+                    text = message.html;
+                if(message.id) {
+                    var existing = document.getElementById(message.id);
+                    if(existing) {
+                        existing.outerHTML = text;
+                        existing.id = message.id;
+                        existing.classList.add("edited");
+                        return;
+                    }
+                }
+                var added = false;
+                // TODO: binary insert message into correct place order-wise.
+                for(var i = 0; i < msgList.children.length; i++) {
+                    var el = msgList.children[i];
+                    if(el.tagName.toLowerCase() === "div" && el.id && message.id) {
+                        var a = getTimestamp(el.id);
+                        var b = getTimestamp(message.id);
+                        //console.log(`${frm(new Date(Number(a)))} > ${frm(new Date(Number(b)))} = ${a > b}`);
+                        if(a > b) {
+                            //console.warn(`Inserting text for ${message.content} before ${el.content}`)
+                            el.insertAdjacentHTML("beforebegin", text);
+                            var e = document.getElementById(message.id);
+                            e.content = message.content;
+                            added = true;
+                            break;
+                        }
+                    }
+                }
+                if(added === false) {
+                    msgList.insertAdjacentHTML("beforeend", text);
+                    var e = document.getElementById(message.id);
+                    if(e)
+                        e.content = message.content;
+                }
+                scrollEnd();
+            }
+            const GUILD_ID = "<REPLACE id='guild.id'/>";
+            const USER_ID = "<REPLACE id='user.id'/>"
+            var MUTED = "<REPLACE id='appeal.IsMuted'/>".toLowerCase() == "true";
+            let prot = document.location.protocol === "http:" ? "ws" : "wss";
+            let host = prot === "wss" ? document.location.hostname : `${document.location.hostname}:4650`;
+            let fullUrl = `${prot}://${host}/ban-appeal?id=${GUILD_ID}`;
+            var WS = new WebSocket(fullUrl);
+            WS.onopen = function(e) {
+                console.log(e);
+                addMessage({
+                    text: "WebSocket connection established. Fetching messages..."
+                })
+                WS.send(JSON.stringify({
+                    type: "GetMessages",
+                    before: Date.now().toString()
+                }));
+            }
+            WS.onerror = function(e) {
+                console.log(e);
+            }
+            WS.onclose = function(e) {
+                console.log(e);
+                addMessage({
+                    text: "WebSocket connection has closed. Please reload the page."
+                });
+            }
+            WS.onmessage = function(e) {
+                console.log(e);
+                var obj = JSON.parse(e.data);
+                if(obj.id) {
+                    addMessage(obj);
+                    if(obj.author == USER_ID) {
+                        area.value = "";
+                    }
+                } 
+                if(obj.muted) {
+                    MUTED = true;
+                    clearTimeout(unlockTextArea);
+                    textBtn.disabled = true;
+                    addMessage({
+                        text: "Ban appeal is muted for the next " + obj.muted
+                    });
+                    addMessage({
+                        text: "You will need to reload the page once that period has ended."
+                    });
+                }
+                if(obj.error) {
+                    alert(obj.error);
+                }
+            }
+            function sendMsg() {
+                textBtn.disabled = true;
+                setTimeout(unlockTextArea, 2500);
+                WS.send(JSON.stringify({
+                    type: "SendMessage",
+                    content: area.value
+                }));
+            }
+            function unlockTextArea() {
+                if(!MUTED)
+                    textBtn.disabled = false;
+            }
+            function maybeSend(event) {
+                if(event.code === "Enter" && textBtn.disabled === false && event.shiftKey === false) {
+                    sendMsg();
+                }
+            }
+        </script>
+    </body>
+</html>
