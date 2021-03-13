@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>MLAPI Privacy Policy</title>
+        <style>
+            td.essential::before {
+                content: "As this data is essential, it can only be removed by the termination of your account. ";
+            }
+            td[consent]::before,
+            td.consent::before {
+                content: "As this data is stored only with your consent, you can request it be deleted at any time. "
+            }
+            td[optional]::before,
+            td.optional::before {
+                content: "Optional";
+                text-decoration: underline;
+                margin-right: 5px;
+            }
+            td,
+            th {
+                border: 1px solid rgb(190, 190, 190);
+                padding: 10px;
+            }
+
+            td {
+                text-align: center;
+            }
+
+            tr:nth-child(even) {
+                background-color: #eee;
+            }
+            table {
+                border-collapse: collapse;
+                border: 2px solid rgb(200, 200, 200);
+                letter-spacing: 1px;
+                font-family: sans-serif;
+                font-size: .8rem;
+            }
+            code {
+                background-color: black;
+                color: white;
+                padding-top: 1px;
+                padding-bottom: 1px;
+                padding-left: 3px;
+                padding-right: 3px;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>MLAPI Privacy Policy</h1>
+
+        <p>MLAPI collects and stores the following data related to you:</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>Data</th>
+                    <th>Circumstances</th>
+                    <th>Purposes</th>
+                    <th>Duration / Removal</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>HTTP connection information, including your IP address, and any headers on the request</td>
+                    <td>On every request sent to ml-api.uk.ms</td>
+                    <td>IP address stored for security and safeguarding; headers stored for debugging</td>
+                    <td>Indefinite; data older than 90 days may be removed upon your request</td>
+                </tr>
+                <tr>
+                    <td>Discord OAuth2 information, including your snowflake ID, username and discriminator</td>
+                    <td>When creating the account (logging in via OAuth2 for first time)</td>
+                    <td>ID is used to internally reference your account; username and discriminator displayed if your Discord account information cannot otherwise be loaded (eg, your server nickname)</td>
+                    <td class="essential"></td>
+                </tr>
+                <tr>
+                    <td>EduLink information, including the teaching groups you are in, and your username and plaintext password</td>
+                    <td class="optional">Only when you run the <code>edulink setup</code> bot command and provide this information</td>
+                    <td>Consent, to provide homework updates</td>
+                    <td class="consent"></td>
+                </tr>
+                <tr>
+                    <td>Internal MLAPI data, including flags indicating whether your account is verified or has been approved to access the website, and any access tokens for authentication</td>
+                    <td>Your MLAPI account will have these flags at all times, and they will be changed accordingly</td>
+                    <td>Essential to the function of the service, to ensure certain pages and routes are accessible only to selected users</td>
+                    <td class="essential"></td>
+                </tr>
+                <tr>
+                    <td>MLAPI account password</td>
+                    <td>Upon first login via OAuth2, you will be prompted to provide a password. This password is salted and hashed and only that hashed format is stored.
+                        <br/><u>Note:</u> MLAPI uses haveibeenpwned to detect whether a password provided is compromised.
+                    </td>
+                    <td>Allows for login to MLAPI website outside of Discord OAuth2.</td>
+                    <td>Your password will be stored until account termination, but can be deleted upon request</td>
+                </tr>
+                <tr>
+                    <td>
+                        <u>CoronaService:</u> The date and time to which your isolation period ends.
+                    </td>
+                    <td class="optional">
+                        Upon usage of the <code>covid isolate</code> command
+                    </td>
+                    <td>Allows bot to keep track of when your isolation period ends, and update your nickname accordingly</td>
+                    <td>This information would be removed when the isolation period ends. As it is not personal, it cannot be removed by request.</td>
+                </tr>
+                <tr>
+                    <td>
+                        <u>ELHomeworkService:</u> Data regarding your preferences on homework, currently only a bool on whether to be mentioned (also, currently does nothing)
+                    </td>
+                    <td class="optional">
+                        Tied to edulink information as above.
+                    </td>
+                    <td>
+                        Keeps track of your preferences on how homework should be provided to you.
+                    </td>
+                    <td class="consent"></td>
+                </tr>
+                <tr>
+                    <td>
+                        Masterlist information, including the name and type of the server, and its internal and external IP address (which, thus, may be your IPs)
+                    </td>
+                    <td class="optional">Upon submitting the information via POST to API endpoint</td>
+                    <td>Information can be displayed to clients wishing to find a server</td>
+                    <td class="consent"></td>
+                </tr>
+                <tr>
+                    <td>
+                        <u>PenaltyService</u> Penalties stored contain the ID of the user acted on, the ID of the staff operator, the datetime it occured, the provided reason and the duration.
+                    </td>
+                    <td>
+                        When the penalty commands are invoked, including <code>mute</code>, <code>tban</code>, <code>tblock</code>
+                    </td>
+                    <td>
+                        Essential information that must be stored when the command is invoked.
+                    </td>
+                    <td>Kept until the penalty duration lapses, and then removed</td>
+                </tr>
+                <tr>
+                    <td>
+                        <u>CountdownService</u> ID of the user who created the countdown, to which datetime the countdown counts to, and what the bot says when that time is reached
+                    </td>
+                    <td optional>
+                        Upon usage of <code>countdown</code> commands
+                    </td>
+                    <td>To allow countdowns to be created, such as birthdays or new years.</td>
+                    <td consent>Data removed after countdown has lapsed</td>
+                </tr>
+                <tr>
+                    <td>
+                        <u>TranslationService</u> IDs of users monitoring and being monitored
+                    </td>
+                    <td optional>Upon <code>translate watch</code></td>
+                    <td>
+                        To allow for a user to see translations of specific users messages
+                    </td>
+                    <td>
+                        Users can remove their monitoring status upon request; users being monitored cannot.
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <u>VCLockService</u> Information on a locked VC channel, including the IDs of users authorized to enter it
+                    </td>
+                    <td optional>
+                        Upon usage of <code>vc lock</code> command
+                    </td>
+                    <td>
+                        Allows for locked VCs to be preserved even through bot restarts.
+                    </td>
+                    <td>Data is removed when the VC is unlocked, and will be stored indefinitely until that happens</td>
+                </tr>
+                <tr>
+                    <td>
+                        <strong><u>Message logging</u></strong> In servers which have not opted out, all messages seen by the bot sent by non-bots will record the following:
+                        <ul style="text-align: left;">
+                            <li>The ID of the author</li>
+                            <li>The ID of the channel</li>
+                            <li>The ID of the guild</li>
+                            <li>The ID of the message</li>
+                            <li>The message content itself</li>
+                            <li>The links to any attachments on the message</li>
+                        </ul>
+                    </td>
+                    <td>On every message in applicable servers</td>
+                    <td>To support moderation, security and safeguarding of servers</td>
+                    <td>Stored indefinitely. For messages with personal data present in their content, the author may request that such personal data be redacted</td>
+                </tr>
+                <tr>
+                    <td><u>Chess data</u> Account information, such as linked Discord ID, and name. Information regarding games and appeals</td>
+                    <td>Depending on the data, when the chess account is created, when the game is submitted, or when an appeal is created</td>
+                    <td>To provide for the Chess leaderboard and related functionality</td>
+                    <td essential></td>
+                </tr>
+                <tr>
+                    <td>Logs are kept of commands invoked and API endpoints requested, where your username and IP (respectively) are visible.</td>
+                    <td>Every command invocation and API endpoint requested</td>
+                    <td>Debugging and security monitoring</td>
+                    <td>Stored indefinitely; data older than 90 days may be removed upon request</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h3>Accuracy</h3>
+        <p>Whilst best efforts have been made to ensure the above table is up to date (as of 13th March 2021), MLAPI cannot guarantee that the above is absolutely accurate. To verify what data is stored, you can see the source code of MLAPI at https://github.com/TheGrandCoding/discord-bot</p>
+
+        <h3>Requests to Remove</h3>
+        <p>You can request to have data removed by contacting the owner of this website, Bob123#4008 on Discord.</p>
+
+        <h3>Subject Access Request</h3>
+        <p>You have the legal and moral right to view the data that MLAPI has stored on you.<br/>
+        You may request such data via https://ml-api.uk.ms/privacy/sar, or by contacting the owner, and you should receive a DM from the bot or the owner with further instructions.
+        <br/>
+        Due to the limited resources of MLAPI, it may take up to seven (7) days for your request to be answered, and a further 14 (fourteen) for it to be processed.    
+        </p>
+    </body>
+</html>

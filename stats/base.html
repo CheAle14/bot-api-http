@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+    <head></head>
+    <body>
+        <table id="table">
+            <thead>
+                <tr>
+                    <th>User</th>
+                    <th>Messages</th>
+                    <th>Average Length</th>
+                    <th>Average Time</th>
+                </tr>
+            </thead>
+            <tbody id="bodies">
+
+            </tbody>
+        </table>
+        <script>
+            let prot = document.location.protocol === "http:" ? "ws" : "wss";
+            let host = prot === "wss" ? document.location.hostname : `${document.location.hostname}:4650`;
+            let fullUrl = `${prot}://${host}/statistics`;
+            let socket = new WebSocket(fullUrl);
+            socket.onopen = function(e) {
+                console.log("Opened ", e);
+            }
+            socket.onmessage = function(e) {
+                console.log("Message ", e);
+                var data = JSON.parse(e.data);
+                var table = document.getElementById("bodies");
+                table.innerHTML = "";
+                var globalRow = table.insertRow(0);
+                globalRow.insertCell(0).innerText = "[Whole Channel]";
+                globalRow.insertCell(1).innerText = data.total.count;
+                globalRow.insertCell(2).innerText = data.total.avgLength;
+                globalRow.insertCell(3).innerText = data.total.avgTime;
+                for(let key in data) {
+                    if(key === "total")
+                        continue;
+                    var userData = data[key];
+                    console.log(userData);
+                    var userRow = table.insertRow(-1);
+                    userRow.insertCell().innerHTML = `<img src='${userData.user.avatar}' width='48px'/> ${userData.user.username}`;
+                    userRow.insertCell().innerText = `${userData.stats.count} (${Math.round((userData.stats.count / data.total.count) * 100)}%)`;
+                    userRow.insertCell().innerText = `${Math.round(userData.stats.avgLength)}`;
+                    userRow.insertCell().innerText = `${Math.round(userData.stats.avgTime)}`;
+                }
+            }
+            socket.onerror = function(e) {
+                console.error("Error ", e);
+            }
+            socket.onclose = function(e) {
+                console.warn("Close ", e);
+            }
+        </script>
+    </body>
+</html>
