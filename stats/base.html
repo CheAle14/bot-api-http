@@ -2,6 +2,7 @@
 <html>
     <head></head>
     <body>
+        <script src="https://cdn.jsdelivr.net/npm/chart.js@3.0.1/dist/chart.min.js"></script>
         <table id="table">
             <thead>
                 <tr>
@@ -15,11 +16,45 @@
 
             </tbody>
         </table>
+        <p><strong>Words used:</strong>
+            <canvas id="piechart"></canvas>
+        </p>
         <script>
             let prot = document.location.protocol === "http:" ? "ws" : "wss";
             let host = prot === "wss" ? document.location.hostname : `${document.location.hostname}:4650`;
             let fullUrl = `${prot}://${host}/statistics`;
             let socket = new WebSocket(fullUrl);
+
+            function getRndInteger(min, max) {
+                return Math.floor(Math.random() * (max - min) ) + min;
+                }
+
+            function genColours() {
+                var arr = [];
+                while(arr.length < 100) {
+                    var r = getRndInteger(0, 256);
+                    var g = getRndInteger(0, 256);
+                    var b = getRndInteger(0, 256);
+                    arr.push(`rgba(${r}, ${g}, ${b}, 0.5)`);
+                }
+                return arr;
+            }
+
+            var chartConfig = {
+                labels: [],
+                datasets: [
+                    {
+                        label: "Word Counts",
+                        data: [],
+                        hoverOffset: 4,
+                        backgroundColor: genColours()
+                    }
+                ]
+            };
+            let chart = new Chart(document.getElementById("piechart"), {
+                type: "pie",
+                data: chartConfig
+            });
             socket.onopen = function(e) {
                 console.log("Opened ", e);
             }
@@ -34,15 +69,30 @@
                 globalRow.insertCell(2).innerText = data.total.avgLength;
                 globalRow.insertCell(3).innerText = data.total.avgTime;
                 for(let key in data) {
-                    if(key === "total")
+                    if(key === "total" || key === "words")
                         continue;
                     var userData = data[key];
                     console.log(userData);
                     var userRow = table.insertRow(-1);
-                    userRow.insertCell().innerHTML = `<img src='${userData.user.avatar}' width='48px'/> ${userData.user.username}`;
+                    try {
+                        userRow.insertCell().innerHTML = `<img src='${userData.user.avatar}' width='48px'/> ${userData.user.username}`;
+                    } catch {
+                    }
                     userRow.insertCell().innerText = `${userData.stats.count} (${Math.round((userData.stats.count / data.total.count) * 100)}%)`;
                     userRow.insertCell().innerText = `${Math.round(userData.stats.avgLength)}`;
                     userRow.insertCell().innerText = `${Math.round(userData.stats.avgTime)}`;
+                }
+                chart.data.labels = [];
+                chart.data.datasets.forEach((x) => {
+                    x.data = [];
+                })
+                for(var key in data.words) {
+                    var count = data.words[key];
+                    chart.data.labels.push(key);
+                    chart.data.datasets.forEach((dataset) => {
+                        dataset.data.push(count);
+                    });
+                    chart.update();
                 }
             }
             socket.onerror = function(e) {
