@@ -22,7 +22,8 @@
         <script>
             let prot = document.location.protocol === "http:" ? "ws" : "wss";
             let host = prot === "wss" ? document.location.hostname : `${document.location.hostname}:4650`;
-            let fullUrl = `${prot}://${host}/statistics`;
+            const urlParams = new URLSearchParams(window.location.search);
+            let fullUrl = `${prot}://${host}/statistics?id=${urlParams.get("id")}`;
             let socket = new WebSocket(fullUrl);
 
             function getRndInteger(min, max) {
