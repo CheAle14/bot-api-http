@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title><REPLACE id="server.name"/> Rules</title>
+        <style>
+            input, textarea {
+                width: 100%;
+                height: 100%;
+            }
+            textarea {
+                min-height: 50px;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>Rules for <REPLACE id="server.name"/></h1>
+        <REPLACE id="table"/>
+
+        <input type="button" value="Save" onclick="save();"/>
+
+        <script>
+            const GUILD_ID = "<REPLACE id='server.id'/>";
+            function getJson() {
+                var arr = [];
+                var rows = document.getElementsByClassName("ruleItem");
+                console.log(rows);
+                var i = 0;
+                for(var i = 0; i < rows.length; i++) 
+                {
+                    var row = rows[i];
+                    var ruleObject = {
+                        id: row.children[0].children[0].value,
+                        short: row.children[1].children[0].value,
+                        long: row.children[2].children[0].value
+                    }
+                    arr.push(ruleObject);
+                }
+                return arr;
+            }
+
+            function createElement(tag, value, type) {
+                var inp = document.createElement(tag);
+                inp.type = type;
+                inp.value = value;
+                return inp;
+            }
+
+            function addRule(ruleObj) {
+                var last = document.getElementById("addNewBtn");
+                var tr = document.createElement("tr");
+                tr.classList.add("ruleItem");
+                var tdId = document.createElement("td");
+                tdId.appendChild(createElement("input", ruleObj.id || "69", "number"));
+                tr.appendChild(tdId);
+                var tdShort = document.createElement("td");
+                tdShort.appendChild(createElement("input", ruleObj.short, "text"));
+                tr.appendChild(tdShort);
+                var tdLong = document.createElement("td");
+                tdLong.appendChild(createElement("textarea", ruleObj.long, ""));
+                tr.appendChild(tdLong);
+                last.parentElement.insertBefore(tr, last);
+            }
+
+            function newRule() {
+                addRule({
+                    id: 69,
+                    short: "",
+                    long: ""
+                });
+            }
+
+            function save() {
+                var ob = getJson();
+                var url = getUrl(`/server/${GUILD_ID}/rules`);
+                console.log(url);
+                fetch(url, {
+                    body: JSON.stringify(ob),
+                    method: "POST"
+                }).then(function(r) {
+                    console.log(r);
+                    if(r.ok) {
+                        window.location.reload();
+                    } else {
+                        r.text().then(function(t) {
+                            console.error(t);
+                            alert(t);
+                        })
+                    }
+                }).catch(function(r) {
+                    console.log(r);
+                });
+            }
+        </script>
+    </body>
+</html>
