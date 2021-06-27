@@ -3,22 +3,259 @@
     <head>
         <title>Calender / Scheduler</title> 
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar-scheduler@5.8.0/main.min.css">
+        <style>
+            .fc-timegrid-event {
+                border-width: 4px;
+                padding: 2px;
+            }
+            .fc-event-avatar {
+                position:absolute;
+                top: 3px;
+                right: 3px;
+            }
+            .fc-event-avatar > img {
+                border-radius: 50%;
+                -webkit-border-radius: 50%;
+                -moz-border-radius: 50%;
+                display: list-item;
+                margin-bottom: 2px;
+            }
+            .clickable {
+                cursor: pointer
+            }
+        </style>
         <script src="https://cdn.jsdelivr.net/npm/fullcalendar-scheduler@5.8.0/main.min.js"></script>
         <script>
-    
-            document.addEventListener('DOMContentLoaded', function() {
+
+            const USER_ID = "<REPLACE id='user.id'/>";
+            const PLUS = "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9e/Plus_symbol.svg/500px-Plus_symbol.svg.png";
+            var USERS = {};
+            var calendar = null;
+
+            function fetchUsers() {
+                fetch("/api/calendar/users")
+                  .then(function(r) {
+                    console.log(r);
+                    if(r.ok) {
+                        r.json().then(function(x) {
+                            USERS = x;
+                            console.log("Loaded users: ", USERS);
+                            init();
+                        })
+                    }
+                }).catch(function(err) {
+                    console.error(err);
+                    alert("Failed to fetch users!");
+                })
+            }
+
+            function init() {
                 var calendarEl = document.getElementById('calendar');
-                var calendar = new FullCalendar.Calendar(calendarEl, {
+                calendar = new FullCalendar.Calendar(calendarEl, {
+                    headerToolbar: {
+                        center: "timeGridDay,timeGridWeek,dayGridMonth"
+                    },
                     initialView: 'timeGridWeek',
                     firstDay: 1,
-                    allDaySlot: false
+                    allDaySlot: false,
+                    events: {
+                        url: "/api/calendar"
+                    },
+                    height: "auto",
+                    initialDate: !!window.location.hash ? new Date(window.location.hash) : undefined,
+                    nowIndicator: true,
+                    eventOverlap: function(stillEvent, movingEvent) {
+                        var ours = stillEvent.extendedProps.creator == USER_ID && movingEvent.extendedProps.creator == USER_ID;
+                        if(ours)
+                            return false; // don't allow user to overlap their own events
+                        return true;
+                        // TODO: prevent if user is attending one
+                    },
+                    eventContent: eventContentHooks
                 });
                 calendar.on("dateClick", calendarDateClick);
+                calendar.on("eventClick", eventClicked);
+                calendar.on("eventDrop", eventChanged);
+                calendar.on("eventResize", eventChanged);
                 calendar.render();
-                console.log(calendar);
+
+                var prevButton = document.getElementsByClassName("fc-prev-button")[0];
+                var nextButton = document.getElementsByClassName("fc-next-button")[0];
+                prevButton.addEventListener("click", dateChanged);
+                nextButton.addEventListener("click", dateChanged);
+            }
+
+            function dateChanged(arg) {
+                var first = calendar.view.currentStart;
+                var date = first.getFullYear() + "-" + pad(first.getMonth() + 1) + "-" + pad(first.getDate());
+                window.location.hash = date;
+            }
+    
+            document.addEventListener('DOMContentLoaded', function() {
+                fetchUsers();
             });
 
             var selectStart = null;
+
+            function eventChanged(arg) {
+                console.log(arg);
+                fetch(`/api/calendar/move?id=${arg.event.id}&start=${arg.event.start.getTime()}&end=${arg.event.end.getTime()}`, {
+                    method: "PUT"
+                }).then(function(response) {
+                    console.log(response);
+                    if(!response.ok) {
+                        arg.revert();
+                        alert("Failed to modify event! See console for details");
+                    } else if (popupOpen) {
+                        showPopupUi(arg.event);
+                    }
+                }).catch(function(err) {
+                    console.error(err);
+                    arg.revert();
+                    alert("Failed to modify event! See console for details");
+                });
+                
+            }
+
+            function getUser(id) {
+                var usr = USERS[id];
+                if(!usr) {
+                    usr = {
+                        username: id,
+                        discriminator: "0",
+                        avatar: "https://http.cat/404"
+                    }
+                }
+                return usr;
+            }
+
+            function eventContentHooks(arg, createElement) {
+                var dom = [];
+                var start = arg.event.start;
+                var end = arg.event.end;
+                var creator = getUser(arg.event.extendedProps.creator);
+                console.log(arg, creator);
+                var formatTime = function(date) {
+                    return pad(date.getHours()) + ":" + pad(date.getMinutes());
+                }
+                var time = document.createElement("div");
+                time.innerText = formatTime(start) + " - " + formatTime(end);
+                time.classList.add("fc-event-time");
+                dom.push(time);
+
+                var title = document.createElement("div");
+                title.classList.add("fc-event-title-container");
+                title.innerText = arg.event.title;
+                dom.push(title);
+
+                var avatar = document.createElement("div");
+                avatar.classList.add("fc-event-avatar");
+                
+                var img = document.createElement("img");
+                img.src = creator.avatar;
+                img.width = 32;
+                img.height = 32;
+
+                img.alt = `${creator.username}#${creator.discriminator} - Organiser`
+                img.title = `${creator.username}#${creator.discriminator} - Organiser`
+                avatar.appendChild(img);
+
+                var weAttend = arg.event.extendedProps.creator == USER_ID;
+                for(let userId of arg.event.extendedProps.attendees) {
+                    var usr = getUser(userId);
+                    var uimg = document.createElement("img");
+                    if(userId == USER_ID) {
+                        weAttend = true;
+                        uimg.classList.add("clickable");
+                        uimg.setAttribute("data-event-id", arg.event.id);
+                        uimg.addEventListener("click", avatarRemoveSelf);
+                    }
+                    uimg.src = usr.avatar;
+                    uimg.width = 32;
+                    uimg.height = 32;
+
+                    uimg.alt = `${usr.username}#${usr.discriminator}`
+                    uimg.title = `${usr.username}#${usr.discriminator}`
+                    avatar.appendChild(uimg);
+                }
+
+                if(!weAttend) {
+                    var omg = document.createElement("img");
+                    omg.classList.add("clickable");
+                    omg.setAttribute("data-event-id", arg.event.id);
+                    omg.addEventListener("click", avatarAddSelf);
+                    omg.src = PLUS;
+                    omg.width = 32;
+                    omg.height = 32;
+                    omg.alt = "Attend";
+                    omg.title = "Attend this event";
+                    omg.style.backgroundColor = "white";
+                    avatar.appendChild(omg);
+                }
+
+                var mask = document.createElement("canvas");
+                mask.width = 40;
+                mask.height = 40;
+                mask.class = "mask";
+                mask.style = "transform-origin: left top; z-index: 1; position: absolute;";
+                avatar.appendChild(mask);
+
+                dom.push(avatar);
+
+                console.log(dom);
+
+                return {domNodes: dom};
+            }
+
+            function avatarRemoveSelf(arg) {
+                console.log("Self remove:", arg);
+                var eventId = arg.target.getAttribute("data-event-id");
+                var event = calendar.getEventById(eventId);
+                if(confirm(`Are you sure you want to remove yourself from '${event.title}' attendees?`)) {
+                    fetch(`/api/calendar/attendee?eventId=${eventId}`, {
+                        method: "DELETE"
+                    }).then(function(r) {
+                        console.log(r);
+                        if(r.ok) {
+                            window.location.reload();
+                        } else {
+                            r.text().then(function(t) {
+                                console.log(t);
+                                alert("Failed to remove: " + t)
+                            });
+                        }
+                    }).catch(function(e) {
+                        console.error(e);
+                    })
+                }
+            }
+            function avatarAddSelf(arg) {
+                console.log("Self add:", arg);
+                var eventId = arg.target.getAttribute("data-event-id");
+                var event = calendar.getEventById(eventId);
+                if(confirm(`Are you sure you want to mark yourself as attending the event '${event.title}'?`)) {
+                    fetch(`/api/calendar/attendee?eventId=${eventId}`, {
+                        method: "POST"
+                    }).then(function(r) {
+                        console.log(r);
+                        if(r.ok) {
+                            window.location.reload();
+                        } else {
+                            r.text().then(function(t) {
+                                console.log(t);
+                                alert("Failed to add: " + t)
+                            });
+                        }
+                    }).catch(function(e) {
+                        console.error(e);
+                    })
+                }
+            }
+
+            function eventClicked(arg) {
+                showPopupUi(arg.event);
+            }
+
             function calendarDateClick(event) {
                 console.log(event);
 
@@ -34,27 +271,154 @@
                         console.log(`UI: ${selectStart} for ${hours} hours`);
                         showPopupUi({
                             start: selectStart,
-                            duration: hours * 60
+                            duration: hours * 60,
+                            title: ""
                         })
                         selectStart = null;
                     } else {
                         selectStart = event.date;
                     }
+                } else {
+                    var clicked = event.jsEvent.target;
+                    if(clicked.classList.contains("fc-timegrid-slot") || clicked.classList.contains("fc-daygrid-day-frame")) {
+                        showPopupUi(null);
+                    }
                 }
 
             }
 
-            function showPopupUi(info) {
+            function pad(number) {
+                return number.toString().padStart(2, "0");
+            }
+
+            var popupOpen = false;
+
+            function formatDateTime(s) {
+                    return `${s.getFullYear()}-${pad(s.getMonth() + 1)}-${pad(s.getDate())}T${pad(s.getHours())}:${pad(s.getMinutes())}`;
+                }
+
+            function setEventUi(event) {
+                var form = document.forms["event"];
+                var fields = document.getElementById("fields");
+                if(event.id) {
+                    form["id"].value = event.id;
+                    form["id"].style.display = "";
+                    form["remove"].style.display = "";
+                    if(event.extendedProps.creator == USER_ID) {
+                        fields.removeAttribute("disabled");
+                    } else {
+                        fields.setAttribute("disabled", "disabled");
+                    }
+                } else {
+                    form["id"].style.display = "none";
+                    fields.removeAttribute("disabled");
+                    form["remove"].style.display = "none";
+                }
+                console.log(event.start, event.start.getDay());
+                
+                var frm = formatDateTime(event.start);
+                console.log(frm);
+                form["start"].value = frm;
+                if(event.end) {
+                    form["duration"].value = (event.end - event.start) / 1000 / 60;
+                } else {
+                    form["duration"].value = event.duration;
+                }
+                if(event.extendedProps) {
+                    form["priority"].value = event.extendedProps.priority;
+                }
+                form["name"].value = event.title;
+            }
+
+            function setSeriesUi(event) {
+                var seriesInfo = (event.extendedProps ?? {}).series;
+                var form = document.forms["series"];
+                var fields = document.getElementById("fields_series");
+                var dsp = !!seriesInfo ? "" : "none";
+                form["remove"].style.display = dsp;
+                form["disconnect"].style.display = dsp;
+                if(!seriesInfo) {
+                    // no current series
+                    seriesInfo = {
+                        id: null,
+                        daysOfWeek: [],
+                        startRecur: null,
+                        endRecur: null
+                    };
+                }
+                if(event.id) {
+                    if(event.extendedProps.creator == USER_ID) {
+                        fields.removeAttribute("disabled");
+                    } else {
+                        fields.setAttribute("disabled", "disabled");
+                    }
+                } else {
+                    fields.removeAttribute("disabled");
+                }
+                form["event_id"].value = event.id;
+
+                form["series_id"].value = seriesInfo.id;
+                form["series_id"].style.display = !!seriesInfo.id ? "" : "none";
+
+                form["recursOn"].value = seriesInfo.daysOfWeek.join(",");
+
+                for(let dayNo = 0; dayNo < 7; dayNo++) {
+                    var cb = document.getElementById("cb-" + dayNo);
+                    cb.checked = seriesInfo.daysOfWeek.includes(dayNo);
+                }
+                form["startRecur"].value = seriesInfo.startRecur == null ? "" : formatDateTime(seriesInfo.startRecur); 
+                form["endRecur"].value = seriesInfo.endRecur == null ? "" : formatDateTime(seriesInfo.endRecur); 
+            }
+
+            function showPopupUi(event) {
                 var div = document.getElementById("popup");
-                div.style.display = "block";
-                console.log(info);
-                var form = document.forms[0];
-                form["start"].valueAsNumber = info.start.getTime();
-                form["duration"].value = info.duration;
+                popupOpen = !!event;
+                if(event) {
+                    div.style.display = "block";
+                } else {
+                    div.style.display = "none";
+                    return;
+                }
+                console.log(event);
+                
+                setEventUi(event);
+                setSeriesUi(event);
             }
 
             function formChange(event) {
                 console.log(event);
+            }
+
+            var recursOn = [];
+            function recursSelectChange(event) {
+                console.log(event);
+                var form = document.forms["series"];
+                var inp = form["recursOn"];
+                var cb = event.target;
+                console.log(inp, cb.value);
+                var asInt = parseInt(cb.value);
+                recursOn = recursOn.filter(x => x !== asInt);
+                if(event.target.checked) {
+                    recursOn.push(asInt);
+                }
+                inp.value = recursOn.join(",");
+            }
+
+            function validateSeriesForm() {
+                var form = document.forms["series"];
+                if(!form["startRecur"].value) {
+                    alert("Series must have a start recur date!");
+                    return false;
+                }
+                if(!form["endRecur"].value) {
+                    alert("Series must have an end recur date!");
+                    return false;
+                }
+                if(!form["recursOn"].value) {
+                    alert("Series must have days selected that it recurs on!");
+                    return false;
+                }
+                return true;
             }
 
         </script>
@@ -62,14 +426,86 @@
     <body>
         <div id='calendar'></div>
 
-        <div id="popup" style="display: none; position: fixed; left: 0px; bottom: 0px; width: 100%; padding: 1%; margin: 0; background: grey; z-index: 999999;">
-            <form style="width: 100%; height: 100%" onchange="formChange(event)">
-                <label for="start">Start Date</label>
-                <input type="datetime-local" name="start"/>
-                <br/>
+        <div id="popup" style="display: none;width: 100%; margin-top: 5px;">
+            <form name="event" style="width: 50%; height: 100%; float: left" onchange="formChange(event)" method="POST" action="/api/calendar/events">
+                <fieldset id="fields">
+                    <legend>Event Information</legend>
+                    <label for="id">Event Id</label>
+                    <input type="number" name="id" readonly/>
+                    <br/>
 
-                <label for="duration">Duration (minutes)</label>
-                <input type="number" min="0" max="1440" name="duration">
+                    <label for="name">Event Name</label>
+                    <input type="text" name="name"/>
+                    <br/>
+
+                    <label for="start">Start Date</label>
+                    <input type="datetime-local" name="start"/>
+                    <br/>
+
+                    <label for="duration">Duration (minutes)</label>
+                    <input type="number" min="0" max="1440" name="duration" step="30">
+                    <br/>
+
+                    <label for="priority">Availability</label>
+                    <select name="priority">
+                        <option value="illegal">Impossible</option>
+                        <option value="-1">Disliked</option>
+                        <option value="0">Neutral</option>
+                        <option value="1" selected>Preferred</option>
+                        <option value="2">Strongly Preferred</option>
+                    </select>
+                    <br/>
+                    <br/>
+                    
+                    <input type="submit" value="Add or Update Event" name="submit">
+                    <input type="submit" value="Delete Event" name="remove" style="background-color: red;">
+                </fieldset>
+            </form>
+            <form name="series" action="/api/calendar/series", method="POST" style="float: right; width: 50%" onsubmit="return validateSeriesForm()">
+                <fieldset id="fields_series">
+                    <legend>Recurring Series Information</legend>
+
+                    <input type="number" name="event_id"/>
+
+                    <label for="series_id">Series Id</label>
+                    <input type="number" name="series_id" readonly/><br/>
+                    <input type="text" name="recursOn"/><br/>
+
+                    <label>Sunday</label>
+                    <input type="checkbox" id="cb-0" value="0" onchange="recursSelectChange(event)"/>
+                    <br/>
+                    <label>Monday</label>
+                    <input type="checkbox" id="cb-1" value="1" onchange="recursSelectChange(event)"/>
+                    <br/>
+                    <label>Tuesday</label>
+                    <input type="checkbox" id="cb-2" value="2" onchange="recursSelectChange(event)"/>
+                    <br/>
+                    <label>Wednesday</label>
+                    <input type="checkbox" id="cb-3" value="3" onchange="recursSelectChange(event)"/>
+                    <br/>
+                    <label>Thursday</label>
+                    <input type="checkbox" id="cb-4" value="4" onchange="recursSelectChange(event)"/>
+                    <br/>
+                    <label>Friday</label>
+                    <input type="checkbox" id="cb-5" value="5" onchange="recursSelectChange(event)"/>
+                    <br/>
+                    <label>Saturday</label>
+                    <input type="checkbox" id="cb-6" value="6" onchange="recursSelectChange(event)"/>
+
+                    <br/>
+
+                    <label for="startRecur">Recurrence Starts On</label>
+                    <input type="datetime-local" name="startRecur"/>
+                    <br/>
+                    <label for="endRecur">Recurrence Ends On</label>
+                    <input type="datetime-local" name="endRecur"/>
+                    <br/>
+                    <br/>
+
+                    <input type="submit" value="Add or Update Series" name="add">
+                    <input type="submit" value="Disconnect Event" name="disconnect" style="background-color: orange;">
+                    <input type="submit" value="Delete Series" name="remove" style="background-color: red;">
+                </fieldset>
             </form>
         </div>
     </body>
