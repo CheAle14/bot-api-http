@@ -10,8 +10,8 @@
             }
             .fc-event-avatar {
                 position:absolute;
-                top: 3px;
-                right: 3px;
+                bottom: 3px;
+                left: 3px;
             }
             .fc-event-avatar > img {
                 border-radius: 50%;
@@ -135,12 +135,13 @@
                 var start = arg.event.start;
                 var end = arg.event.end;
                 var creator = getUser(arg.event.extendedProps.creator);
+                creator.id = arg.event.extendedProps.creator;
                 console.log(arg, creator);
                 var formatTime = function(date) {
                     return pad(date.getHours()) + ":" + pad(date.getMinutes());
                 }
                 var time = document.createElement("div");
-                time.innerText = formatTime(start) + " - " + formatTime(end);
+                time.innerText = formatTime(start) + " - " + formatTime(end ?? start);
                 time.classList.add("fc-event-time");
                 dom.push(time);
 
@@ -161,14 +162,20 @@
                 img.title = `${creator.username}#${creator.discriminator} - Organiser`
                 avatar.appendChild(img);
 
+                if((arg.event.extendedProps.attendees ?? []).length > 0) {
+                    img.style.marginBottom = "3px";
+                    img.style.borderBottom = "1px solid black";
+                }
+
                 var weAttend = arg.event.extendedProps.creator == USER_ID;
                 for(let userId of arg.event.extendedProps.attendees) {
                     var usr = getUser(userId);
                     var uimg = document.createElement("img");
-                    if(userId == USER_ID) {
+                    if(userId == USER_ID || creator.id == USER_ID) {
                         weAttend = true;
                         uimg.classList.add("clickable");
                         uimg.setAttribute("data-event-id", arg.event.id);
+                        uimg.setAttribute("data-user-id", userId);
                         uimg.addEventListener("click", avatarRemoveSelf);
                     }
                     uimg.src = usr.avatar;
@@ -180,7 +187,7 @@
                     avatar.appendChild(uimg);
                 }
 
-                if(!weAttend) {
+                if(!weAttend && arg.event.extendedProps.visibility === 0) {
                     var omg = document.createElement("img");
                     omg.classList.add("clickable");
                     omg.setAttribute("data-event-id", arg.event.id);
@@ -209,11 +216,12 @@
             }
 
             function avatarRemoveSelf(arg) {
-                console.log("Self remove:", arg);
                 var eventId = arg.target.getAttribute("data-event-id");
+                var userId = arg.target.getAttribute("data-user-id");
+                var selfRemove  = userId == USER_ID;
                 var event = calendar.getEventById(eventId);
-                if(confirm(`Are you sure you want to remove yourself from '${event.title}' attendees?`)) {
-                    fetch(`/api/calendar/attendee?eventId=${eventId}`, {
+                if(confirm(`Are you sure you want to remove ${(selfRemove ? "yourself" : getUser(userId).username)} from '${event.title}' attendees?`)) {
+                    fetch(`/api/calendar/attendee?eventId=${eventId}${(selfRemove ? "" : "&userId=" + userId)}`, {
                         method: "DELETE"
                     }).then(function(r) {
                         console.log(r);
@@ -325,9 +333,10 @@
                 } else {
                     form["duration"].value = event.duration;
                 }
-                if(event.extendedProps) {
-                    form["priority"].value = event.extendedProps.priority;
-                }
+                event.extendedProps = event.extendedProps ?? {};
+                form["priority"].value = event.extendedProps.priority;
+                form["visibility"].value = event.extendedProps.visibility;
+
                 form["name"].value = event.title;
             }
 
@@ -357,6 +366,7 @@
                     fields.removeAttribute("disabled");
                 }
                 form["event_id"].value = event.id;
+                recursOn = seriesInfo.daysOfWeek;
 
                 form["series_id"].value = seriesInfo.id;
                 form["series_id"].style.display = !!seriesInfo.id ? "" : "none";
@@ -367,8 +377,8 @@
                     var cb = document.getElementById("cb-" + dayNo);
                     cb.checked = seriesInfo.daysOfWeek.includes(dayNo);
                 }
-                form["startRecur"].value = seriesInfo.startRecur == null ? "" : formatDateTime(seriesInfo.startRecur); 
-                form["endRecur"].value = seriesInfo.endRecur == null ? "" : formatDateTime(seriesInfo.endRecur); 
+                form["startRecur"].value = seriesInfo.startRecur == null ? "" : formatDateTime(new Date(seriesInfo.startRecur)); 
+                form["endRecur"].value = seriesInfo.endRecur == null ? "" : formatDateTime(new Date(seriesInfo.endRecur)); 
             }
 
             function showPopupUi(event) {
@@ -456,6 +466,14 @@
                         <option value="2">Strongly Preferred</option>
                     </select>
                     <br/>
+                    <label for="visibility">Visibility</label>
+                    <select name="visibility">
+                        <option value="0">Visible to anyone</option>
+                        <option value="1">Name hidden, availability/time visible</option>
+                        <option value="2">Visibile only to those attending</option>
+                    </select>
+
+                    <br/>
                     <br/>
                     
                     <input type="submit" value="Add or Update Event" name="submit">
@@ -466,11 +484,11 @@
                 <fieldset id="fields_series">
                     <legend>Recurring Series Information</legend>
 
-                    <input type="number" name="event_id"/>
+                    <input type="number" name="event_id" style="display: none"/>
 
                     <label for="series_id">Series Id</label>
                     <input type="number" name="series_id" readonly/><br/>
-                    <input type="text" name="recursOn"/><br/>
+                    <input type="text" name="recursOn"/ readonly style="display: none"><br/>
 
                     <label>Sunday</label>
                     <input type="checkbox" id="cb-0" value="0" onchange="recursSelectChange(event)"/>
