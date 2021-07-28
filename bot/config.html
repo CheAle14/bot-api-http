@@ -3,33 +3,153 @@
     <head>
         <title>Bot Configuration</title>
         <style>
-            .json {
+            div#root {
                 font-family: monospace, monospace;
             }
-
-            .bracket::before {
-                content: "{";
-                padding-left: -2em;
-                
+            div#root div {
+                padding-left: 1em;
+                position: relative;
             }
-            .bracket::after {
-                content: "}";
-                padding-left: -2em;
+            div > span:first-of-type {
+                color: rgb(128, 0, 255);
             }
 
-            .special {
-                font-weight: bolder;
-                color: blue;
-            }
             .string {
-                color: rgb(212, 96, 96);
+                color: rgb(128, 0, 0);
             }
-            span.key {
+            .integer {
                 color: green;
+            }
+            .boolean {
+                color: blue
+            }
+            .bigint {
+                color: orange;
+            }
+            .entered {
+                background-color: rgba(0, 0, 255, 0.1);
+            }
+            #btnContainer {
+                position: absolute;
+                top: 1px;
+                right: 1px;
+            }
+            .btn {
+                width: 1.5em;
+                padding: 0;
+                height: 1.5em;
+                margin-left: 2px;
+            }
+            .btn.remove {
+                background-color: rgb(255, 0, 0);
             }
         </style>
     </head>
     <body>
-        <REPLACE id="json"/>
+        <REPLACE id="html"/>
+
+        <br/>
+
+        <button value="Upload" onclick="save()"/>
+
+        <script>
+            const CONFIG = <REPLACE id="json"/>;
+
+            function mouseEnter(event) {
+                if(event.target.tagName !== "DIV")
+                    return;
+                var container = document.getElementById("btnContainer");
+                if(container) {
+                    container.parentElement.removeChild(container);
+                }
+                event.target.classList.add("entered");
+                container = document.createElement("span");
+                container.id = "btnContainer";
+
+                var deleteItem = document.createElement("button");
+                deleteItem.onclick = deleteNode;
+                deleteItem.setAttribute("data-id", event.target.id);
+                deleteItem.innerText = "X";
+                deleteItem.classList.add("btn", "remove");
+                container.appendChild(deleteItem);
+
+                var newItem = document.createElement("button");
+                newItem.onclick = addNode;
+                newItem.setAttribute("data-id", event.target.id);
+                newItem.innerText = "+";
+                newItem.classList.add("btn", "add");
+                container.appendChild(newItem);
+
+                event.target.appendChild(container);
+            }
+            function mouseLeave(event) {
+                if(event.target.tagName !== "DIV")
+                    return;
+                event.target.classList.remove("entered");
+            }
+            function clickSpan(event) {
+                console.log("clicked on span: ", event);
+            }
+
+            function deleteNode(event) {
+                var path = event.target.getAttribute("data-id");
+                setValue(path, undefined);
+                var btnContainer = event.target.parentElement;
+                var toRemove = btnContainer.parentElement;
+                var container = toRemove.parentElement;
+                container.removeChild(toRemove);
+                console.log("Removed ", toRemove, " from ", container);
+            }
+
+            function addNode(event) {
+                var path = event.target.getAttribute("data-id").split(":");
+                path.splice(path.length - 1, 1); // removes last, so we are adding to parent
+                var key = prompt("Please enter the new key name to place under " + path.join(":"), "");
+                if(!key) {
+                    return;
+                }
+                path.push(key);
+                var type = prompt("Please enter the new key type [object, bigint, integer, boolean, string]", null);
+                if(!type) {
+                    return;
+                }
+                if(!["object", "bigint", "integer", "boolean", "string"].includes(type)) {
+                    alert("Invalid option.");
+                    return;
+                }
+
+                var btnContainer = event.target.parentElement;
+                var clickedOn = btnContainer.parentElement;
+                var container = clickedOn.parentElement;
+                
+                var newItem = document.createElement("span");
+            }
+
+            function setValue(path, value) {
+                if(typeof path === "string") {
+                    path = path.split(":");
+                }
+                var key = path.splice(path.length - 1, 1)[0];
+                console.log("Setting ", key, " at ", path, " to ", value);
+                var obj = CONFIG;
+                for(let node of path) {
+                    obj = obj[node];
+                }
+                obj[key] = value;
+            }
+            
+            
+
+            function save() {
+                fetch("/bot/config", {
+                    method: "POST",
+                    body: JSON.stringify(CONFIG)
+                }).then(function(r) {
+                    console.log(r);
+                }).catch(function(e) {
+                    console.error(e);
+                })
+            }
+        </script>
     </body>
 </html>
