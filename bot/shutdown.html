@@ -1,0 +1,29 @@
+<html>
+    <head>
+        <title>Shutdown Process</title>
+    </head>
+
+    <body>
+        <REPLACE id="text"/>
+
+        <p id="para">The text above will update as your request is processed; if it does not do so, please scan the QR code again.</p>
+
+        <script>
+            const RELOAD = <REPLACE id="doReload"/>;
+            var para = document.getElementById("para");
+
+            var dateob = new Date();
+
+            var s = `${String(dateob.getHours()).padStart(2, "0")}:${String(dateob.getMinutes()).padStart(2, "0")}:${String(dateob.getSeconds()).padStart(2, "0")}`
+
+            if(RELOAD) {
+                para.innerText = `Last updated at ${s}; checking soon..`
+                setTimeout(function() {
+                    window.location.reload();
+                }, 5000);
+            } else {
+                para.innerText = `Final update at ${s}.`
+            }
+        </script>
+    </body>
+</html>
