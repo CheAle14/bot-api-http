@@ -4,7 +4,67 @@
 </head>
 <body>
     <h3>MasterList API</h3>
-    <p>There are currently <REPLACE id="count"/> servers registered</p>
     <p>Click on server name to see more information. Click on the game name to filter only those servers</p>
-    <REPLACE id="table"/>
+
+    <table id="table">
+
+    </table>
+
+    <script>
+
+        var WS = null;
+        function initWs() {
+
+            let prot = document.location.protocol === "http:" ? "ws" : "wss";
+            let host = prot === "wss" ? document.location.hostname : `${document.location.hostname}:4650`;
+            let fullUrl = `${prot}://${host}/masterlist`;
+            fullUrl += "?game=*"
+            fullUrl += "&client=true";
+            fullUrl += "&mode=*";
+            console.log("Starting WS connection to ", fullUrl);
+            WS = new WebSocket(fullUrl);
+
+            WS.onopen = function(e) {
+                console.log("[WS] Connected ", e);
+            }
+
+            WS.onerror = function(e) {
+                console.error("[WS] Error: ", e);
+            }
+
+            WS.onclose = function(e) {
+                console.warn("[WS] Closed: ", e);
+            }
+
+            WS.onmessage = function(e) {
+                var packet = JSON.parse(e.data);
+                console.log("[WS] << ", packet);
+
+                if(packet.id === "SendServers") {
+                    setTable(packet.content ?? []);
+                }
+            }
+        }
+
+        function setTable(array) {
+            var table = document.getElementById("table");
+            table.innerHTML = "<tr><th>Server Name</th><th>Game</th><th>IP</th></tr>";
+
+            for(var server of array) {
+                var row = document.createElement("tr");
+
+                row.innerHTML = `
+                    <td>${server.name}</td>
+                    <td>${server.game} - ${server.mode}</td>
+                    <td><strong>${server.ip}:${server.port}</strong></td>
+                `;
+
+                table.appendChild(row);
+            }
+        }
+
+        initWs();
+
+
+    </script>
 </body>
