@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+    <head>
+
+        <script src="../_/js/quagga.min.js"></script>
+    </head>
+    <body>
+        <div id="yourElement"></div>
+        <script>
+            Quagga.init({
+                inputStream : {
+                name : "Live",
+                type : "LiveStream",
+                    target: document.querySelector('#yourElement')    // Or '#yourElement' (optional)
+                },
+                decoder : {
+                    readers : ["ean_reader"]
+                },
+                debug: {
+                    drawBoundingBox: true,
+                    showFrequency: true,
+                    drawScanline: true,
+                    showPattern: true
+                }
+            }, function(err) {
+                if (err) {
+                    console.log(err);
+                    return
+                }
+                console.log("Initialization finished. Ready to start");
+                Quagga.onDetected(function(data)  {
+                    console.log(data);
+                    alert(data.codeResult.code);
+                })
+                Quagga.start();
+            });
+        </script>
+    </body>
+</html>
