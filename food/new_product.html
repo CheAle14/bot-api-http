@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+    <head>
+    </head>
+    <body>
+        <h3>Add New Product</h3>
+        <form action="/api/food/products" method="post">
+            <label for="productId">Product ID:</label><br>
+            <input type="text" id="productId" name="productId" readonly value="$REPLACE id='code'/$"><br>
+
+            <label for="productName">Name:</label><br>
+            <input type="text" id="productName" name="productName"><br>
+
+            <input type="submit" value="Submit">
+        </form>
+    </body>
+</html>

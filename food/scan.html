@@ -6,6 +6,10 @@
     </head>
     <body>
         <div id="yourElement"></div>
+        <p>Scan the barcode of the product.</p>
+        <br/>
+        <a href="/food">View Complete Inventory</a>
+
         <script>
             Quagga.init({
                 inputStream : {
@@ -30,7 +34,7 @@
                 console.log("Initialization finished. Ready to start");
                 Quagga.onDetected(function(data)  {
                     console.log(data);
-                    alert(data.codeResult.code);
+                    window.location.replace(`/food/new?code=${data.codeResult.code}`);
                 })
                 Quagga.start();
             });

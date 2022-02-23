@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+    <head>
+    </head>
+    <body>
+        <h3>Add To Inventory</h3>
+        <form action="/api/food/inventory" method="post">
+            <label for="productId">Product ID:</label><br>
+            <input type="text" id="productId" name="productId" readonly value="$REPLACE id='product.id'/$"><br>
+            <label>Name: <REPLACE id='product.name'/> </label><br>
+
+            <label for="expires">Expires: </label>
+            <input type="date" name="expires">
+
+            <input type="submit" value="Submit">
+        </form>
+    </body>
+</html>
