@@ -9,10 +9,34 @@
             .expires-soon {
                 background-color: orange;
             }
+            .danger {
+                background-color: red;
+            }
         </style>
     </head>
     <body>
         <h1><REPLACE id='inventoryid'/> Inventory</h1>
         <REPLACE id='table'/>
+
+        <a href="/food?full=true">Click to view full information</a>
+
+        <script>
+            function removeInvItem(invId) {
+                fetch({
+                    url: `/api/food/inventory?code=${invId}`,
+                    method: "DELETE"
+                }).then(function(r) {
+                    if(r.ok) {
+                        window.location.reload();
+                    } else {
+                        console.error(r);
+                        alert("Failed.");
+                    }
+                }).catch(function(x) {
+                    console.error(x);
+                    alert("Errored.");
+                })
+            }
+        </script>
     </body>
 </html>
