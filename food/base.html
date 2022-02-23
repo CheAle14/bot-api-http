@@ -10,7 +10,8 @@
                 background-color: orange;
             }
             .danger {
-                background-color: red;
+                background-color: blue;
+                color: white;
             }
         </style>
     </head>
@@ -22,8 +23,8 @@
 
         <script>
             function removeInvItem(invId) {
-                fetch({
-                    url: `/api/food/inventory?code=${invId}`,
+                console.log(invId);
+                fetch(`/api/food/inventory?invId=${invId}`, {
                     method: "DELETE"
                 }).then(function(r) {
                     if(r.ok) {
