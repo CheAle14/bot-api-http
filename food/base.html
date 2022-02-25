@@ -13,6 +13,8 @@
                 background-color: blue;
                 color: white;
             }
+            .product-warn {
+            }
             .badge {
                 background-color: rgb(83, 83, 255);
                 border: 1px rgb(83, 83, 255) solid;
@@ -26,10 +28,7 @@
         <h1><REPLACE id='inventoryid'/> Inventory</h1>
         <REPLACE id='table'/>
 
-        <a href="/food?full=true">Click to view full information</a><br/><br/>
-        
-        <a href="/food/scan">Scan new item</a>
-
+        <REPLACE id="links"/>
         <script>
             function removeInvItem(invId) {
                 console.log(invId);
