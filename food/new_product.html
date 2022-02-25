@@ -2,12 +2,23 @@
 <html>
     <head>
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <style>
+            .badge {
+                background-color: rgb(83, 83, 255);
+                border: 1px rgb(83, 83, 255) solid;
+                border-radius: 10%;
+                margin-right: 2px;
+                padding-left: 2px;
+            }
+        </style>
     </head>
     <body>
         <h3>Add New Product</h3>
         <form action="/api/food/products" method="post">
             <label for="productId">Product ID:</label><br>
             <input type="text" id="productId" name="productId" value="$REPLACE id='code'/$"><br>
+
+            <REPLACE id="manu"/>
 
             <label for="productName">Name:</label><br>
             <input type="text" id="productName" name="productName" autofocus><br>
