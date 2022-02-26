@@ -36,9 +36,24 @@
         <REPLACE id="existing"/>
         <script>
             function removeInvItem(invId) {
-                console.log(invId);
                 fetch(`/api/food/inventory?invId=${invId}`, {
                     method: "DELETE"
+                }).then(function(r) {
+                    if(r.ok) {
+                        window.location.reload();
+                    } else {
+                        console.error(r);
+                        alert("Failed.");
+                    }
+                }).catch(function(x) {
+                    console.error(x);
+                    alert("Errored.");
+                })
+            }
+            function markFrozen(invId) {
+                fetch(`/api/food/inventory?invId=${invId}`, {
+                    method: "PATCH",
+                    body: "frozen=True"
                 }).then(function(r) {
                     if(r.ok) {
                         window.location.reload();
