@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Food Calendar</title> 
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar-scheduler@5.8.0/main.min.css">
+        <style>
+            .fc-timegrid-event {
+                border-width: 4px;
+                padding: 2px;
+            }
+            .fc-event-avatar {
+                position:absolute;
+                bottom: 3px;
+                left: 3px;
+            }
+            .fc-event-avatar > img {
+                border-radius: 50%;
+                -webkit-border-radius: 50%;
+                -moz-border-radius: 50%;
+                display: list-item;
+                margin-bottom: 2px;
+            }
+            .clickable {
+                cursor: pointer
+            }
+            .badge {
+                background-color: rgb(83, 83, 255);
+                border: 1px rgb(83, 83, 255) solid;
+                border-radius: 10%;
+                margin-right: 2px;
+                padding-left: 2px;
+            }
+        </style>
+        <script src="https://cdn.jsdelivr.net/npm/fullcalendar-scheduler@5.8.0/main.min.js"></script>
+        
+        <script>
+            var calendar = null;
+            function init() {
+                var calendarEl = document.getElementById('calendar');
+                calendar = new FullCalendar.Calendar(calendarEl, {
+                    schedulerLicenseKey: 'CC-Attribution-NonCommercial-NoDerivatives',
+                    initialView: 'dayGridMonth',
+                    firstDay: 1,
+                    allDaySlot: false,
+                    events: {
+                        url: "/api/food/calendar"
+                    },
+                    editable: false,
+                    height: "auto",
+                    initialDate: !!window.location.hash ? new Date(window.location.hash) : undefined,
+                    nowIndicator: true,
+                    eventContent: injectContent,
+                    eventColor: 'black'
+                });
+                calendar.render();
+
+                var prevButton = document.getElementsByClassName("fc-prev-button")[0];
+                var nextButton = document.getElementsByClassName("fc-next-button")[0];
+                prevButton.addEventListener("click", dateChanged);
+                nextButton.addEventListener("click", dateChanged);
+            }
+            function pad(number) {
+                return number.toString().padStart(2, "0");
+            }
+            function dateChanged(arg) {
+                var first = calendar.view.currentStart;
+                var date = first.getFullYear() + "-" + pad(first.getMonth() + 1) + "-" + pad(first.getDate());
+                window.location.hash = date;
+            }
+            function sentenceCase(str) {
+                items = str.split("-");
+                b = "";
+                for(let x of items) {
+                    b += x.substring(0, 1).toUpperCase() + x.substring(1);
+                    b += " "
+                }
+                return b;
+            }
+
+            function injectContent(arg) {
+                var items = [];
+                var event = arg.event;
+                var props = event.extendedProps;
+
+
+                if(props.manu) {
+                    var manuf = document.createElement("span");
+                    manuf.innerText = props.manu;
+                    manuf.className = "badge";
+                    items.push(manuf);
+                }
+                var title = document.createElement("div");
+                title.className = "fc-event-title fc-sticky";
+                title.innerText = event.title;
+                items.push(title);
+
+                if(props.tags) {
+                    items.push(document.createElement("br"));
+                    for(let tag of props.tags) {
+                        var tg = document.createElement("span");
+                        tg.innerText = sentenceCase(tag);
+                        tg.className = "badge";
+                        tg.style.color = "black";
+                        tg.style.backgroundColor = "red";
+                        items.push(tg);
+                    }
+                }
+
+                if(props.frozen) {
+                    items.push(document.createElement("br"));
+                    let fr = document.createElement("img");
+                    fr.src = "/_/img/snowflake.png"
+                    fr.style.width = "32px";
+                    items.push(fr);
+                }
+                return {domNodes: items};
+            }
+            document.addEventListener('DOMContentLoaded', function() {
+                init();
+            });
+        </script>
+    </head>
+    <body>
+        <div id="calendar">
+
+        </div>
+    </body>
+</html>
