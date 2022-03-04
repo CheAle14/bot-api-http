@@ -28,14 +28,30 @@
     </head>
     <body>
         <h1><REPLACE id='inventoryid'/> Inventory</h1>
+        <REPLACE id="links"/>
         <REPLACE id='table'/>
 
-        <REPLACE id="links"/>
         <script>
             function removeInvItem(invId) {
                 console.log(invId);
                 fetch(`/api/food/inventory?invId=${invId}`, {
                     method: "DELETE"
+                }).then(function(r) {
+                    if(r.ok) {
+                        window.location.reload();
+                    } else {
+                        console.error(r);
+                        alert("Failed.");
+                    }
+                }).catch(function(x) {
+                    console.error(x);
+                    alert("Errored.");
+                })
+            }
+            function toggleFrozen(invId, isFrozen) {
+                console.log(invId);
+                fetch(`/api/food/inventory?invId=${invId}&frozen=${!isFrozen}`, {
+                    method: "PATCH"
                 }).then(function(r) {
                     if(r.ok) {
                         window.location.reload();
