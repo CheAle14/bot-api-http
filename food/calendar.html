@@ -39,6 +39,9 @@
                 var calendarEl = document.getElementById('calendar');
                 calendar = new FullCalendar.Calendar(calendarEl, {
                     schedulerLicenseKey: 'CC-Attribution-NonCommercial-NoDerivatives',
+                    headerToolbar: {
+                        center: "dayGridWeek,dayGridMonth"
+                    },
                     initialView: 'dayGridMonth',
                     firstDay: 1,
                     allDaySlot: false,
