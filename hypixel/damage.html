@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Hypixel Damage Calculator</title>
+        <script src="../_/js/hypixel-damage.js"></script>
+    </head>
+    <body>
+        <h1>Damage Calculator</h1>
+        <label for="strength">Strength: </label><input id="strength" type="number" onchange="calculate()"><br/>
+        <label for="weaponDmg">Weapon Damage: </label><input id="weaponDmg" type="number" onchange="calculate()"><br/>
+        <label for="critDmg">Critical Damage: </label><input id="critDmg" type="number" onchange="calculate()"><br/>
+        <label for="combatLevel">Combat Level: </label><input id="combatLevel" type="number" onchange="calculate()"><br/>
+        <label for="wpnBonus">Weapon Bonus: </label><input id="wpnBonus" type="number" onchange="calculate()"><br/>
+        <div id="targetDmg" style="display: none">
+            <label for="tgtHealth">Target Health: </label><input id="tgtHealth" type="number" onchange="calculate()"><br/>
+        </div>
+
+        <br/>
+        <p>Add Enchants:</p>
+        <select id="newEnchants" onchange="addNewEnchant(event)">
+            <option id="null-opt"></option>
+        </select>
+        <p>
+            Selected enchantments:
+            <table id="enchants">
+                <tr>
+                    <th>Name</th>
+                    <th>Level</th>
+                </tr>
+            </table>
+        </p>
+
+        <p>
+            Initial Damage: <input id="initDmg" type="number" readonly><br/>
+            Dmg Multiplier: <input id="dmgMult" type="number" readonly><br/>
+            <br>
+            Final Total: <input id="total" type="number" readonly><br/>
+            Crit Total: <input id="crit" type="number" readonly><br/>
+        </p>
+        
+
+        <script>
+            // 150/274
+            const SELECTED = {};
+            function addNewEnchant(e) {
+                const select = e.target;
+                const index = select.selectedIndex;
+                if(index === 0) return;
+                const opt = select.options[index];
+                const enchant = ENCHANTS[opt.id];
+                console.log(opt, enchant);
+
+                var level = 1;
+                if(enchant.maxLevels != 1) {
+                    level = parseInt(prompt(`Enter the ${enchant.id} level, max ${enchant.maxLevels}`, "1"));
+                }
+                const selected = new SelectedEnchant(level, enchant);
+                const table = document.getElementById("enchants");
+                var tr = document.createElement("tr");
+                tr.id = "s-" + opt.id;
+                var nm = document.createElement("td");
+                nm.innerText = enchant.id;
+                var lvl = document.createElement("td");
+                lvl.innerText = selected.level;
+                tr.appendChild(nm); tr.appendChild(lvl);
+                table.appendChild(tr);
+                SELECTED[opt.id] = selected;
+
+                calculate();
+            }
+            function validateInput(id) {
+                const i = document.getElementById(id);
+                const isValid = (!!i.value) || i.value === "0";
+                console.log(id, i.value, isValid);
+                if(isValid) {
+                    i.style.backgroundColor = "";
+                } else {
+                    i.style.backgroundColor = "red";
+                }
+                return isValid;
+            }
+            function validate() {
+                if(!validateInput("strength")) return false;
+                if(!validateInput("weaponDmg")) return false;
+                if(!validateInput("critDmg")) return false;
+                if(!validateInput("wpnBonus")) return false;
+
+                var any = false;
+                for(const key in SELECTED) {
+                    const s = SELECTED[key];
+                    if(s.enchant.needsTargetHealth) {
+                        any = true;
+                        break;
+                    }
+                }
+                const target = document.getElementById("targetDmg");
+                if(any) {
+                    target.style.display = "";
+                    return validateInput("tgtHealth");
+                } else {
+                    target.style.display = "none";
+                    return true;
+                }
+            }
+            function getValue(id) {
+                const i = document.getElementById(id);
+                const v = i.value;
+                console.log(id, i, v);
+                return parseFloat(v);
+            }
+            function calculate() {
+                // 148 / 343
+                // with: str=18; critdm 132; ability dmg 8; intel 12
+
+                // axe: 60 / 96
+
+                console.log("calc");
+                if(!validate()) {
+                    console.log("invalid");
+                    return;
+                }
+                
+                const values = new Values(getValue("combatLevel"), getValue("weaponDmg"), getValue("strength"), getValue("critDmg"));
+                for(let key in SELECTED) {
+                    const e = SELECTED[key];
+                    e.apply(values);
+                }
+                console.log(values);
+                document.getElementById("total").value = `${values.calculate(false)}`;
+                document.getElementById("crit").value = `${values.calculate(true)}`;
+
+            }
+            function init() {
+                const addSelect = document.getElementById("newEnchants");
+                for(let key in ENCHANTS) {
+                    var enchant = ENCHANTS[key];
+                    console.log(key, enchant);
+                    var opt = document.createElement("option");
+                    opt.id = key;
+                    opt.innerText = enchant.id;
+                    addSelect.appendChild(opt);
+                }
+            }
+            init();
+        </script>
+    </body>
+</html>
