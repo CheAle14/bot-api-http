@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Viewing Ongoing Recipe</title>
+        <style>
+            html, body {
+                margin: 0;
+                min-height: 100%;
+            }
+        </style>
+    </head>
+    <body>
+        <div>
+            <h1 id="desc"></h1>
+            <h2 id="time"></h2>
+            <h3 id="endsAt"></h3>
+        </div>
+
+        <script src="../_/js/food-ws.js"></script>
+        <script>
+            const ID = "<REPLACE id='id'/>";
+            const descElem = document.getElementById("desc");
+            const timeElem = document.getElementById("time");
+            const endsAtElem = document.getElementById("endsAt");
+
+            var fullEndsAt = 0;
+            var countTo = 0;
+            var timerInterval = null;
+            var started = false;
+            var done = false;
+            var audio = null;
+
+            function pad(n, width, z) {
+                z = z || '0';
+                n = n + '';
+                return n.length >= width ? n : new Array(width - n.length + 1).join(z) + n;
+            }
+
+            function setDone() {
+                endsAtElem.innerText = "";
+                timeElem.innerText = "Complete!";
+                document.body.style.backgroundColor = "green";
+                if(audio != null) {
+                    audio.pause();
+                    audio = null;
+                }
+            }
+
+            function getTime(secs) {
+                var hours = Math.floor(secs / 3600);
+                secs -= hours * 3600;
+
+                var minutes = Math.floor(secs / 60);
+                secs -= minutes * 60;
+                return [hours, minutes, secs];
+            }
+            function formatTime(secs, full) {
+                var arr = getTime(secs);
+                var hours = arr[0];
+                var mins = arr[1];
+                var secs = arr[2];
+                if(full) {
+                    var f = "";
+                    if(hours > 0) {
+                        f += `, ${hours}h`;
+                    }
+                    if(mins > 0) {
+                        f += `, ${mins}m`;
+                    }
+                    if(secs > 0) {
+                        f +=  `, ${secs}s`;
+                    }
+                    if(f === "")
+                        f = "Now.";
+                    return f.substring(2);
+                } else {
+                    return `${pad(hours, 2)}:${pad(mins, 2)}:${pad(secs, 2)}`;
+                }
+            }
+
+            function updateTimer() {
+                if(done) {
+                    setDone();
+                    return;
+                }
+                if(countTo === 0) return;
+                var now = Date.now();
+                var msDiff = countTo - now; 
+                if(msDiff <= 0) {
+                    timeElem.innerText = "00:00:00";
+                } else {
+                    timeElem.innerText = formatTime(Math.round(msDiff / 1000));
+                }
+
+
+                if(msDiff < 3000) {
+                    document.body.style.backgroundColor = "red";
+                    if(audio === null && started) {
+                        audio = new Audio("/_/assets/alarm.mp3");
+                        audio.loop = true;
+                        audio.play();
+                    }
+                } else if(msDiff < 25000) {
+                    document.body.style.backgroundColor = "orange";
+                } else {
+                    document.body.style.backgroundColor = null;
+                }
+
+            }
+
+            function handleMsg(e) {
+                const data = JSON.parse(e.data);
+                console.log(data);
+                if(data.done) {
+                    done = true;
+                    clearInterval(timerInterval);
+                    timerInterval = null;
+                    document.body.removeEventListener("click", handleNext);
+                    setDone();
+                } else {
+                    if(audio) {
+                        audio.pause();
+                        audio = null;
+                    }
+                    descElem.innerText = data.description;
+                    countTo = parseInt(data.at);
+                    timerInterval = setInterval(updateTimer, 50);
+                    started = !!data.started;
+                    fullEndsAt = parseInt(data.end ?? 0);
+                    var msDiff = fullEndsAt - Date.now();
+                    if(msDiff < 0) {
+                        endsAtElem.innerText = "Recalculating ends at..";
+                    } else {
+                        endsAtElem.innerText = "All done in " + formatTime(Math.round(msDiff / 1000), true);
+                    }
+                }
+            }
+            function handleNext() {
+                started = true;
+                WSC.socket.send(JSON.stringify({"data": "next"}));
+            }
+            function init() {
+                descElem.innerText = "...";
+                timeElem.innerText = "??:??:??";
+                WSC.initWS(ID, handleMsg);
+                document.body.addEventListener("click", handleNext, true);
+            }
+            init();
+        </script>
+    </body>
+</html>

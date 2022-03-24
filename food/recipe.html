@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Recipes</title>
+    </head>
+    <body>
+        <a href="/food/add-recipe">Add Recipe</a>
+        <REPLACE id="table"/>
+
+        <script>
+            function startRecipe(id) {
+                fetch(`/api/food/recipes?id=${id}`, {
+                    method: 'PUT'
+                }).then(function(resp) {
+                    console.log(resp);
+                    if(resp.ok) {
+                        resp.text().then(function(t) {
+                            window.location = `/food/ongoing-recipe?id=${t}`;
+                        })
+                    }
+                }).catch(function(err) {
+                    console.log(err);
+                })
+            }
+        </script>
+    </body>
+</html>

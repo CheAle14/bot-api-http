@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>New Recipe</title>
+    </head>
+    <body>
+        <div>
+            <p>Ingredients</p>
+
+            <ul id="ingredients"></ul>
+            <input type="button" value="Add another" onclick="addNewIngredient()">
+        </div>
+        <hr>
+        <div>
+            <p>Steps</p>
+
+            <ul id="steps">
+            </ul>
+            <input type="button" value="Add another" onclick="addNewStep()">
+        </div>
+        <hr>
+        <div>
+            <p>Verify recipe as above, then submit:</p>
+            <input type="button" value="Submit" onclick="submit()">
+        </div>
+
+        <script>
+            function getRandomInt(max) {
+                return Math.floor(Math.random() * max);
+            }
+            const ulIngredients = document.getElementById("ingredients");
+            const ulSteps = document.getElementById("steps");
+            const disableValue = 123765;
+            const idempotent = getRandomInt(65565);
+
+            function getSpanText(txt) {
+                var s = document.createElement("span");
+                s.innerText = txt;
+                return s;
+            }
+
+            class Ingredient {
+                constructor() {
+                    this.id = null;
+                    this.unitsUsed = 1;
+                }
+
+                toHTML() {
+                    const _this = this;
+                    var li = document.createElement("li");
+                    li.id = "ingredient-" + this._index;
+
+                    var inpt = document.createElement("input");
+                    inpt.type = "text";
+                    inpt.placeholder = "Product ID";
+                    inpt.onchange = function(e) {
+                        _this.id = inpt.value;
+                        this.style.backgroundColor = (!!inpt.value) ? "" : "red";
+                        console.log(_this);
+                    }
+                    inpt.value = this.id;
+
+                    li.appendChild(inpt);
+
+                    li.appendChild(getSpanText(", used: "));
+
+                    var units = document.createElement("input");
+                    units.type = "number";
+                    units.placeholder = "units used";
+                    units.value = this.unitsUsed;
+                    units.onchange = function() {
+                        _this.unitsUsed = units.value;
+                        this.style.backgroundColor = (this.value !== null && this.value > 0) ? "" : "red";
+                        console.log(_this);
+                    }
+                    li.appendChild(units);
+
+                    return li;
+                }
+            }
+            class Step {
+                constructor() {
+                    this.description = null;
+                    this.duration = null;
+                    this.delay = null;
+                    this.parent = null;
+                }
+                addChild(step) {
+                    if(this.children === undefined || this.children === null) {
+                        this.children = [];
+                    }
+                    step._index = this.children.length;
+                    step.parent = this;
+                    this.duration = disableValue;
+                    this.delay = disableValue;
+                    this.children.push(step);
+                }
+                removeChild(step) {
+                    var ind = this.children.indexOf(step);
+                    console.log("(remove)", step, ind);
+                    if(ind >= 0) {
+                        this.children.splice(ind, 1);
+                    }
+                    if(this.children.length === 0) {
+                        this.duration = null;
+                        this.delay = null;
+                    }
+                }
+
+                toHTML() {
+                    const _this = this;
+                    var li = document.createElement("li");
+                    li.id = "step-" + this._index;
+
+                    var inD = document.createElement("input");
+                    inD.type = "text";
+                    inD.value = this.description;
+                    inD.onchange = function(e) {
+                        _this.description = inD.value;
+                        this.style.backgroundColor = (!!this.value) ? "" : "red";
+                        console.log(_this);
+                    }
+                    li.appendChild(inD);
+
+
+                    li.appendChild(getSpanText(", taking "))
+
+                    var inL = document.createElement("input");
+                    inL.type = "number";
+                    inL.value = this.duration;
+                    inL.placeholder = "duration (s)";
+                    inL.onchange = function(ein) {
+                        _this.duration = inL.value;
+                        this.style.backgroundColor = (this.value !== null && this.value >= 0) ? "" : "red";
+                        console.log(_this);
+                    }
+                    if(this.duration == disableValue) {
+                        inL.value = null;
+                        inL.placeholder = "disabled: has children";
+                        inL.setAttribute("readonly", "");
+                    }
+                    li.appendChild(inL);
+
+                    li.appendChild(getSpanText("; after "));
+                    var del = document.createElement("input");
+                    del.type = "number";
+                    del.value = this.delay;
+                    del.placeholder = "delay (s)";
+                    del.onchange = function() {
+                        _this.delay = del.value;
+                        this.style.backgroundColor = (this.value !== null && this.value >= 0) ? "" : "red";
+                        console.log(_this);
+                    }
+                    if(this.delay == disableValue) {
+                        del.value = null;
+                        del.placeholder = "disabled: has children";
+                        del.setAttribute("readonly", "");
+                    }
+                    li.appendChild(del);
+
+                    var addC = document.createElement("input");
+                    addC.type = "button";
+                    addC.value = "+";
+                    addC.onclick = function() {
+                        var newStep = new Step(null, null, null);
+                        _this.addChild(newStep);
+                        console.log(_this);
+                        refreshHtml();
+                    }
+                    li.appendChild(addC);
+                    if(this.parent) {
+                        var remC = document.createElement("input");
+                        remC.type = "button";
+                        remC.value = "-";
+                        remC.onclick = function() {
+                            var newStep = new Step(null, null, null);
+                            _this.parent.removeChild(_this);
+                            console.log("(parent)", _this.parent);
+                            refreshHtml();
+                        }
+                        li.appendChild(remC);
+                    }
+
+                    if(this.children !== undefined) {
+                        li.appendChild(getSpanText("  Sub-steps: "))
+                        var inner = document.createElement("ul");
+                        for(var k of this.children) {
+                            inner.appendChild(k.toHTML());
+                        }
+                        li.appendChild(inner);
+                    }
+
+                    return li;
+                }
+            }
+            class Recipe {
+                constructor() {
+                    this.ingredients = [];
+                    this.steps = [];
+                }
+
+                addIngredient(ingred) {
+                    ingred._index = this.ingredients.length;
+                    this.ingredients.push(ingred);
+                }
+                addStep(step) {
+                    step._index = this.steps.length;
+                    this.steps.push(step);
+                }
+            }
+            const MAKING = new Recipe();
+
+            function addNewIngredient() {
+                var i = new Ingredient();
+                MAKING.addIngredient(i);
+
+                refreshHtml();
+            }
+
+            function addNewStep() {
+                var step = new Step();
+                MAKING.addStep(step);
+                refreshHtml();
+            }
+
+            function refreshHtml() {
+                ulIngredients.innerHTML = "";
+                for(var k of MAKING.ingredients) {
+                    console.log(k);
+                    ulIngredients.appendChild(k.toHTML());
+                }
+
+                ulSteps.innerHTML = "";
+                for(var k of MAKING.steps) {
+                    ulSteps.appendChild(k.toHTML());
+                }
+            }
+
+            function replacer(k, v) {
+                if(k === "parent") return undefined;
+                if(k === "_index") return undefined;
+                if(v === disableValue) return null;
+                return v;
+            }
+
+            function submit() {
+                fetch('/api/food/recipes', {
+                    method: 'POST',
+                    headers: {"X-Idempotency": idempotent, "Content-Type": "application/json"},
+                    body: JSON.stringify(MAKING, replacer)
+                }).then(function(response) {
+                    console.log(response);
+                    response.text().then(function(body) {
+                        if(response.ok) {
+                            window.location = "/food/recipes";
+                        } else {
+                            alert(response.status + ":" + body);
+                        }
+                    });
+                }).catch(function(err) {
+                    console.log(err);
+                })
+            }
+
+
+        </script>
+    </body>
+</html>
