@@ -5,12 +5,27 @@
     </head>
     <body>
         <a href="/food/add-recipe">Add Recipe</a>
+        <REPLACE id="ongoing"/>
         <REPLACE id="table"/>
 
+        <input type="button" value="Start selected" onclick="startRecipe()">
+
         <script>
-            function startRecipe(id) {
-                fetch(`/api/food/recipes?id=${id}`, {
-                    method: 'PUT'
+            function startRecipe() {
+
+                var selected = [];
+                var selects = document.getElementsByClassName("recipe-selects");
+                console.log(selects);
+                for(let x of selects) {
+                    console.log(x);
+                    if(x.checked) {
+                        selected.push(x.id);
+                    }
+                }
+
+                fetch(`/api/food/recipes`, {
+                    method: 'PUT',
+                    body: JSON.stringify(selected)
                 }).then(function(resp) {
                     console.log(resp);
                     if(resp.ok) {
