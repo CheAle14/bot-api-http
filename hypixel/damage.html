@@ -6,19 +6,31 @@
     </head>
     <body>
         <h1>Damage Calculator</h1>
-        <label for="strength">Strength: </label><input id="strength" type="number" onchange="calculate()"><br/>
-        <label for="weaponDmg">Weapon Damage: </label><input id="weaponDmg" type="number" onchange="calculate()"><br/>
-        <label for="critDmg">Critical Damage: </label><input id="critDmg" type="number" onchange="calculate()"><br/>
-        <label for="combatLevel">Combat Level: </label><input id="combatLevel" type="number" onchange="calculate()"><br/>
-        <label for="wpnBonus">Weapon Bonus: </label><input id="wpnBonus" type="number" onchange="calculate()"><br/>
-        <div id="targetDmg" style="display: none">
+        <label for="strength">Strength: </label><input id="strength" type="number" value="20" onchange="calculate()"><br/>
+        <label for="weaponDmg">Weapon Damage: </label><input id="weaponDmg" type="number" value="100" onchange="calculate()"><br/>
+        <label for="critDmg">Critical Damage: </label><input id="critDmg" type="number" value="57" onchange="calculate()"><br/>
+        <label for="combatLevel">Combat Level: </label><input id="combatLevel" type="number" value="13" onchange="calculate()"><br/>
+
+        <label for="addBonus">Additive Bonus: </label><input id="addBonus" type="number" value="0" onchange="calculate()"><br/>
+        <label for="multBonus">Multiplicative Bonus: </label><input id="multBonus" type="number" value="0" onchange="calculate()"><br/>
+
+
+        <label for="tgtDefense">Target Defense: </label><input id="tgtDefense" type="number" onchange="calculate()"><br/>
+        <div id="target" style="display: none">
             <label for="tgtHealth">Target Health: </label><input id="tgtHealth" type="number" onchange="calculate()"><br/>
+            <label for="tgtKind">Target Kind: </label>
+            <select id="targetKind" onchange="calculate()">
+                <option id="null-optk"></option>
+            </select>
+        </div>
+        <div id="player" style="display: none">
+            <label for="playerHealth">Player Health: </label><input id="playerHealth" type="number" onchange="calculate()"><br/>
         </div>
 
         <br/>
         <p>Add Enchants:</p>
         <select id="newEnchants" onchange="addNewEnchant(event)">
-            <option id="null-opt"></option>
+            <option id="null-opte"></option>
         </select>
         <p>
             Selected enchantments:
@@ -40,7 +52,22 @@
         
 
         <script>
-            // 150/274
+            // 150 / 274
+            // 174 hp zombie:
+                // 160 / 372
+
+            // skeleton
+                // 157 / 366
+
+            // spider
+                //     / 184
+
+            // 233 / 372 vs 174
+            // 164 / 366
+
+            // 180
+
+
             const SELECTED = {};
             function addNewEnchant(e) {
                 const select = e.target;
@@ -65,13 +92,18 @@
                 tr.appendChild(nm); tr.appendChild(lvl);
                 table.appendChild(tr);
                 SELECTED[opt.id] = selected;
+                select.selectedIndex = 0;
 
                 calculate();
             }
             function validateInput(id) {
                 const i = document.getElementById(id);
-                const isValid = (!!i.value) || i.value === "0";
-                console.log(id, i.value, isValid);
+                var isValid;
+                if(i.tagName === "SELECT") {
+                    isValid = i.selectedIndex > 0;
+                } else {
+                    isValid = (!!i.value) || i.value === "0";
+                }
                 if(isValid) {
                     i.style.backgroundColor = "";
                 } else {
@@ -83,29 +115,49 @@
                 if(!validateInput("strength")) return false;
                 if(!validateInput("weaponDmg")) return false;
                 if(!validateInput("critDmg")) return false;
-                if(!validateInput("wpnBonus")) return false;
+                if(!validateInput("combatLevel")) return false;
 
-                var any = false;
+                var needsTargetHealth = false;
+                var needsPlayerHealth = false;
                 for(const key in SELECTED) {
                     const s = SELECTED[key];
                     if(s.enchant.needsTargetHealth) {
-                        any = true;
-                        break;
+                        needsTargetHealth = true;
+                    }
+                    if(s.enchant.needsPlayerHealth) {
+                        needsPlayerHealth = true;
                     }
                 }
-                const target = document.getElementById("targetDmg");
-                if(any) {
+                const target = document.getElementById("target");
+                if(needsTargetHealth) {
                     target.style.display = "";
-                    return validateInput("tgtHealth");
+                    if(!validateInput("tgtHealth")) return false;
+                    if(!validateInput("targetKind")) return false;
                 } else {
                     target.style.display = "none";
-                    return true;
                 }
+
+                const player = document.getElementById("player");
+                if(needsPlayerHealth) {
+                    player.style.display = "";
+                    if(!validateInput("playerHealth")) return false;
+                } else {
+                    player.style.display = "none";
+                }
+                return true;
             }
-            function getValue(id) {
+            function getValue(id, dV = 0) {
                 const i = document.getElementById(id);
-                const v = i.value;
-                console.log(id, i, v);
+                var v = null;
+                if(i) {
+                    if(i.tagName === "SELECT") {
+                        return i.options[i.selectedIndex].value;
+                    } else {
+                        v = i.value;
+                    }
+                } else {
+                    v = dV;
+                }
                 return parseFloat(v);
             }
             function calculate() {
@@ -114,31 +166,55 @@
 
                 // axe: 60 / 96
 
-                console.log("calc");
+                // bow: ?? / 170
+
                 if(!validate()) {
-                    console.log("invalid");
+                    console.log("Invalid input");
                     return;
                 }
-                
-                const values = new Values(getValue("combatLevel"), getValue("weaponDmg"), getValue("strength"), getValue("critDmg"));
+
+                const player = new Entity(getValue("playerHealth", 0));
+                const target = new Enemy(getValue("tgtHealth", 0), getValue("tgtDefense", 0), getValue("targetKind", ENTITY_KIND.OTHER));
+
+                const context = new Context(getValue("strength"), getValue("weaponDmg"), getValue("critDmg"), getValue("combatLevel"), player, target);
+
+                var av = getValue("addBonus", 0);
+                if(av) {
+                    context.applyAdditive("Manual Bonus", av);
+                }
+
+                var mv = getValue("multBonus", 0);
+                if(mv) {
+                    context.applyMultiplicative("Manual bonus", mv);
+                }
+
+
                 for(let key in SELECTED) {
                     const e = SELECTED[key];
-                    e.apply(values);
+                    context.addEnchant(e);
                 }
-                console.log(values);
-                document.getElementById("total").value = `${values.calculate(false)}`;
-                document.getElementById("crit").value = `${values.calculate(true)}`;
+                console.log(context);
+                document.getElementById("total").value = `${context.RegularDamage}`;
+                document.getElementById("crit").value = `${context.CriticalDamage}`;
 
             }
+
             function init() {
                 const addSelect = document.getElementById("newEnchants");
                 for(let key in ENCHANTS) {
                     var enchant = ENCHANTS[key];
-                    console.log(key, enchant);
                     var opt = document.createElement("option");
                     opt.id = key;
                     opt.innerText = enchant.id;
                     addSelect.appendChild(opt);
+                }
+                const tgtKindSelect = document.getElementById("targetKind");
+                for(let key in ENTITY_KIND) {
+                    var name = ENTITY_KIND[key];
+                    var opt = document.createElement("option");
+                    opt.id = key;
+                    opt.innerText = name;
+                    tgtKindSelect.appendChild(opt);
                 }
             }
             init();
