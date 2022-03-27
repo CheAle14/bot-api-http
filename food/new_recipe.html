@@ -14,6 +14,8 @@
         <div>
             <p>Steps</p>
 
+            <input type="checkbox" value="Perform in-order?" onclick="rootOrderChange(this);">
+
             <ul id="steps">
             </ul>
             <input type="button" value="Add another" onclick="addNewStep()">
@@ -84,6 +86,7 @@
                     this.duration = null;
                     this.delay = null;
                     this.parent = null;
+                    this.order = false;
                 }
                 addChild(step) {
                     if(this.children === undefined || this.children === null) {
@@ -104,6 +107,7 @@
                     if(this.children.length === 0) {
                         this.duration = null;
                         this.delay = null;
+                        this.children = undefined;
                     }
                 }
 
@@ -168,20 +172,32 @@
                         refreshHtml();
                     }
                     li.appendChild(addC);
-                    if(this.parent) {
-                        var remC = document.createElement("input");
-                        remC.type = "button";
-                        remC.value = "-";
-                        remC.onclick = function() {
-                            var newStep = new Step(null, null, null);
+                    var remC = document.createElement("input");
+                    remC.type = "button";
+                    remC.value = "-";
+                    remC.onclick = function() {
+                        if(_this.parent) {
                             _this.parent.removeChild(_this);
                             console.log("(parent)", _this.parent);
-                            refreshHtml();
+                        } else {
+                            MAKING.removeStep(_this);
+                            console.log("(making)", MAKING);
                         }
-                        li.appendChild(remC);
+                        refreshHtml();
                     }
+                    li.appendChild(remC);
+
 
                     if(this.children !== undefined) {
+                        var selOrder = document.createElement("input");
+                        selOrder.type = "checkbox";
+                        selOrder.checked = _this.order;
+                        selOrder.onclick = function() {
+                            _this.order = selOrder.checked;
+                            refreshHtml();
+                        }
+                        li.appendChild(selOrder);
+
                         li.appendChild(getSpanText("  Sub-steps: "))
                         var inner = document.createElement("ul");
                         for(var k of this.children) {
@@ -197,6 +213,7 @@
                 constructor() {
                     this.ingredients = [];
                     this.steps = [];
+                    this.order = false;
                 }
 
                 addIngredient(ingred) {
@@ -206,6 +223,13 @@
                 addStep(step) {
                     step._index = this.steps.length;
                     this.steps.push(step);
+                }
+                removeStep(step) {
+                    var ind = this.steps.indexOf(step);
+                    console.log("(remove)", step, ind);
+                    if(ind >= 0) {
+                        this.steps.splice(ind, 1);
+                    }
                 }
             }
             const MAKING = new Recipe();
@@ -226,7 +250,6 @@
             function refreshHtml() {
                 ulIngredients.innerHTML = "";
                 for(var k of MAKING.ingredients) {
-                    console.log(k);
                     ulIngredients.appendChild(k.toHTML());
                 }
 
@@ -260,6 +283,11 @@
                 }).catch(function(err) {
                     console.log(err);
                 })
+            }
+
+            function rootOrderChange(i){
+                MAKING.order = i.checked;
+                refreshHtml();
             }
 
 

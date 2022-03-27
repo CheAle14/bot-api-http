@@ -14,6 +14,8 @@
             <h1 id="desc"></h1>
             <h2 id="time"></h2>
             <h3 id="endsAt"></h3>
+
+            <p><strong id="after"></strong></p>
         </div>
 
         <script src="../_/js/food-ws.js"></script>
@@ -22,6 +24,7 @@
             const descElem = document.getElementById("desc");
             const timeElem = document.getElementById("time");
             const endsAtElem = document.getElementById("endsAt");
+            const afterElem = document.getElementById("after");
 
             var fullEndsAt = 0;
             var countTo = 0;
@@ -122,8 +125,9 @@
                         audio.pause();
                         audio = null;
                     }
-                    descElem.innerText = data.description;
-                    countTo = parseInt(data.at);
+                    const current = data.current;
+                    descElem.innerText = current.description;
+                    countTo = parseInt(current.at);
                     timerInterval = setInterval(updateTimer, 50);
                     started = !!data.started;
                     fullEndsAt = parseInt(data.end ?? 0);
@@ -132,6 +136,10 @@
                         endsAtElem.innerText = "Recalculating ends at..";
                     } else {
                         endsAtElem.innerText = "All done in " + formatTime(Math.round(msDiff / 1000), true);
+                    }
+
+                    if(data.next) {
+                        afterElem.innerText = `Next: ${data.next.description}`;
                     }
                 }
             }
