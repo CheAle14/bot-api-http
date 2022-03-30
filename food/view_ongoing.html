@@ -3,9 +3,24 @@
     <head>
         <title>Viewing Ongoing Recipe</title>
         <style>
-            html, body {
+            html, body, div {
                 margin: 0;
                 min-height: 100%;
+            }
+            h1 {
+                font-size: 4em;
+            }
+            h2 {
+                font-size: 3em;
+            }
+            h3 {
+                font-size: 2em;
+                margin: 0;
+            }
+            h1, h2, h3, p {
+                margin: 0;
+                padding: 0;
+                text-align: center
             }
         </style>
     </head>
@@ -16,6 +31,9 @@
             <h3 id="endsAt"></h3>
 
             <p><strong id="after"></strong></p>
+            <table id="full">
+
+            </table>
         </div>
 
         <script src="../_/js/food-ws.js"></script>
@@ -25,6 +43,7 @@
             const timeElem = document.getElementById("time");
             const endsAtElem = document.getElementById("endsAt");
             const afterElem = document.getElementById("after");
+            const tableElem = document.getElementById("full");
 
             var fullEndsAt = 0;
             var countTo = 0;
@@ -32,6 +51,8 @@
             var started = false;
             var done = false;
             var audio = null;
+
+            var ALL = null;
 
             function pad(n, width, z) {
                 z = z || '0';
@@ -46,6 +67,37 @@
                 if(audio != null) {
                     audio.pause();
                     audio = null;
+                }
+            }
+
+            function createTd(value, header = false, colspan = null) {
+                var d = document.createElement(header ? "th" : "td");
+                d.innerText = value;
+                if(colspan)
+                    d.colSpan = colspan;
+                return d;
+            }
+            function createTr(header, ...values) {
+                var tr = document.createElement("tr");
+                for(let x of values) {
+                    tr.appendChild(createTd(x, header));
+                }
+                return tr;
+            }
+
+            function setTable() {
+                if(ALL !== null) {
+                    tableElem.innerHTML = "";
+                    var headerRow = createTr(true, "Step", "When", "Delta");
+                    tableElem.appendChild(headerRow);
+
+                    var last = 0;
+                    for(let step of ALL) {
+                        console.log(step);
+                        var diffLast = step.diff - last;
+                        tableElem.appendChild(createTr(false, step.description, formatTime(step.diff, true), formatTime(diffLast, true)));
+                        last = step.diff;
+                    }
                 }
             }
 
@@ -74,7 +126,7 @@
                         f +=  `, ${secs}s`;
                     }
                     if(f === "")
-                        f = "Now.";
+                        return "Now.";
                     return f.substring(2);
                 } else {
                     return `${pad(hours, 2)}:${pad(mins, 2)}:${pad(secs, 2)}`;
@@ -141,6 +193,8 @@
                     if(data.next) {
                         afterElem.innerText = `Next: ${data.next.description}`;
                     }
+                    ALL = data.steps;
+                    setTable();
                 }
             }
             function handleNext() {
