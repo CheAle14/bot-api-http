@@ -37,6 +37,21 @@
                     console.log(err);
                 })
             }
+            function deleteRecipe(id) {
+                var x = prompt("Are you sure you want to delete this? Type yes to continue", "")
+                if(x !== "yes")
+                    return;
+                fetch(`/api/food/recipe?id=${id}`, {method: "DELETE"}).then(function(resp) {
+                    console.log(resp);
+                    if(resp.ok) {
+                        window.location.reload();
+                    } else {
+                        console.error(resp);
+                    }
+                }).catch(function(err) {
+                    console.error(err);
+                })
+            }
         </script>
     </body>
 </html>

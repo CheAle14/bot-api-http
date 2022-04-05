@@ -199,7 +199,7 @@
                         li.appendChild(selOrder);
 
                         li.appendChild(getSpanText("  Sub-steps: "))
-                        var inner = document.createElement("ul");
+                        var inner = document.createElement(_this.order ? "ol" : "ul");
                         for(var k of this.children) {
                             inner.appendChild(k.toHTML());
                         }

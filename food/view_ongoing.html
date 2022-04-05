@@ -152,6 +152,10 @@
                     document.body.style.backgroundColor = "red";
                     if(audio === null && started) {
                         audio = new Audio("/_/assets/alarm.mp3");
+                        audio.loop = false;
+                        audio.play();
+                    }
+                    if(msDiff < -10000) {
                         audio.loop = true;
                         audio.play();
                     }
