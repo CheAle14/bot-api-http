@@ -93,27 +93,34 @@
 
                     var last = 0;
                     for(let step of ALL) {
-                        console.log(step);
                         var diffLast = step.diff - last;
-                        tableElem.appendChild(createTr(false, step.description, formatTime(step.diff, true), formatTime(diffLast, true)));
+                        var date = new Date(parseInt(step.at));
+                        tableElem.appendChild(createTr(false, step.description, `${pad(date.getHours(), 2)}:${pad(date.getMinutes(), 2)}:${pad(date.getSeconds(), 2)}; (t: ${step.diff})`, formatTime(diffLast, true)));
                         last = step.diff;
                     }
                 }
             }
 
             function getTime(secs) {
+                var negative = false;
+                if(secs < 0) {
+                    negative = true;
+                    secs *= -1;
+                }
                 var hours = Math.floor(secs / 3600);
                 secs -= hours * 3600;
 
                 var minutes = Math.floor(secs / 60);
                 secs -= minutes * 60;
-                return [hours, minutes, secs];
+                return [hours, minutes, secs, negative];
             }
             function formatTime(secs, full) {
                 var arr = getTime(secs);
                 var hours = arr[0];
                 var mins = arr[1];
                 var secs = arr[2];
+                var negative = arr[3];
+            
                 if(full) {
                     var f = "";
                     if(hours > 0) {
@@ -127,6 +134,8 @@
                     }
                     if(f === "")
                         return "Now.";
+                    if(negative)
+                        f += " ago";
                     return f.substring(2);
                 } else {
                     return `${pad(hours, 2)}:${pad(mins, 2)}:${pad(secs, 2)}`;
@@ -139,13 +148,18 @@
                     return;
                 }
                 if(countTo === 0) return;
-                var now = Date.now();
-                var msDiff = countTo - now; 
-                if(msDiff <= 0) {
-                    timeElem.innerText = "00:00:00";
+                if(started) {
+                    var now = Date.now();
+                    var msDiff = countTo - now; 
+                    if(msDiff <= 0) {
+                        timeElem.innerText = "+ " + formatTime(Math.round((msDiff * -1) / 1000)) + " +";
+                    } else {
+                        timeElem.innerText = formatTime(Math.round(msDiff / 1000));
+                    }
                 } else {
-                    timeElem.innerText = formatTime(Math.round(msDiff / 1000));
+                    timeElem.innerText = "Click to begin";
                 }
+                setTable();
 
 
                 if(msDiff < 3000) {
@@ -155,8 +169,8 @@
                         audio.loop = false;
                         audio.play();
                     }
-                    if(msDiff < -10000) {
-                        audio.loop = true;
+                    if(audio !== null) {
+                        audio.loop = msDiff < -10000;
                         audio.play();
                     }
                 } else if(msDiff < 25000) {
@@ -185,6 +199,7 @@
                     descElem.innerText = current.description;
                     countTo = parseInt(current.at);
                     timerInterval = setInterval(updateTimer, 50);
+                    console.log(data, data.started, !!data.started);
                     started = !!data.started;
                     fullEndsAt = parseInt(data.end ?? 0);
                     var msDiff = fullEndsAt - Date.now();
