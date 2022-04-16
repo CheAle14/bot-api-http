@@ -11,21 +11,27 @@
         <input type="button" value="Start selected" onclick="startRecipe()">
 
         <script>
+            function cbToggled(e) {
+                console.log(e);
+                var id = e.target.id;
+                var inp = document.getElementById("delay-" + id);
+                inp.style.display = e.target.checked ? "" : "none";
+            }
             function startRecipe() {
-
-                var selected = [];
+                var doing = {};
                 var selects = document.getElementsByClassName("recipe-selects");
-                console.log(selects);
                 for(let x of selects) {
-                    console.log(x);
                     if(x.checked) {
-                        selected.push(x.id);
+                        var offset = document.getElementById("delay-" + x.id);
+                        console.log(x, offset);
+                        doing[parseInt(x.id)] = parseInt(offset.value || 0);
                     }
                 }
+                console.log(doing);
 
                 fetch(`/api/food/recipes`, {
                     method: 'PUT',
-                    body: JSON.stringify(selected)
+                    body: JSON.stringify(doing)
                 }).then(function(resp) {
                     console.log(resp);
                     if(resp.ok) {
