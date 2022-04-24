@@ -34,7 +34,7 @@
             <table id="full">
 
             </table>
-            <input type="button" value="Enable Editing" onclick="enableEdit(this);">
+            <input type="button" id="editBtn" value="Enable Editing" onclick="enableEdit(this);">
         </div>
 
         <script src="../_/js/food-ws.js"></script>
@@ -229,7 +229,8 @@
                     setTable();
                 }
             }
-            function handleNext() {
+            function handleNext(ev) {
+                if(ev.target.id === "editBtn") return;
                 if(!interactable) {
                     console.log("Attempted to advance but we're not in edit mode.")
                     return;
