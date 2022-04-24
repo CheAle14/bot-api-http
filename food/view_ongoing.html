@@ -34,6 +34,7 @@
             <table id="full">
 
             </table>
+            <input type="button" value="Enable Editing" onclick="enableEdit(this);">
         </div>
 
         <script src="../_/js/food-ws.js"></script>
@@ -51,6 +52,18 @@
             var started = false;
             var done = false;
             var audio = null;
+
+            var interactable = false;
+            function enableEdit(btn) {
+                if(interactable) {
+                    interactable = false;
+                } else if(prompt("Enter word to edit:") === "swordfish") {
+                    interactable = true;
+                } else {
+                    interactable = false;
+                }
+                btn.value = interactable ? "Disable Edit" : "Enable Edit";
+            }
 
             var ALL = null;
 
@@ -217,6 +230,10 @@
                 }
             }
             function handleNext() {
+                if(!interactable) {
+                    console.log("Attempted to advance but we're not in edit mode.")
+                    return;
+                }
                 started = true;
                 WSC.socket.send(JSON.stringify({"data": "next"}));
             }
