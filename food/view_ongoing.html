@@ -169,6 +169,12 @@
                     } else {
                         timeElem.innerText = formatTime(Math.round(msDiff / 1000));
                     }
+                    var endsAtDiff = fullEndsAt - now;
+                    if(endsAtDiff < 0) {
+                        endsAtElem.innerText = "Recalculating ends at..";
+                    } else {
+                        endsAtElem.innerText = "All done in " + formatTime(Math.round(endsAtDiff / 1000), true);
+                    }
                 } else {
                     timeElem.innerText = "Click to begin";
                 }
@@ -191,14 +197,6 @@
                 } else {
                     document.body.style.backgroundColor = null;
                 }
-
-                var endsAtDiff = fullEndsAt - now;
-                if(endsAtDiff < 0) {
-                    endsAtElem.innerText = "Recalculating ends at..";
-                } else {
-                    endsAtElem.innerText = "All done in " + formatTime(Math.round(endsAtDiff / 1000), true);
-                }
-
             }
 
             function handleMsg(e) {
