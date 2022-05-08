@@ -23,6 +23,7 @@
                 text-align: center
             }
         </style>
+        <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js"></script>
     </head>
     <body>
         <div>
@@ -35,8 +36,8 @@
 
             </table>
             <input type="button" id="editBtn" value="Enable Editing" onclick="enableEdit(this);">
+            <input type="checkbox" id="editRemember" onclick="rememberEdit(this)">
         </div>
-
         <script src="../_/js/food-ws.js"></script>
         <script>
             const ID = "<REPLACE id='id'/>";
@@ -45,6 +46,8 @@
             const endsAtElem = document.getElementById("endsAt");
             const afterElem = document.getElementById("after");
             const tableElem = document.getElementById("full");
+            const editRemember = document.getElementById("editRemember");
+            const editBtn = document.getElementById("editBtn");
 
             var fullEndsAt = 0;
             var countTo = 0;
@@ -63,6 +66,14 @@
                     interactable = false;
                 }
                 btn.value = interactable ? "Disable Edit" : "Enable Edit";
+                editRemember.style.display = interactable ? "" : "none";
+            }
+            function rememberEdit(cb) {
+                if(cb.checked) {
+                    Cookies.set("edit", "true");
+                } else {
+                    Cookies.remove("edit");
+                }
             }
 
             var ALL = null;
@@ -249,6 +260,14 @@
                 timeElem.innerText = "??:??:??";
                 WSC.initWS(ID, handleMsg);
                 document.body.addEventListener("click", handleNext, true);
+
+                if(Cookies.get("edit")) {
+                    editRemember.checked = true;
+                    interactable = true;
+                    editBtn.value = "Stop editing";
+                } else {
+                    editRemember.style.display = "none";
+                }
             }
             init();
         </script>
