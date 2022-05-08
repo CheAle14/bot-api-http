@@ -161,6 +161,7 @@
                     return;
                 }
                 if(countTo === 0) return;
+                setTable();
                 var now = Date.now();
                 var msDiff = countTo - now; 
                 if(started) {
@@ -177,8 +178,8 @@
                     }
                 } else {
                     timeElem.innerText = "Click to begin";
+                    return;
                 }
-                setTable();
 
 
                 if(msDiff < 3000) {
