@@ -161,9 +161,9 @@
                     return;
                 }
                 if(countTo === 0) return;
+                var now = Date.now();
+                var msDiff = countTo - now; 
                 if(started) {
-                    var now = Date.now();
-                    var msDiff = countTo - now; 
                     if(msDiff <= 0) {
                         timeElem.innerText = "+ " + formatTime(Math.round((msDiff * -1) / 1000)) + " +";
                     } else {
@@ -183,13 +183,20 @@
                         audio.play();
                     }
                     if(audio !== null) {
-                        audio.loop = msDiff < -10000;
+                        audio.loop = msDiff < -30000;
                         audio.play();
                     }
                 } else if(msDiff < 25000) {
                     document.body.style.backgroundColor = "orange";
                 } else {
                     document.body.style.backgroundColor = null;
+                }
+
+                var endsAtDiff = fullEndsAt - now;
+                if(endsAtDiff < 0) {
+                    endsAtElem.innerText = "Recalculating ends at..";
+                } else {
+                    endsAtElem.innerText = "All done in " + formatTime(Math.round(endsAtDiff / 1000), true);
                 }
 
             }
