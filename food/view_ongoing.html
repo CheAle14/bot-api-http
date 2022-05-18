@@ -38,7 +38,7 @@
             <input type="button" id="editBtn" value="Enable Editing" onclick="enableEdit(this);">
             <input type="checkbox" id="editRemember" onclick="rememberEdit(this)">
         </div>
-        <script src="../_/js/food-ws.js"></script>
+        <script src="../_/js/bot-ws.js"></script>
         <script>
             const ID = "<REPLACE id='id'/>";
             const descElem = document.getElementById("desc");
@@ -258,7 +258,10 @@
             function init() {
                 descElem.innerText = "...";
                 timeElem.innerText = "??:??:??";
-                WSC.initWS(ID, handleMsg);
+                WSC.initWS(`food?id=${ID}`, 5, handleMsg, null, function(e) {
+                    // reconnect limit reached
+                    window.location.reload();
+                });
                 document.body.addEventListener("click", handleNext, true);
 
                 if(Cookies.get("edit")) {
