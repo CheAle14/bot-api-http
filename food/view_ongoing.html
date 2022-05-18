@@ -22,11 +22,17 @@
                 padding: 0;
                 text-align: center
             }
+            #wsClosed {
+                top: 0;
+                left: 0;
+                position: fixed
+            }
         </style>
         <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js"></script>
     </head>
     <body>
         <div>
+            <img id="wsClosed" src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/17/Warning.svg/260px-Warning.svg.png" width="5%" style="display: none">
             <h1 id="desc"></h1>
             <h2 id="time"></h2>
             <h3 id="endsAt"></h3>
@@ -48,6 +54,7 @@
             const tableElem = document.getElementById("full");
             const editRemember = document.getElementById("editRemember");
             const editBtn = document.getElementById("editBtn");
+            const wsWarning = document.getElementById("wsClosed");
 
             var fullEndsAt = 0;
             var countTo = 0;
@@ -212,6 +219,7 @@
             }
 
             function handleMsg(e) {
+                wsWarning.style.display = "none";
                 const data = JSON.parse(e.data);
                 console.log(data);
                 if(data.done) {
@@ -246,6 +254,11 @@
                     setTable();
                 }
             }
+
+            function onWsClose(e) {
+                wsWarning.style.display = null;
+            }
+
             function handleNext(ev) {
                 if(ev.target.id === "editBtn") return;
                 if(!interactable) {
@@ -258,7 +271,7 @@
             function init() {
                 descElem.innerText = "...";
                 timeElem.innerText = "??:??:??";
-                WSC.initWS(`food?id=${ID}`, 5, handleMsg, null, function(e) {
+                WSC.initWS(`food?id=${ID}`, 5, handleMsg, onWsClose, function(e) {
                     // reconnect limit reached
                     window.location.reload();
                 });
