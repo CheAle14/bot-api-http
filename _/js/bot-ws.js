@@ -26,6 +26,7 @@ WSC.connect = function() {
     
     this.socket.onmessage = function(e) {
         this.retryattempts = 0;
+        console.log("[WSC] onmessage", this, this.onMessage, e);
         if(this.onMessage) this.onMessage(e);
     };
     
