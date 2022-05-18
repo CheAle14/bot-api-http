@@ -3,60 +3,60 @@ WSC.initWS = function (path, retryLimit, onMessage, onClose, onReconnectLimit, o
     console.log("Starting WS");
     let prot = document.location.protocol === "http:" ? "ws" : "wss";
     let host = prot === "wss" ? document.location.hostname : `${document.location.hostname}:4650`;
-    this.fullUrl = `${prot}://${host}/${path}`;
-    console.log(this.fullUrl);
-    this.socket = new WebSocket(this.fullUrl);
-    this.retrylimit = retryLimit === null ? 5 : retryLimit;
-    this.retryattempts = 0;
+    WSC.fullUrl = `${prot}://${host}/${path}`;
+    console.log(WSC.fullUrl);
+    WSC.socket = new WebSocket(WSC.fullUrl);
+    WSC.retrylimit = retryLimit === null ? 5 : retryLimit;
+    WSC.retryattempts = 0;
 
-    this.onMessage = onMessage;
-    this.onOpen = onOpen;
-    this.onClose = onClose;
-    this.onError = onError;
-    this.onReconnectLimit = onReconnectLimit;
+    WSC.onMessage = onMessage;
+    WSC.onOpen = onOpen;
+    WSC.onClose = onClose;
+    WSC.onError = onError;
+    WSC.onReconnectLimit = onReconnectLimit;
 
-    this.connect();
+    WSC.connect();
 }
 WSC.connect = function() {
-    this.socket = new WebSocket(this.fullUrl);
-    this.socket.onopen = function(e) {
+    WSC.socket = new WebSocket(WSC.fullUrl);
+    WSC.socket.onopen = function(e) {
         console.log("[WS] Connection established: ", e);
-        if(this.onOpen) this.onOpen(e);
+        if(WSC.onOpen) WSC.onOpen(e);
     };
     
-    this.socket.onmessage = function(e) {
-        this.retryattempts = 0;
-        console.log("[WSC] onmessage", this, this.onMessage, e);
-        if(this.onMessage) this.onMessage(e);
+    WSC.socket.onmessage = function(e) {
+        WSC.retryattempts = 0;
+        console.log("[WSC] onmessage", WSC, WSC.onMessage, e);
+        if(WSC.onMessage) WSC.onMessage(e);
     };
     
-    this.socket.onclose = function(event) {
+    WSC.socket.onclose = function(event) {
         console.log("[WS] Connection closed ", event);
         console.warn(`${event.code} ${event.reason}`);
 
-        if(this.onClose) {
-            var ret = this.onClose(event);
+        if(WSC.onClose) {
+            var ret = WSC.onClose(event);
             if(ret) {
                 console.log("[WS] Not trying to reconnect due to onClose return value. ", ret);
-                this.socket = null;
+                WSC.socket = null;
                 return;
             } 
         }
-        if(this.retrylimit === 0) {
+        if(WSC.retrylimit === 0) {
             console.log("Not attempting to reconnect due to limit 0");
-            if(this.onReconnectLimit) this.onReconnectLimit(event);
+            if(WSC.onReconnectLimit) WSC.onReconnectLimit(event);
             return;
-        } else if(this.retrylimit === -1) {
+        } else if(WSC.retrylimit === -1) {
             // always retry
         }
-        else if(this.retryattempts > this.retrylimit) {
+        else if(WSC.retryattempts > WSC.retrylimit) {
             console.error("[WS] Number of retries exceeded maximum, WS failed.", event);
-            this.socket = null;
-            if(this.onReconnectLimit) this.onReconnectLimit(event);
+            WSC.socket = null;
+            if(WSC.onReconnectLimit) WSC.onReconnectLimit(event);
             return;
         }
         
-        this.retryattempts++;
+        WSC.retryattempts++;
         console.log("[WS] Queueing reconnect");
         setTimeout(function() {
             console.log(`[WS] Reconnecting ${WSC.retryattempts}/${WSC.retrylimit}`);
@@ -64,7 +64,7 @@ WSC.connect = function() {
         }, 2500);
     };
     
-    this.socket.onerror = function(error) {
+    WSC.socket.onerror = function(error) {
         console.log("[error] Connection errored");
         console.log(error);
         alert(JSON.stringify(error, ["message", "arguments", "type", "name"]));
