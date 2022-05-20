@@ -20,6 +20,7 @@
     <body>
         <h3>Add To Inventory</h3>
         <form action="/api/food/inventory" method="post" style="width: 100%; height: 100%">
+            <input type="text" id="redirect" name="redirect" style="display: none" value="$REPLACE id='redirect'/$">
             <label for="productId">Product ID:</label><br>
             <input type="text" id="productId" name="productId" readonly value="$REPLACE id='prodId'/$"><br>
             <label>Name: <REPLACE id="prodName"/> </label><br>

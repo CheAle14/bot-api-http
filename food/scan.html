@@ -35,7 +35,7 @@
                 console.log("Initialization finished. Ready to start");
                 Quagga.onDetected(function(data)  {
                     console.log(data);
-                    window.location = `/food/new?code=${data.codeResult.code}`;
+                    window.location = `/food/new?code=${data.codeResult.code}&redirect=scan`;
                 })
                 Quagga.start();
             });
