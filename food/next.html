@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Missing and upcoming items</title>
+    </head>
+    <body>
+        <h2>Date of next shopping</h2>
+        <input type="date" id="datePicker" onchange="dateChanged(event);">
+
+        <hr>
+
+        <h2>Expiring items</h2>
+        <table id="expiring"></table>
+
+        <hr>
+
+        <h2>Predicted items</h2>
+        <table id="predicted"></table>
+
+        <script>
+            function dateChanged(event) {
+                console.log(event);
+                const v = event.target.value;
+
+                fetch(`/api/food/future?date=${v}`).then(function(resp) {
+                    console.log(resp);
+                    resp.json().then(function(body) {
+                        console.log(body);
+
+                        setExpiring(body.expiring);
+                        setPredicted(body.products, body.predicted);
+                    })
+                }).catch(function(err) {
+                    console.error(err);
+                });
+            }
+
+            function createNode(tag, inner) {
+                var node = document.createElement(tag);
+                node.innerHTML = inner;
+                return node;
+            }
+
+            function createNodeSafe(tag, text) {
+                var node = document.createElement(tag);
+                node.innerText = text;
+                return node;
+            }
+
+            function createTd(value) {
+                return createNode("td", value);
+            }
+            
+            function setExpiring(items) {
+                const table = document.getElementById("expiring");
+                table.innerHTML = "";
+                const headerRow = createNode("tr", "");
+                headerRow.appendChild(createNode("th", "Item"));
+                headerRow.appendChild(createNode("th", "Expires At"));
+                table.appendChild(headerRow);
+
+                for(let item of items) {
+                    const itemRow = createNode("tr", "");
+                    itemRow.appendChild(createNodeSafe("td", item.name))
+                    const dt = new Date(item.expires);
+                    itemRow.appendChild(createNodeSafe("td", dt.toDateString()));
+
+                    table.appendChild(itemRow);
+                }
+
+            }
+
+            function setPredicted(products, predicted) {
+                const table = document.getElementById("predicted");
+                table.innerHTML = "";
+
+                const headerRow = createNode("tr", "");
+                headerRow.appendChild(createNode("th", "Item or Group"));
+                headerRow.appendChild(createNode("th", "Added per week"));
+                headerRow.appendChild(createNode("th", "Removed per week"));
+                headerRow.appendChild(createNode("th", "Amount"));
+                
+                table.appendChild(headerRow);
+
+                for(let tagName in predicted.tags) {
+                    const row = createNode("tr", "");
+                    const data = predicted.tags[tagName];
+                    row.appendChild(createNode("td", `<strong>${tagName}</strong>`));
+                    row.appendChild(createNode("td", data.add));
+                    row.appendChild(createNode("td", data.rem));
+                    row.appendChild(createNode("td", data.count));
+                    table.appendChild(row);
+                }
+
+                for(let prodId in predicted.products) {
+                    const product = products[prodId];
+                    console.log(product);
+                    
+                    const row = createNode("tr", "");
+                    const data = predicted.products[prodId];
+                    row.appendChild(createNode("td", `${product.name}`));
+                    row.appendChild(createNode("td", data.add));
+                    row.appendChild(createNode("td", data.rem));
+                    row.appendChild(createNode("td", data.count));
+                    table.appendChild(row);
+                }
+            }
+        </script>
+    </body>
+</html>
