@@ -70,6 +70,19 @@
 
             }
 
+            function msToString(ms) {
+                seconds = ms / 1000;
+                if(seconds < 60) return `${seconds} seconds`;
+                minutes = seconds / 60;
+                if(minutes < 60) return `${minutes} minutes`;
+                hours = minutes / 60;
+                if(hours < 24) return `${hours} hours`;
+                days = hours / 24;
+                if(days < 7) return `${days} days`;
+                weeks = days / 7;
+                return `${weeks} weeks`;
+            }
+
             function setPredicted(products, predicted) {
                 const table = document.getElementById("predicted");
                 table.innerHTML = "";
@@ -78,7 +91,10 @@
                 headerRow.appendChild(createNode("th", "Item or Group"));
                 headerRow.appendChild(createNode("th", "Added per week"));
                 headerRow.appendChild(createNode("th", "Removed per week"));
-                headerRow.appendChild(createNode("th", "Amount"));
+                headerRow.appendChild(createNode("th", "Avg time between adds"));
+                headerRow.appendChild(createNode("th", "Avg time between removes"));
+                headerRow.appendChild(createNode("th", "Average lifetime"));
+                headerRow.appendChild(createNode("th", "Est. Needed"));
                 
                 table.appendChild(headerRow);
 
@@ -88,7 +104,10 @@
                     row.appendChild(createNode("td", `<strong>${tagName}</strong>`));
                     row.appendChild(createNode("td", data.add));
                     row.appendChild(createNode("td", data.rem));
-                    row.appendChild(createNode("td", data.count));
+                    row.appendChild(createNode("td", msToString(data.avgAdd)));
+                    row.appendChild(createNode("td", msToString(data.avgRem)));
+                    row.appendChild(createNode("td", msToString(data.avgLifetime)));
+                    row.appendChild(createNode("td", data.estimation));
                     table.appendChild(row);
                 }
 
@@ -101,7 +120,10 @@
                     row.appendChild(createNode("td", `${product.name}`));
                     row.appendChild(createNode("td", data.add));
                     row.appendChild(createNode("td", data.rem));
-                    row.appendChild(createNode("td", data.count));
+                    row.appendChild(createNode("td", msToString(data.avgAdd)));
+                    row.appendChild(createNode("td", msToString(data.avgRem)));
+                    row.appendChild(createNode("td", msToString(data.avgLifetime)));
+                    row.appendChild(createNode("td", data.estimation));
                     table.appendChild(row);
                 }
             }
