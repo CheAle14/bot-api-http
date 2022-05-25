@@ -4,10 +4,15 @@
         <title>Missing and upcoming items</title>
     </head>
     <body>
+        <h2>Date of last shop</h2>
+        <input type="date" id="lastShop" onchange="dateChanged(event);">
         <h2>Date of next shopping</h2>
-        <input type="date" id="datePicker" onchange="dateChanged(event);">
+        <input type="date" id="nextShop" onchange="dateChanged(event);">
 
         <hr>
+
+        <h2>Recently removed items</h2>
+        <table id="removed"></table>
 
         <h2>Expiring items</h2>
         <table id="expiring"></table>
@@ -18,21 +23,32 @@
         <table id="predicted"></table>
 
         <script>
+            const dates = {
+                last: null,
+                next: null
+            }
             function dateChanged(event) {
                 console.log(event);
                 const v = event.target.value;
+                if(event.target.id === "lastShop") {
+                    dates.last = v;
+                } else {
+                    dates.next = v;
+                }
+                if(dates.last !== null && dates.next !== null) {
+                    fetch(`/api/food/future?date=${dates.next}&prev=${dates.last}`).then(function(resp) {
+                        console.log(resp);
+                        resp.json().then(function(body) {
+                            console.log(body);
 
-                fetch(`/api/food/future?date=${v}`).then(function(resp) {
-                    console.log(resp);
-                    resp.json().then(function(body) {
-                        console.log(body);
-
-                        setExpiring(body.expiring);
-                        setPredicted(body.products, body.predicted);
-                    })
-                }).catch(function(err) {
-                    console.error(err);
-                });
+                            setExpiring(body.expiring);
+                            setPredicted(body.products, body.predicted);
+                            setRemoved(body.products, body.recent);
+                        })
+                    }).catch(function(err) {
+                        console.error(err);
+                    });
+                }
             }
 
             function createNode(tag, inner) {
@@ -117,7 +133,7 @@
                     
                     const row = createNode("tr", "");
                     const data = predicted.products[prodId];
-                    row.appendChild(createNode("td", `${product.name}`));
+                    row.appendChild(createNodeSafe("td", `${product.name}`));
                     row.appendChild(createNode("td", data.add));
                     row.appendChild(createNode("td", data.rem));
                     row.appendChild(createNode("td", msToString(data.avgAdd)));
@@ -125,6 +141,25 @@
                     row.appendChild(createNode("td", msToString(data.avgLifetime)));
                     row.appendChild(createNode("td", data.estimation));
                     table.appendChild(row);
+                }
+            }
+
+            function setRemoved(products, items) {
+                const table = document.getElementById("removed");
+                table.innerHTML = "";
+                const headerRow = createNode("tr", "");
+                headerRow.appendChild(createNode("th", "Item"));
+                headerRow.appendChild(createNode("th", "Removed At"));
+                table.appendChild(headerRow);
+
+                for(let itemId in items) {
+                    const item = items[itemId];
+                    const itemRow = createNode("tr", "");
+                    itemRow.appendChild(createNodeSafe("td", item.name))
+                    const dt = new Date(item.removed);
+                    itemRow.appendChild(createNodeSafe("td", dt.toDateString()));
+
+                    table.appendChild(itemRow);
                 }
             }
         </script>
