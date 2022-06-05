@@ -5,11 +5,13 @@
     </head>
     <body>
         <a href="/food/add-recipe">Add Recipe</a>
+        <input id="inFilter" type="text" placeholder="Filter recipes" onchange="setFilter()">
         <REPLACE id="ongoing"/>
         <REPLACE id="table"/>
 
         <input type="button" value="Start selected" onclick="startRecipe()">
 
+        <script src="../_/js/bot-ws.js"></script>
         <script>
             function cbToggled(e) {
                 console.log(e);
@@ -17,6 +19,35 @@
                 var inp = document.getElementById("delay-" + id);
                 inp.style.display = e.target.checked ? "" : "none";
             }
+
+            function containsFilter(td, str) {
+                if(td.innerText.indexOf(str) !== -1) return true;
+
+                var unorderedList = td.children[0];
+                for(let listItem of unorderedList.children) {
+                    var attr = listItem.getAttribute("data-id");
+                    if(attr == str) return true;
+                }
+                return false;
+            }
+
+            function setFilter() {
+                console.log("Setting filter");
+                const filter = document.getElementById("inFilter").value;
+                const rows = document.getElementsByTagName("tr");
+
+                for(let row of rows) {
+                    const firstCell = row.children[0];
+                    if(firstCell.tagName === "TD") {
+                        if(filter) {
+                            row.style.display = (containsFilter(firstCell, filter)) ? "" : "none";
+                        } else {
+                            row.style.display = "";
+                        }
+                    }
+                }
+            }
+
             function startRecipe() {
                 var doing = {};
                 var selects = document.getElementsByClassName("recipe-selects");
@@ -58,6 +89,21 @@
                     console.error(err);
                 })
             }
+            function init() {
+                WSC.initWS(`food-scan`, 5, function(msg) {
+                    const data = JSON.parse(msg.data);
+                    if(data.code) {
+                        const inp = document.getElementById("inFilter");
+                        inp.value = data.code;
+                        console.log("Set to", data.code);
+                        inp.dispatchEvent(new Event("change"));
+                    }
+                }, null, function(e) {
+                    // reconnect limit reached
+                    window.location.reload();
+                });
+            }
+            init();
         </script>
     </body>
 </html>
