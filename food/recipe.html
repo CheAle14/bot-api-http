@@ -21,20 +21,20 @@
             }
 
             function containsFilter(td, str) {
-                if(td.innerText.toUpperCase().indexOf(str) !== -1) return true;
+                if(td.innerText.ToLowerCase().indexOf(str) !== -1) return true;
 
                 var unorderedList = td.children[0];
                 for(let listItem of unorderedList.children) {
                     var attr = listItem.getAttribute("data-id");
-                    if(attr.toUpperCase() == str) return true;
+                    if(attr.ToLowerCase() == str) return true;
                 }
                 return false;
             }
 
             function setFilter() {
                 console.log("Setting filter");
-                const filter = document.getElementById("inFilter").value;
-                if(filter) filter = filter.toUpperCase();
+                var filter = document.getElementById("inFilter").value;
+                if(filter) filter = filter.ToLowerCase();
                 const rows = document.getElementsByTagName("tr");
 
                 for(let row of rows) {
