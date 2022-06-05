@@ -21,12 +21,12 @@
             }
 
             function containsFilter(td, str) {
-                if(td.innerText.ToLowerCase().indexOf(str) !== -1) return true;
+                if(td.innerText.toLowerCase().indexOf(str) !== -1) return true;
 
                 var unorderedList = td.children[0];
                 for(let listItem of unorderedList.children) {
                     var attr = listItem.getAttribute("data-id");
-                    if(attr.ToLowerCase() == str) return true;
+                    if(attr.toLowerCase() == str) return true;
                 }
                 return false;
             }
@@ -34,7 +34,7 @@
             function setFilter() {
                 console.log("Setting filter");
                 var filter = document.getElementById("inFilter").value;
-                if(filter) filter = filter.ToLowerCase();
+                if(filter) filter = filter.toLowerCase();
                 const rows = document.getElementsByTagName("tr");
 
                 for(let row of rows) {
