@@ -26,6 +26,7 @@
             <input type="button" value="Submit" onclick="submit()">
         </div>
 
+        <script src="../_/js/bot-ws.js"></script>
         <script>
             function getRandomInt(max) {
                 return Math.floor(Math.random() * max);
@@ -234,8 +235,9 @@
             }
             const MAKING = new Recipe();
 
-            function addNewIngredient() {
+            function addNewIngredient(optId) {
                 var i = new Ingredient();
+                if(optId) i.id = optId;
                 MAKING.addIngredient(i);
 
                 refreshHtml();
@@ -291,6 +293,18 @@
             }
 
 
+            function init() {
+                WSC.initWS(`food-scan`, 5, function(msg) {
+                    const data = JSON.parse(msg.data);
+                    if(data.code) {
+                        console.log("Adding ", data.code);
+                        addNewIngredient(data.code);
+                    }
+                }, null, function(e) {
+                   console.error("WS reached reconnect limit.");
+                });
+            }
+            init();
         </script>
     </body>
 </html>
