@@ -21,12 +21,12 @@
             }
 
             function containsFilter(td, str) {
-                if(td.innerText.indexOf(str) !== -1) return true;
+                if(td.innerText.toUpperCase().indexOf(str) !== -1) return true;
 
                 var unorderedList = td.children[0];
                 for(let listItem of unorderedList.children) {
                     var attr = listItem.getAttribute("data-id");
-                    if(attr == str) return true;
+                    if(attr.toUpperCase() == str) return true;
                 }
                 return false;
             }
@@ -34,6 +34,7 @@
             function setFilter() {
                 console.log("Setting filter");
                 const filter = document.getElementById("inFilter").value;
+                if(filter) filter = filter.toUpperCase();
                 const rows = document.getElementsByTagName("tr");
 
                 for(let row of rows) {
