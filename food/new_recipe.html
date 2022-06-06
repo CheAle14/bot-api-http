@@ -5,6 +5,9 @@
     </head>
     <body>
         <div>
+            <label>Title: </label> <input id="title" type="text" onchange="updateTitle(event)">
+        </div>
+        <div>
             <p>Ingredients</p>
 
             <ul id="ingredients"></ul>
@@ -33,8 +36,10 @@
             }
             const ulIngredients = document.getElementById("ingredients");
             const ulSteps = document.getElementById("steps");
+            const rTitle = document.getElementById("title");
             const disableValue = 123765;
             const idempotent = getRandomInt(65565);
+            const MODIFYING = "<REPLACE id='modifying'/>";
 
             function getSpanText(txt) {
                 var s = document.createElement("span");
@@ -46,6 +51,7 @@
                 constructor() {
                     this.id = null;
                     this.unitsUsed = 1;
+                    this.frozen = false;
                 }
 
                 toHTML() {
@@ -77,6 +83,15 @@
                         console.log(_this);
                     }
                     li.appendChild(units);
+
+                    li.appendChild(getSpanText(", from frozen: "));
+                    var frozen = document.createElement("input");
+                    frozen.type = "checkbox"
+                    frozen.checked = this.frozen;
+                    frozen.onclick = function() {
+                        _this.frozen = frozen.checked;
+                    };
+                    li.appendChild(frozen);
 
                     return li;
                 }
@@ -215,6 +230,7 @@
                     this.ingredients = [];
                     this.steps = [];
                     this.order = false;
+                    this.title = null;
                 }
 
                 addIngredient(ingred) {
@@ -232,8 +248,47 @@
                         this.steps.splice(ind, 1);
                     }
                 }
+
+                toHTML() {
+                    rTitle.value = this.title;
+
+                    ulIngredients.innerHTML = "";
+                    for(var k of this.ingredients) {
+                        ulIngredients.appendChild(k.toHTML());
+                    }
+
+                    ulSteps.innerHTML = "";
+                    for(var k of this.steps) {
+                        ulSteps.appendChild(k.toHTML());
+                    }
+                }
+
+                load(obj) {
+                    this.title = obj.title;
+
+                    for(let i of obj.ingredients) {
+                        var newI = new Ingredient();
+                        newI.id = i.id;
+                        newI.frozen = i.frozen;
+                        newI.unitsUsed = i.unitsUsed;
+                        this.addIngredient(newI);
+                    }
+                    for(let s of obj.steps) {
+                        var newS = new Step();
+                        newS.description = s.description;
+                        newS.duration = s.duration;
+                        newS.delay = s.delay;
+                        newS.order = s.order;
+                        this.addStep(newS);
+                    }
+                }
             }
             const MAKING = new Recipe();
+
+            function updateTitle(event) {
+                MAKING.title = event.target.value;
+                console.log("updateTitle", MAKING);
+            }
 
             function addNewIngredient(optId) {
                 var i = new Ingredient();
@@ -250,15 +305,7 @@
             }
 
             function refreshHtml() {
-                ulIngredients.innerHTML = "";
-                for(var k of MAKING.ingredients) {
-                    ulIngredients.appendChild(k.toHTML());
-                }
-
-                ulSteps.innerHTML = "";
-                for(var k of MAKING.steps) {
-                    ulSteps.appendChild(k.toHTML());
-                }
+                MAKING.toHTML();
             }
 
             function replacer(k, v) {
@@ -269,7 +316,11 @@
             }
 
             function submit() {
-                fetch('/api/food/recipes', {
+                var url = "/api/food/recipes";
+                if(MODIFYING) {
+                    url += "?overwrite=" + MODIFYING;
+                }
+                fetch(url, {
                     method: 'POST',
                     headers: {"X-Idempotency": idempotent, "Content-Type": "application/json"},
                     body: JSON.stringify(MAKING, replacer)
@@ -294,6 +345,27 @@
 
 
             function init() {
+                if(MODIFYING) {
+                    console.log("We are modifying recipe of ID ", MODIFYING);
+                    fetch(`/api/food/recipe?id=${MODIFYING}`).then(function(r) {
+                        console.log(r);
+                        r.json().then(function(value) {
+                            console.log(value);
+
+                            MAKING.load(value);
+                            console.log("After load:", MAKING);
+                            refreshHtml();
+
+
+                        }).catch(function(err2) {
+                            console.error(err2);
+                        });
+                    }).catch(function(err) {
+                        console.error(err);
+                    })
+                }
+
+
                 WSC.initWS(`food-scan`, 5, function(msg) {
                     const data = JSON.parse(msg.data);
                     if(data.code) {
