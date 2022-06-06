@@ -17,7 +17,7 @@
         <div>
             <p>Steps</p>
 
-            <input type="checkbox" value="Perform in-order?" onclick="rootOrderChange(this);">
+            <input id="rootOrder" type="checkbox" value="Perform in-order?" onclick="rootOrderChange(this);">
 
             <ul id="steps">
             </ul>
@@ -37,6 +37,7 @@
             const ulIngredients = document.getElementById("ingredients");
             const ulSteps = document.getElementById("steps");
             const rTitle = document.getElementById("title");
+            const rOrder = document.getElementById("rootOrder");
             const disableValue = 123765;
             const idempotent = getRandomInt(65565);
             const MODIFYING = "<REPLACE id='modifying'/>";
@@ -251,6 +252,7 @@
 
                 toHTML() {
                     rTitle.value = this.title;
+                    rOrder.checked = this.order;
 
                     ulIngredients.innerHTML = "";
                     for(var k of this.ingredients) {
