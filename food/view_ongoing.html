@@ -27,12 +27,18 @@
                 left: 0;
                 position: fixed
             }
+            #sentnext {
+                top: 0;
+                left: 5%;
+                position: fixed;
+            }
         </style>
         <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js"></script>
     </head>
     <body>
         <div>
             <img id="wsClosed" src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/17/Warning.svg/260px-Warning.svg.png" width="5%" style="display: none">
+            <img id="sentnext" src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/eb/Blue_check.svg/240px-Blue_check.svg.png" width="4%" style="display: none">
             <h1 id="desc"></h1>
             <h2 id="time"></h2>
             <h3 id="endsAt"></h3>
@@ -55,6 +61,7 @@
             const editRemember = document.getElementById("editRemember");
             const editBtn = document.getElementById("editBtn");
             const wsWarning = document.getElementById("wsClosed");
+            const wsNext = document.getElementById("sentnext");
 
             var fullEndsAt = 0;
             var countTo = 0;
@@ -222,6 +229,10 @@
                 wsWarning.style.display = "none";
                 const data = JSON.parse(e.data);
                 console.log(data);
+                if(_goingNext) {
+                    _goingNext = false;
+                    wsNext.style.display = "none";
+                }
                 if(data.done) {
                     done = true;
                     clearInterval(timerInterval);
@@ -259,14 +270,28 @@
                 wsWarning.style.display = null;
             }
 
-            function handleNext(ev) {
-                if(ev.target.id === "editBtn") return;
+            _goingNext = false;
+            function moveNext() {
                 if(!interactable) {
                     console.log("Attempted to advance but we're not in edit mode.")
                     return;
                 }
                 started = true;
-                WSC.socket.send(JSON.stringify({"data": "next"}));
+                if(_goingNext === false) {
+                    _goingNext = true;
+                    wsNext.style.display = "";
+                    WSC.socket.send(JSON.stringify({"data": "next"}));
+                }
+            }
+
+            function handleNext(ev) {
+                if(ev.target.id === "editBtn") return;
+                moveNext();
+            }
+            function onKeyUp(ev) {
+                if(ev.code === "Space") {
+                    moveNext();
+                }
             }
             function init() {
                 descElem.innerText = "...";
@@ -276,6 +301,7 @@
                     window.location.reload();
                 });
                 document.body.addEventListener("click", handleNext, true);
+                document.body.addEventListener("keyup", onKeyUp, true);
 
                 if(Cookies.get("edit")) {
                     editRemember.checked = true;

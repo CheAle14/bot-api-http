@@ -65,9 +65,7 @@ WSC.connect = function() {
     };
     
     WSC.socket.onerror = function(error) {
-        console.log("[error] Connection errored");
-        console.log(error);
-        alert(JSON.stringify(error, ["message", "arguments", "type", "name"]));
+        console.error("[WS] ", error);
     };
 }
 console.log("HEY WS", WSC);
