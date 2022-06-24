@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>
+            New Menu
+        </title>
+        <style>
+            .dangerhover {
+                color: blue;
+                text-decoration: underline;
+                cursor: not-allowed;
+            }
+            .danger {
+                background-color: red;
+            }
+        </style>
+    </head>
+    <body>
+        <p>New Menu</p>
+
+        <input type="button" value="New Group" onclick="addNewGroup()">
+
+        <table id="table"></table>
+
+        <script>
+            
+            function getRandomInt(max) {
+                return Math.floor(Math.random() * max);
+            }
+            const idempotent = getRandomInt(65565);
+            const htmlTable = document.getElementById("table");
+            const DAY_NAMES = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+            const PRODUCT_CACHE = {};
+
+            function createElementWithText(tagName, text) {
+                var el = document.createElement(tagName);
+                el.innerText = text;
+                return el;
+            }
+            function createOptionWithArgs(text, selected) {
+                var o = createElementWithText("option", text);
+                o.selected = selected;
+                return o;
+            }
+            function createHoverDeleteText(text) {
+                var span = document.createElement("span");
+                span.classList.add("dangerhover");
+                span.innerText = text;
+                return span;
+            }
+
+            function createManySpans(...args) {
+                var root = document.createElement("span");
+                for(const text of args) {
+                    if(typeof text === "string") {
+                        root.appendChild(createElementWithText("span", text));
+                    } else {
+                        root.appendChild(text);
+                    }
+                }
+                return root;
+            }
+
+            class MenuDayItem {
+                constructor(day, grp) {
+                    this._parent = day;
+                    this._group = grp;
+                    this.type = "";
+                    this.value = null;
+                }
+
+
+                toHtml(index) {
+                    const _this = this;
+                    var div = document.createElement("div");
+                    div.style.border = "1px solid blue";
+                    div.style.margin = "1px 1px 1px 1px";
+                    
+                    var typeSelect = document.createElement("select");
+                    typeSelect.appendChild(createOptionWithArgs("", this.type === ""));
+                    typeSelect.appendChild(createOptionWithArgs("Id", this.type === "id"));
+                    typeSelect.appendChild(createOptionWithArgs("Tag", this.type === "tag"));
+
+                    typeSelect.onchange = function(e) {
+                        if(typeSelect.value) {
+                            _this.type = typeSelect.value.toLowerCase();
+                            if(_this.type === "id" || _this.type === "tag")
+                                _this.value = [];
+
+                            refreshHtml();
+                        }
+                    }
+
+                    div.appendChild(typeSelect);
+                    div.appendChild(createElementWithText("br"));
+
+                    if(this.type === "id" || this.type === "tag") {
+                        if(this.value.length > 0) {
+                            var t = [this.type === "id" ? "Products " : "Tags "];
+                            for(let ind in this.value) {
+                                const x = this.value[ind];
+                                var span = createHoverDeleteText(x);
+                                span.onclick = function(e) {
+                                    _this.value.splice(ind, 1);
+                                    console.log(e);
+                                    refreshHtml();
+                                }
+                                t.push(span);
+                                t.push(" and ");
+                            }
+
+                            div.appendChild(createManySpans(...t));
+                        }
+
+
+                        var addI = document.createElement("input");
+                        addI.type = "button";
+                        addI.value = "+";
+                        addI.onclick = function() {
+                            var x = prompt("Enter " + (_this.type === "id" ? "ID" : "Tag"));
+                            _this.value.push(x);
+                            refreshHtml();
+                        }
+                        div.appendChild(addI);
+                    } 
+
+                    var remI = document.createElement("input");
+                    remI.type = "button";
+                    remI.value = "-";
+                    remI.classList.add("danger");
+                    remI.onclick = function() {
+                        _this._parent.removeItem(_this._group, index);
+                        refreshHtml();
+                    }
+                    div.appendChild(remI);
+
+                    return div;
+                }
+            }
+
+            class MenuDay {
+                constructor(i) {
+                    this._index = i;
+                    this.text = "";
+                    this.items = {};
+                }
+
+                getGroups() {
+                    return Object.keys(this.items);
+                }
+
+                addItem(group) {
+                    this.items[group].push(new MenuDayItem(this, group, this.items[group].length));
+                }
+                removeItem(group, index) {
+                    this.items[group].splice(index, 1);
+                }
+
+                toHtml(dayRow, groups) {
+                    const _this = this;
+                    var mergedItem = this.items["*"];
+                    console.log(mergedItem);
+                    if(mergedItem) {
+                        var mergedCell = document.createElement("td");
+                        mergedCell.style.paddingLeft = "15px";
+                        mergedCell.style.borderLeft = "4px solid black";
+                        mergedCell.colSpan = MENU.getGroups().length;
+                        
+                        let index = 0;
+                        for(let item of mergedItem) {
+                            mergedCell.appendChild(item.toHtml(index++));
+                        }
+
+                        var addI = document.createElement("input");
+                        addI.type = "button";
+                        addI.value = "Add";
+                        addI.onclick = function() {
+                            _this.addItem("*");
+                            console.log(_this, "*");
+                            refreshHtml();
+                        }
+                        mergedCell.appendChild(addI);
+
+                        dayRow.appendChild(mergedCell);
+                    } else {
+                        for(let group of groups) {
+                            var groupCell = document.createElement("td");
+                            
+                            let index = 0;
+                            for(let item of this.items[group]) {
+                                groupCell.appendChild(item.toHtml(index++));
+                            }
+
+                            var addI = document.createElement("input");
+                            addI.type = "button";
+                            addI.value = "Add";
+                            addI.onclick = function() {
+                                _this.addItem(group);
+                                console.log(_this, group);
+                                refreshHtml();
+                            }
+                            groupCell.appendChild(addI);
+
+                            dayRow.appendChild(groupCell);
+                        }
+                    }
+                    if(mergedItem || groups.length > 1) {
+                        var mergeC = document.createElement("input");
+                        mergeC.type = "checkbox";
+                        mergeC.value = "M";
+                        mergeC.checked = mergedItem !== undefined;
+                        mergeC.style.right = "8px";
+                        mergeC.style.position = "fixed";
+                        mergeC.onclick = function(e) {
+                            if(e.target.checked) {
+                                _this.items = {};
+                                _this.items["*"] = [];
+                            } else {
+                                _this.items = {};
+                                for(let group of MENU.getGroups()) {
+                                    _this.items[group] = [];
+                                }
+                            }
+                            console.log("mergeC", _this);
+                            refreshHtml();
+                        }
+                        dayRow.appendChild(mergeC);
+                    }
+                }
+            }
+
+            class Menu {
+                constructor() {
+                    this.title = "";
+                    this.days = [];
+                    for(let i = 0; i < 7; i++)
+                        this.days.push(new MenuDay(i));
+                }
+
+                getGroups() {
+                    var groups = [];
+                    for(const day of this.days) {
+                        var grps = day.getGroups();
+                        for(const maybe of grps) {
+                            if(maybe === "*") continue;
+                            if(groups.indexOf(maybe) === -1) {
+                                groups.push(maybe);
+                            }
+                        }
+                    }
+                    return groups;
+                }
+
+                addGroup(name) {
+                    for(const day of this.days) {
+                        day.items[name] = [];
+                    }
+                }
+
+                toHtml(table) {
+                    console.log(this);
+                    var headerRow = document.createElement("tr");
+                    headerRow.appendChild(createElementWithText("th", "Day"));
+                    var groups = this.getGroups();
+                    for(let group of groups) {
+                        headerRow.appendChild(createElementWithText("th", group));
+                    }
+                    table.appendChild(headerRow);
+
+                    for(let day of this.days) {
+                        var dayRow = document.createElement("tr");
+                        dayRow.appendChild(createElementWithText("td", DAY_NAMES[day._index]));
+
+                        day.toHtml(dayRow, groups);
+
+                        table.appendChild(dayRow);
+                    }
+                }
+            }
+
+            var MENU = new Menu();
+            function refreshHtml() {
+                htmlTable.innerHTML = "";
+
+                MENU.toHtml(htmlTable);
+
+            }
+
+            function addNewGroup() {
+                var name = prompt("Enter new group name");
+                if(name) {
+                    MENU.addGroup(name);
+                }
+
+                refreshHtml();
+            }
+
+            function replacer(k, v) {
+                if(k.startsWith("_")) return undefined;
+                return v;
+            }
+
+            function submit() {
+                var url = "/api/food/menus";
+                if(MODIFYING) {
+                    url += "?overwrite=" + MODIFYING;
+                }
+                fetch(url, {
+                    method: 'POST',
+                    headers: {"X-Idempotency": idempotent, "Content-Type": "application/json"},
+                    body: JSON.stringify(MAKING, replacer)
+                }).then(function(response) {
+                    console.log(response);
+                    response.text().then(function(body) {
+                        if(response.ok) {
+                            window.location = "/food/menus";
+                        } else {
+                            alert(response.status + ":" + body);
+                        }
+                    });
+                }).catch(function(err) {
+                    console.log(err);
+                })
+            }
+
+            refreshHtml();
+
+        </script>
+    </body>
+
+
+</html>
