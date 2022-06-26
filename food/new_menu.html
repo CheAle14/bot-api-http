@@ -163,6 +163,17 @@
 
                 toHtml(dayRow, groups) {
                     const _this = this;
+
+                    var textI = document.createElement("input");
+                    textI.type = "text";
+                    textI.placeholder = "Display text";
+                    textI.value = this.text;
+                    textI.onchange = function(event) {
+                        _this.text = textI.value;
+                        console.log(event, _this);
+                    }
+
+
                     var mergedItem = this.items["*"];
                     console.log(mergedItem);
                     if(mergedItem) {
@@ -170,6 +181,8 @@
                         mergedCell.style.paddingLeft = "15px";
                         mergedCell.style.borderLeft = "4px solid black";
                         mergedCell.colSpan = MENU.getGroups().length;
+
+                        mergedCell.appendChild(textI);
                         
                         let index = 0;
                         for(let item of mergedItem) {
@@ -188,8 +201,14 @@
 
                         dayRow.appendChild(mergedCell);
                     } else {
+                        var addedI = false;
                         for(let group of groups) {
                             var groupCell = document.createElement("td");
+
+                            if(!addedI) {
+                                addedI = true;
+                                groupCell.appendChild(textI);
+                            }
                             
                             let index = 0;
                             for(let item of this.items[group]) {
@@ -322,7 +341,7 @@
                     console.log(response);
                     response.text().then(function(body) {
                         if(response.ok) {
-                            window.location = "/food/menus";
+                            window.location = "/food/menu";
                         } else {
                             console.log(body);
                             alert(response.status);

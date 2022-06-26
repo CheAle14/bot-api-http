@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Menu</title>
+        <style>
+            .shared {
+                border-left: 5px solid black;
+                border-right: 5px solid black;
+                text-align: center; 
+                vertical-align: middle;
+            }
+            .manu {
+                margin-right: 3px;
+                background-color: rgb(56, 56, 255);
+                border-radius: 5%;
+                padding: 1px 3px 1px 3px;
+            }
+            .cbshare {
+                position: fixed;
+                right: 8px;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>Menu <REPLACE id='title'/></h1>
+        <REPLACE id="table"/>
+
+        <a href="/food/menu/new">New Menus</a>
+
+        <br>
+        <label>Search for items: </label> <input type="text" id="search" onchange="searchItems(event)"/>
+        <ul id="searchResults">
+        </ul>
+
+        <script>
+            const searchResults = document.getElementById("searchResults");
+            function selectMenu(id) {
+                fetch(`/api/food/menu?id=${id}`, {
+                    method: "POST"
+                })
+                .then(function(resp) {
+                    if(resp.ok) {
+                        window.location.reload();
+                    } else {
+                        alert("Failed!");
+                    }
+                }).catch(function(err) {
+                    console.error(err);
+                })
+            }
+            function searchItems(event) {
+                fetch(`/api/food/query`, {
+                    method: "POST",
+                    body: `query=${encodeURIComponent(event.target.value)}`,
+                    headers: {
+                        "Content-Type": "x-form-data"
+                    }
+                })
+                .then(function(resp) {
+                    resp.json().then(function(value) {
+                        console.log(value);
+                        searchResults.innerHTML = "";
+                        for(let item of value) {
+                            var existing = document.getElementById(item.id);
+                            if(existing) continue;
+
+                            var div = document.createElement("li");
+                            div.id = item.id;
+                            div.innerText = `${item.name} expires ${new Date(item.expires)}`;
+                            div.setAttribute("draggable", "true");
+                            div.ondragstart = onDragStart;
+                            searchResults.appendChild(div);
+                        }
+                    })
+                }).catch(function(err) {
+                    console.error(err);
+                })
+            }
+
+            function onDragStart(event) {
+                console.log(event);
+                event.dataTransfer.setData("text", event.target.id);
+            }
+            function onDragOver(event) {
+                if(event.target.tagName === "TR") {
+                    console.log(event);
+                } else {
+                    event.preventDefault();
+                }
+            }
+            function toggleShare(event) {
+                var td = event.target.parentElement;
+                var tr = td.parentElement;
+                fetch(`/api/food/menu/shared?day=${tr.id.split('-')[1]}`, {
+                    method: "POST"
+                })
+                .then(function(resp) {
+                    if(resp.ok) {
+                        window.location.reload();
+                    } else {
+                        alert("Failed!");
+                    }
+                }).catch(function(err) {
+                    console.error(err);
+                })
+            }
+            function getTd(elem) {
+                if(elem === null) return null;
+                if(elem.tagName === "TD") return elem;
+                return getTd(elem.parentElement);
+            }
+            function onDrop(event) {
+                const data = event.dataTransfer.getData("text");
+                const fromElem = document.getElementById(data);
+                const toElem = getTd(event.target);
+                console.log(fromElem, "->", toElem);
+                var fromGroup = fromElem.parentElement.getAttribute("data-group");
+                var fromDay = fromElem.parentElement.getAttribute("data-date");
+                var toGroup = toElem.getAttribute("data-group");
+                var toDay = toElem.getAttribute("data-date");
+
+                const evData = {
+                    "toDay": toDay,
+                    "toGroup": toGroup,
+                    "id": data
+                };
+                if(fromGroup)
+                    evData.fromGroup = fromGroup;
+                if(fromDay)
+                    evData.fromDay = fromDay;
+                console.log(evData);
+                
+                fetch(`/api/food/menu/move`, {
+                    method: "POST",
+                    body: JSON.stringify(evData),
+                    headers: {
+                        "Content-Type": "application/json"
+                    }
+                })
+                .then(function(resp) {
+                    if(resp.ok) {
+                        window.location.reload();
+                    } else {
+                        resp.body().then(function(err) {
+                            alert(err);
+                        })
+                    }
+                }).catch(function(err) {
+                    console.error(err);
+                })
+            }
+        </script>
+    </body>
+
+</html>
