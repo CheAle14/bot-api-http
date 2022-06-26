@@ -19,6 +19,9 @@
                 position: fixed;
                 right: 8px;
             }
+            .shift-pressed .item:hover {
+                color: red;
+            }
         </style>
     </head>
     <body>
@@ -109,6 +112,23 @@
                 if(elem.tagName === "TD") return elem;
                 return getTd(elem.parentElement);
             }
+            function onItemClick(event)  {
+                if(!event.shiftKey) return;
+                var thing = getTd(event.target);
+                fetch(`/api/food/menu/item?day=${thing.getAttribute("data-date")}&group=${thing.getAttribute("data-group")}&id=${event.target.id}`, {
+                    method: "DELETE"
+                })
+                .then(function(resp) {
+                    if(resp.ok) {
+                        window.location.reload();
+                    } else {
+                        alert("Failed!");
+                    }
+                }).catch(function(err) {
+                    console.error(err);
+                })
+            }
+
             function onDrop(event) {
                 const data = event.dataTransfer.getData("text");
                 const fromElem = document.getElementById(data);

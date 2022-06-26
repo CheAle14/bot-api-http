@@ -146,7 +146,7 @@
             class MenuDay {
                 constructor(i) {
                     this._index = i;
-                    this.text = "";
+                    this.text = {};
                     this.items = {};
                 }
 
@@ -164,14 +164,6 @@
                 toHtml(dayRow, groups) {
                     const _this = this;
 
-                    var textI = document.createElement("input");
-                    textI.type = "text";
-                    textI.placeholder = "Display text";
-                    textI.value = this.text;
-                    textI.onchange = function(event) {
-                        _this.text = textI.value;
-                        console.log(event, _this);
-                    }
 
 
                     var mergedItem = this.items["*"];
@@ -182,12 +174,21 @@
                         mergedCell.style.borderLeft = "4px solid black";
                         mergedCell.colSpan = MENU.getGroups().length;
 
-                        mergedCell.appendChild(textI);
                         
                         let index = 0;
                         for(let item of mergedItem) {
                             mergedCell.appendChild(item.toHtml(index++));
                         }
+
+                        var textI = document.createElement("input");
+                        textI.type = "text";
+                        textI.placeholder = "Display text";
+                        textI.value = this.text;
+                        textI.onchange = function(event) {
+                            _this.text["*"] = textI.value;
+                            console.log(event, _this);
+                        }
+                        mergedCell.appendChild(textI);
 
                         var addI = document.createElement("input");
                         addI.type = "button";
@@ -205,11 +206,17 @@
                         for(let group of groups) {
                             var groupCell = document.createElement("td");
 
-                            if(!addedI) {
-                                addedI = true;
-                                groupCell.appendChild(textI);
-                            }
                             
+                            var textI = document.createElement("input");
+                            textI.type = "text";
+                            textI.placeholder = "Display text";
+                            textI.value = this.text;
+                            textI.onchange = function(event) {
+                                _this.text[group] = textI.value;
+                                console.log(event, _this);
+                            }
+                            groupCell.appendChild(textI);
+
                             let index = 0;
                             for(let item of this.items[group]) {
                                 groupCell.appendChild(item.toHtml(index++));
@@ -236,6 +243,7 @@
                         mergeC.style.right = "8px";
                         mergeC.style.position = "fixed";
                         mergeC.onclick = function(e) {
+                            _this.text = {};
                             if(e.target.checked) {
                                 _this.items = {};
                                 _this.items["*"] = [];
@@ -327,6 +335,12 @@
                 if(k.startsWith("_")) return undefined;
                 return v;
             }
+
+            function shiftHandler(event) {
+                shift = event.shiftKey;
+                document.body.className = shift ? 'shift-pressed' : '';
+            };
+            document.body.onkeyup = shiftHandler;
 
             function submit() {
                 var url = "/api/food/menus";
