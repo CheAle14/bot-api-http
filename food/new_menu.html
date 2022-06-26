@@ -18,9 +18,13 @@
     <body>
         <p>New Menu</p>
 
+        <input type="text" placeholder="Menu Title" onchange="updateTitle(event)">
+
         <input type="button" value="New Group" onclick="addNewGroup()">
 
         <table id="table"></table>
+
+        <input type="button" value="Submit" onclick="submit()">
 
         <script>
             
@@ -31,6 +35,7 @@
             const htmlTable = document.getElementById("table");
             const DAY_NAMES = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
             const PRODUCT_CACHE = {};
+            const MODIFYING = "<REPLACE id='modify'/>";
 
             function createElementWithText(tagName, text) {
                 var el = document.createElement(tagName);
@@ -294,6 +299,10 @@
 
                 refreshHtml();
             }
+            function updateTitle(e) {
+                MENU.title = e.target.value;
+                console.log("updateTitle", MENU, e);
+            }
 
             function replacer(k, v) {
                 if(k.startsWith("_")) return undefined;
@@ -308,14 +317,15 @@
                 fetch(url, {
                     method: 'POST',
                     headers: {"X-Idempotency": idempotent, "Content-Type": "application/json"},
-                    body: JSON.stringify(MAKING, replacer)
+                    body: JSON.stringify(MENU, replacer)
                 }).then(function(response) {
                     console.log(response);
                     response.text().then(function(body) {
                         if(response.ok) {
                             window.location = "/food/menus";
                         } else {
-                            alert(response.status + ":" + body);
+                            console.log(body);
+                            alert(response.status);
                         }
                     });
                 }).catch(function(err) {
