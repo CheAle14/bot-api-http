@@ -53,6 +53,25 @@
                 span.innerText = text;
                 return span;
             }
+            function getProductInfo(id) {
+                id = id.replace(" ", "");
+                var data = PRODUCT_CACHE[id];
+                if(data) {
+                    return createHoverDeleteText(data.name);
+                } else {
+                    fetch(`/api/food/product?query=${id}`).then(function(resp) {
+                        if(resp.ok) {
+                            resp.json().then(function (arr) {
+                                PRODUCT_CACHE[id] = arr[0];
+                                refreshHtml();
+                            })
+                        }
+                    }).catch(function(err) {
+                        console.error(id, err);
+                    })
+                    return createHoverDeleteText(id);
+                }
+            }
 
             function createManySpans(...args) {
                 var root = document.createElement("span");
@@ -72,6 +91,11 @@
                     this._group = grp;
                     this.type = "";
                     this.value = null;
+                }
+
+                load(data) {
+                    this.type = data.type;
+                    this.value = data.value;
                 }
 
 
@@ -104,7 +128,7 @@
                             var t = [this.type === "id" ? "Products " : "Tags "];
                             for(let ind in this.value) {
                                 const x = this.value[ind];
-                                var span = createHoverDeleteText(x);
+                                var span = this.type === "id" ? getProductInfo(x) : createHoverDeleteText(x);
                                 span.onclick = function(e) {
                                     _this.value.splice(ind, 1);
                                     console.log(e);
@@ -150,12 +174,39 @@
                     this.items = {};
                 }
 
+                load(data) {
+                    console.log("day: ", data);
+                    this.text = data.text;
+                    for(let key in data.items) {
+                        var _new = [];
+                        var ls = data.items[key];
+                        for(let itemData of ls) {
+                            var item = new MenuDayItem(this, key);
+                            item.load(itemData);
+                            _new.push(item);
+                        }
+                        this.items[key] = _new;
+                    }
+                }
+
                 getGroups() {
-                    return Object.keys(this.items);
+                    var ls = Object.keys(this.items);
+                    for(let key in this.text) {
+                        if(ls.indexOf(key) === -1)
+                            ls.push(key);
+                    }
+                    return ls;
                 }
 
                 addItem(group) {
-                    this.items[group].push(new MenuDayItem(this, group, this.items[group].length));
+                    var ls = this.items[group];
+                    if(!ls) {
+                        ls = [];
+                    }
+                    var newItem = new MenuDayItem(this, group, ls.length)
+                    ls.push(newItem);
+
+                    this.items[group] = ls;
                 }
                 removeItem(group, index) {
                     this.items[group].splice(index, 1);
@@ -183,9 +234,9 @@
                         var textI = document.createElement("input");
                         textI.type = "text";
                         textI.placeholder = "Display text";
-                        textI.value = this.text;
+                        textI.value = this.text["*"] || "";
                         textI.onchange = function(event) {
-                            _this.text["*"] = textI.value;
+                            _this.text["*"] = event.target.value;
                             console.log(event, _this);
                         }
                         mergedCell.appendChild(textI);
@@ -210,16 +261,19 @@
                             var textI = document.createElement("input");
                             textI.type = "text";
                             textI.placeholder = "Display text";
-                            textI.value = this.text;
+                            textI.value = this.text[group] || "";
                             textI.onchange = function(event) {
-                                _this.text[group] = textI.value;
+                                _this.text[group] = event.target.value;
                                 console.log(event, _this);
                             }
                             groupCell.appendChild(textI);
 
                             let index = 0;
-                            for(let item of this.items[group]) {
-                                groupCell.appendChild(item.toHtml(index++));
+                            var children = this.items[group];
+                            if(children) {
+                                for(let item of this.items[group]) {
+                                    groupCell.appendChild(item.toHtml(index++));
+                                }
                             }
 
                             var addI = document.createElement("input");
@@ -281,6 +335,13 @@
                         }
                     }
                     return groups;
+                }
+
+                load(data) {
+                    this.title = data.title;
+                    for(var i = 0; i < 7; i++) {
+                        this.days[i].load(data.days[i]);
+                    }
                 }
 
                 addGroup(name) {
@@ -345,7 +406,7 @@
             function submit() {
                 var url = "/api/food/menus";
                 if(MODIFYING) {
-                    url += "?overwrite=" + MODIFYING;
+                    url += "?modify=" + MODIFYING;
                 }
                 fetch(url, {
                     method: 'POST',
@@ -365,8 +426,37 @@
                     console.log(err);
                 })
             }
+            function init() {
+                if(MODIFYING) {
+                    console.log("Fetching menu ", MODIFYING);
+                    fetch(`/api/food/menu?id=${MODIFYING}`)
+                    .then(function(resp) {
+                        if(resp.ok) {
+                            resp.json().then(function(body) {
+                                console.log(MENU, body, MENU.title, MENU.getGroups());
+                                try {
+                                    MENU.load(body);
+                                } catch(err) {
+                                    console.error(err);
+                                    console.log(MENU);
+                                    return;
+                                }
+                                console.log(MENU);
+                                refreshHtml();
+                            });
+                        } else {
+                            alert(resp.status)
+                        }
+                    })
 
-            refreshHtml();
+
+
+
+                } else {
+                    refreshHtml();
+                }
+            }
+            init();
 
         </script>
     </body>
