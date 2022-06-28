@@ -28,16 +28,22 @@
         <h1>Menu <REPLACE id='title'/></h1>
         <REPLACE id="table"/>
 
-        <a href="/food/menu/new">New Menus</a>
+        <div id="editThings">
+            <a href="/food/menu/new">New Menus</a>
 
-        <br>
-        <label>Search for items: </label> <input type="text" id="search" onchange="searchItems(event)"/>
-        <ul id="searchResults">
-        </ul>
+            <br>
+            <label>Search for items: </label> <input type="text" id="search" onchange="searchItems(event)"/>
+            <ul id="searchResults">
+            </ul>
+                
+        </div>
 
         <script>
+            const EDITING = "<REPLACE id='edit'/>";
             const searchResults = document.getElementById("searchResults");
+            document.getElementById("editThings").style.display = (!!EDITING) ? "" : "none";
             function selectMenu(id) {
+                if(!EDITING) return;
                 fetch(`/api/food/menu?id=${id}`, {
                     method: "POST"
                 })
@@ -52,6 +58,7 @@
                 })
             }
             function searchItems(event) {
+                if(!EDITING) return;
                 fetch(`/api/food/query`, {
                     method: "POST",
                     body: `query=${encodeURIComponent(event.target.value)}`,
@@ -81,10 +88,12 @@
             }
 
             function onDragStart(event) {
+                if(!EDITING) return;
                 console.log(event);
                 event.dataTransfer.setData("text", event.target.id);
             }
             function onDragOver(event) {
+                if(!EDITING) return;
                 if(event.target.tagName === "TR") {
                     console.log(event);
                 } else {
@@ -92,6 +101,7 @@
                 }
             }
             function toggleShare(event) {
+                if(!EDITING) return;
                 var td = event.target.parentElement;
                 var tr = td.parentElement;
                 fetch(`/api/food/menu/shared?day=${tr.id.split('-')[1]}`, {
@@ -113,6 +123,7 @@
                 return getTd(elem.parentElement);
             }
             function onItemClick(event)  {
+                if(!EDITING) return;
                 if(!event.shiftKey) return;
                 var thing = getTd(event.target);
                 fetch(`/api/food/menu/item?day=${thing.getAttribute("data-date")}&group=${thing.getAttribute("data-group")}&id=${event.target.id}`, {
@@ -130,6 +141,7 @@
             }
 
             function onDrop(event) {
+                if(!EDITING) return;
                 const data = event.dataTransfer.getData("text");
                 const fromElem = document.getElementById(data);
                 const toElem = getTd(event.target);
