@@ -128,8 +128,7 @@
             function onItemClick(event)  {
                 if(!EDITING) return;
                 if(!event.shiftKey) return;
-                var thing = getTd(event.target);
-                fetch(`/api/food/menu/item?day=${thing.getAttribute("data-date")}&group=${thing.getAttribute("data-group")}&id=${event.target.id}`, {
+                fetch(`/api/food/menu/item?day=${thing.getAttribute("data-date")}&group=${thing.getAttribute("data-group")}&id=${event.currentTarget.id}`, {
                     method: "DELETE"
                 })
                 .then(function(resp) {
