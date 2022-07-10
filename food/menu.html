@@ -25,6 +25,9 @@
             .today-row {
                 background-color: rgb(67, 67, 255);
             }
+            .already-exists {
+                background-color: red;
+            }
         </style>
     </head>
     <body>
@@ -64,7 +67,7 @@
                 if(!EDITING) return;
                 fetch(`/api/food/query`, {
                     method: "POST",
-                    body: `query=${encodeURIComponent(event.target.value)}`,
+                    body: `query=${encodeURIComponent(event.target.value)}&sort=expires`,
                     headers: {
                         "Content-Type": "x-form-data"
                     }
@@ -75,9 +78,11 @@
                         searchResults.innerHTML = "";
                         for(let item of value) {
                             var existing = document.getElementById(item.id);
-                            if(existing) continue;
 
                             var div = document.createElement("li");
+                            if(existing) {
+                                div.classList.add("already-exists");
+                            }
                             div.id = item.id;
                             div.innerText = `${item.name} expires ${new Date(item.expires)}`;
                             div.setAttribute("draggable", "true");
@@ -174,7 +179,8 @@
                 })
                 .then(function(resp) {
                     if(resp.ok) {
-                        window.location.reload();
+                        toElem.appendChild(fromElem);
+                        fromElem.parentElement.removeChild(fromElem);
                     } else {
                         resp.body().then(function(err) {
                             alert(err);
