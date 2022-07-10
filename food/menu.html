@@ -180,7 +180,6 @@
                 .then(function(resp) {
                     if(resp.ok) {
                         toElem.appendChild(fromElem);
-                        fromElem.parentElement.removeChild(fromElem);
                     } else {
                         resp.body().then(function(err) {
                             alert(err);
