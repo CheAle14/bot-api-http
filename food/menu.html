@@ -139,7 +139,7 @@
                 })
                 .then(function(resp) {
                     if(resp.ok) {
-                        window.location.reload();
+                        event.currentTarget.parentElement.removeChild(event.currentTarget);
                     } else {
                         alert("Failed!");
                     }
