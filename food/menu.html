@@ -26,6 +26,13 @@
                 background-color: rgb(67, 67, 255);
             }
             .already-exists {
+                color: rgb(242, 0, 255);
+                
+            }
+            .already-exists::before {
+                content: "(duplicate) ";
+            }
+            .expired {
                 background-color: red;
             }
         </style>
@@ -63,6 +70,10 @@
                     console.error(err);
                 })
             }
+            function formatDate(date) {
+                var options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+                return date.toLocaleDateString("en-US", options);
+            }
             function searchItems(event) {
                 if(!EDITING) return;
                 fetch(`/api/food/query`, {
@@ -76,6 +87,7 @@
                     resp.json().then(function(value) {
                         console.log(value);
                         searchResults.innerHTML = "";
+                        var now = new Date();
                         for(let item of value) {
                             var existing = document.getElementById(item.id);
 
@@ -84,7 +96,15 @@
                                 div.classList.add("already-exists");
                             }
                             div.id = item.id;
-                            div.innerText = `${item.name} expires ${new Date(item.expires)}`;
+                            var date = new Date(item.expires);
+                            if(date < now) {
+                                div.classList.add("expired");
+                            }
+                            var t = "";
+                            if(item.manu) {
+                                t + `(${item.manu}) `;
+                            }
+                            div.innerText = t + `${item.name} expires ${formatDate(date)}`;
                             div.setAttribute("draggable", "true");
                             div.ondragstart = onDragStart;
                             searchResults.appendChild(div);
