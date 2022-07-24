@@ -22,14 +22,8 @@
                 padding: 0;
                 text-align: center
             }
-            #wsClosed {
+            .notify-icon {
                 top: 0;
-                left: 0;
-                position: fixed
-            }
-            #sentnext {
-                top: 0;
-                left: 5%;
                 position: fixed;
             }
         </style>
@@ -37,8 +31,9 @@
     </head>
     <body>
         <div>
-            <img id="wsClosed" src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/17/Warning.svg/260px-Warning.svg.png" width="5%" style="display: none">
-            <img id="sentnext" src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/eb/Blue_check.svg/240px-Blue_check.svg.png" width="4%" style="display: none">
+            <img class="notify-icon" id="wsClosed" src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/17/Warning.svg/260px-Warning.svg.png" width="5%" style="display: none">
+            <img class="notify-icon" id="sentnext" src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/eb/Blue_check.svg/240px-Blue_check.svg.png" width="5%" style="display: none">
+            <img class="notify-icon" id="muted" src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/3f/Mute_Icon.svg/500px-Mute_Icon.svg.png" width="5%" style="display: none">
             <h1 id="desc"></h1>
             <h2 id="time"></h2>
             <h3 id="endsAt"></h3>
@@ -60,8 +55,41 @@
             const tableElem = document.getElementById("full");
             const editRemember = document.getElementById("editRemember");
             const editBtn = document.getElementById("editBtn");
-            const wsWarning = document.getElementById("wsClosed");
             const wsNext = document.getElementById("sentnext");
+
+
+            class NotifyIcons {
+                constructor() {
+                    this.icons = [];
+                }
+                add(icon) {
+                    this.icons.push(icon);
+                }
+                refresh() {
+                    var left = 0;
+                    for(let icon of this.icons) {
+                        if(icon.style.display !== "none") {
+                            icon.style.left = `${left}%`;
+                            left += 6;
+                        }
+                    }
+                }
+                update(name, value) {
+                    for(let icon of this.icons) {
+                        if(icon.id === name) {
+                            icon.style.display = value ? "" : "none";
+                            break;
+                        }
+                    }
+                    this.refresh();
+                }
+            }
+
+            const ICONS = new NotifyIcons();
+            ICONS.add(document.getElementById("wsClosed"));
+            ICONS.add(document.getElementById("sentnext"));
+            ICONS.add(document.getElementById("muted"));
+
 
             var fullEndsAt = 0;
             var countTo = 0;
@@ -105,6 +133,7 @@
                 if(audio != null) {
                     audio.pause();
                     audio = null;
+                    ICONS.update("muted", false);
                 }
             }
 
@@ -212,6 +241,7 @@
                     if(audio === null && started) {
                         audio = new Audio("/_/assets/alarm.mp3");
                         audio.loop = false;
+                        audio.muted = false;
                         audio.play();
                     }
                     if(audio !== null) {
@@ -226,12 +256,12 @@
             }
 
             function handleMsg(e) {
-                wsWarning.style.display = "none";
+                ICONS.update("wsClosed", false);
                 const data = JSON.parse(e.data);
                 console.log(data);
                 if(_goingNext) {
                     _goingNext = false;
-                    wsNext.style.display = "none";
+                    ICONS.update("sentnext", false);
                 }
                 if(data.done) {
                     done = true;
@@ -243,6 +273,7 @@
                     if(audio) {
                         audio.pause();
                         audio = null;
+                        ICONS.update("muted", false);
                     }
                     const current = data.current;
                     descElem.innerText = current.description;
@@ -267,7 +298,7 @@
             }
 
             function onWsClose(e) {
-                wsWarning.style.display = null;
+                ICONS.update("wsClosed", true);
             }
 
             _goingNext = false;
@@ -279,18 +310,31 @@
                 started = true;
                 if(_goingNext === false) {
                     _goingNext = true;
-                    wsNext.style.display = "";
+                    ICONS.update("sentnext", true);
                     WSC.socket.send(JSON.stringify({"data": "next"}));
                 }
             }
 
             function handleNext(ev) {
-                if(ev.target.id === "editBtn") return;
+                console.log(ev.target);
+                if(ev.target.tagName === "INPUT") return;
                 moveNext();
             }
             function onKeyUp(ev) {
+                console.log(ev);
                 if(ev.code === "Space") {
                     moveNext();
+                    ev.preventDefault();
+                } else if(ev.code === "Enter") {
+                    if(audio) {
+                        if(audio.muted) {
+                            moveNext();
+                        } else {
+                            audio.muted = true;
+                            ICONS.update("muted", true);
+                        }
+                    }
+                    ev.preventDefault();
                 }
             }
             function init() {
