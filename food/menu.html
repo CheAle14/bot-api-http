@@ -134,12 +134,13 @@
                 if(!EDITING) return;
                 if(!event.shiftKey) return;
                 var thing = getTd(event.target);
-                fetch(`/api/food/menu/item?day=${thing.getAttribute("data-date")}&group=${thing.getAttribute("data-group")}&id=${event.currentTarget.id}`, {
+                var curTarget = event.currentTarget;
+                fetch(`/api/food/menu/item?day=${thing.getAttribute("data-date")}&group=${thing.getAttribute("data-group")}&id=${curTarget.id}`, {
                     method: "DELETE"
                 })
                 .then(function(resp) {
                     if(resp.ok) {
-                        event.currentTarget.parentElement.removeChild(event.currentTarget);
+                        curTarget.parentElement.removeChild(curTarget);
                     } else {
                         alert("Failed!");
                     }
