@@ -102,7 +102,7 @@
                             }
                             var t = "";
                             if(item.manu) {
-                                t + `(${item.manu}) `;
+                                t = `(${item.manu}) `;
                             }
                             div.innerText = t + `${item.name} expires ${formatDate(date)}`;
                             div.setAttribute("draggable", "true");
