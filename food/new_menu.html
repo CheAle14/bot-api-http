@@ -56,17 +56,28 @@
             function getProductInfo(id) {
                 id = id.replace(" ", "");
                 var data = PRODUCT_CACHE[id];
+                if(data === null) {
+                    return createHoverDeleteText(`~${id}~`)
+                }
                 if(data) {
                     return createHoverDeleteText(data.name);
                 } else {
                     fetch(`/api/food/product?query=${id}`).then(function(resp) {
                         if(resp.ok) {
                             resp.json().then(function (arr) {
-                                PRODUCT_CACHE[id] = arr[0];
+                                var prod = arr[0];
+                                if(prod === undefined) {
+                                    PRODUCT_CACHE[id] = null;
+                                } else {
+                                    PRODUCT_CACHE[id] = arr[0];
+                                }
                                 refreshHtml();
                             })
+                        } else {
+                            PRODUCT_CACHE[id] = null;
                         }
                     }).catch(function(err) {
+                        PRODUCT_CACHE[id] = null;
                         console.error(id, err);
                     })
                     return createHoverDeleteText(id);
@@ -91,11 +102,13 @@
                     this._group = grp;
                     this.type = "";
                     this.value = null;
+                    this.uses = 1;
                 }
 
                 load(data) {
                     this.type = data.type;
                     this.value = data.value;
+                    this.uses = data.uses;
                 }
 
 
@@ -135,7 +148,7 @@
                                     refreshHtml();
                                 }
                                 t.push(span);
-                                t.push(" and ");
+                                t.push(" or ");
                             }
 
                             div.appendChild(createManySpans(...t));
@@ -152,6 +165,16 @@
                         }
                         div.appendChild(addI);
                     } 
+
+                    var countInput = document.createElement("input");
+                    countInput.type = "number";
+                    countInput.placeholder = "Uses";
+                    countInput.value = this.uses;
+                    countInput.onchange = function(event) {
+                        _this.uses = event.target.value;
+                        refreshHtml();
+                    }
+                    div.appendChild(countInput);
 
                     var remI = document.createElement("input");
                     remI.type = "button";

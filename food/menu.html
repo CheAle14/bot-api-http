@@ -74,6 +74,14 @@
                 var options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
                 return date.toLocaleDateString("en-US", options);
             }
+            function getExistingItems() {
+                var items = document.getElementsByClassName("item");
+                var ls = {};
+                for(var item of items) {
+                    ls[item.getAttribute("data-id")] = item;
+                }
+                return ls;
+            }
             function searchItems(event) {
                 if(!EDITING) return;
                 fetch(`/api/food/query`, {
@@ -86,16 +94,20 @@
                 .then(function(resp) {
                     resp.json().then(function(value) {
                         console.log(value);
+
+                        var existingItems = getExistingItems();
+                        console.log(existingItems);
+
                         searchResults.innerHTML = "";
                         var now = new Date();
                         for(let item of value) {
-                            var existing = document.getElementById(item.id);
+                            var existing = existingItems[item.id];
 
                             var div = document.createElement("li");
                             if(existing) {
                                 div.classList.add("already-exists");
                             }
-                            div.id = item.id;
+                            div.id = item.id + "-n";
                             var date = new Date(item.expires);
                             if(date < now) {
                                 div.classList.add("expired");
@@ -106,6 +118,7 @@
                             }
                             div.innerText = t + `${item.name} expires ${formatDate(date)}`;
                             div.setAttribute("draggable", "true");
+                            div.setAttribute("data-id", item.id);
                             div.ondragstart = onDragStart;
                             searchResults.appendChild(div);
                         }
@@ -150,23 +163,40 @@
                 if(elem.tagName === "TD") return elem;
                 return getTd(elem.parentElement);
             }
+
             function onItemClick(event)  {
                 if(!EDITING) return;
-                if(!event.shiftKey) return;
+                console.log(event);
                 var thing = getTd(event.target);
                 var curTarget = event.currentTarget;
-                fetch(`/api/food/menu/item?day=${thing.getAttribute("data-date")}&group=${thing.getAttribute("data-group")}&id=${curTarget.id}`, {
-                    method: "DELETE"
-                })
-                .then(function(resp) {
-                    if(resp.ok) {
-                        curTarget.parentElement.removeChild(curTarget);
-                    } else {
-                        alert("Failed!");
-                    }
-                }).catch(function(err) {
-                    console.error(err);
-                })
+                if(event.ctrlKey) {
+
+                    var uses = parseInt(prompt("How many uses?", curTarget.getAttribute("data-uses")));
+                    fetch(`/api/food/menu/item?day=${thing.getAttribute("data-date")}&group=${thing.getAttribute("data-group")}&id=${curTarget.getAttribute("data-id")}&uses=${uses}`, {
+                        method: "PATCH"
+                    })
+                    .then(function(resp) {
+                        if(resp.ok) {
+                            window.location.reload();
+                        }
+                    }).catch(function(err) {
+                        console.error(err);
+                    })
+
+                } else if(event.shiftKey) {
+                    fetch(`/api/food/menu/item?day=${thing.getAttribute("data-date")}&group=${thing.getAttribute("data-group")}&id=${curTarget.getAttribute("data-id")}`, {
+                        method: "DELETE"
+                    })
+                    .then(function(resp) {
+                        if(resp.ok) {
+                            curTarget.parentElement.removeChild(curTarget);
+                        } else {
+                            alert("Failed!");
+                        }
+                    }).catch(function(err) {
+                        console.error(err);
+                    })
+                }
             }
 
             function onDrop(event) {
@@ -183,12 +213,17 @@
                 const evData = {
                     "toDay": toDay,
                     "toGroup": toGroup,
-                    "id": data
+                    "id": fromElem.getAttribute("data-id"),
+                    "uses": 1
                 };
-                if(fromGroup)
+                if(fromGroup) {
                     evData.fromGroup = fromGroup;
+                } else {
+                    evData.uses = parseInt(prompt("How many uses will this use?", "1"));
+                }
                 if(fromDay)
                     evData.fromDay = fromDay;
+
                 console.log(evData);
                 
                 fetch(`/api/food/menu/move`, {
