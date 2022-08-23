@@ -91,6 +91,179 @@
             ICONS.add(document.getElementById("muted"));
 
 
+            const STATES = {
+                NOT_STARTED: "Not Started",
+                PREPPING: "Prepping",
+                STARTED: "Started",
+                FINISHING: "Finishing",
+                FINISHED: "Finished"
+            }
+            class Step {
+                constructor(parent, rem, delay) {
+                    this._parent = parent;
+                    this._remaining = rem;
+                    this._duration = rem;
+                    this._delay = delay;
+                    this._state = STATES.NOT_STARTED;
+                }
+                tick(delta) {
+                    if(this._state !== STATES.STARTED) return;
+                    this._remaining -= delta;
+                    if(this._remaining <= 0) {
+                        this._state = STATES.FINISHING;
+                        this._remaining = 0;
+                    }
+                }
+
+                get state() {
+                    return this._state;
+                }
+
+                set state(value) {
+                    this._state = value;
+                    if(this._parent) {
+                        this._parent.check_state();
+                    }
+                }
+            }
+            class SimpleStep extends Step {
+                constructor(parent, text, duration, delay) {
+                    super(parent, duration, delay);
+                    this._text = text;
+                }
+            }
+            class MultiStep extends Step {
+                constructor(parent, text, order) {
+                    super(parent, 0, 0);
+                    this._text = text;
+                    this._children = [];
+                    this._inorder = order;
+                }
+                push(child) {
+                    this._children.push(child);
+                    if(this._inorder) {
+                        this._duration += child._duration;
+                        this._delay += child._delay;
+                    } else {
+                        if(child._duration > this._duration) {
+                            this._duration = child._duration;
+                            this._delay = child._delay;
+                        }
+                    }
+                    this._remaining = this._duration + this._delay;
+                }
+                set_remain() {
+                    let v = 0;
+                    for(let child of this._children) {
+                        if(child._remaining > v) {
+                            v = child._remaining;
+                        }
+                    }
+                    this._remaining = v;
+                }
+                tick(delta) {
+                    for(let child of this._children) {
+                        if(child._state !== STATES.STARTED) continue;
+                        child.tick(delta);
+                        if(this._inorder) {
+                            this._remaining -= delta;
+                            break;
+                        } else {
+                            this.set_remain();
+                        }
+                    }
+                }
+                current_inorder() {
+                    for(let child of this._children) {
+                        if(child._state === STATES.FINISHED) continue;
+                        return child;
+                    }
+                }
+                current_outorder() {
+                    const largestRem = {
+                        step: null,
+                        value: null
+                    };
+                    for(let child of this._children) {
+                        if(child._children) {
+                            child = child.current();
+                        }
+                        if(child._state === STATES.FINISHED) continue;
+                        if(largestRem.value === null ||  child._remaining > largestRem.value) {
+                            largestRem.value = child._remaining;
+                            largestRem.step = child;
+                            if(this._inorder) break;
+                        }
+                    }
+                    return largestRem.step;
+                }
+                current() {
+                    if(this._inorder) return this.current_inorder();
+                    return this.current_outorder();
+                }
+
+                check_state() {
+                    var newState = null;
+                    for(let child of this._children) {
+                        if(child.state === STATES.FINISHED) continue;
+                        if(this._inorder) {
+                            newState = child.state;
+                            break;
+                        } else {
+                            if(child.state === STATES.STARTED) {
+                                newState = child.state;
+                            } else if (child.state === STATES.NOT_STARTED && !newState) {
+                                newState = STATES.NOT_STARTED;
+                            }
+                        }
+                    }
+                    var x = newState || STATES.FINISHED;
+                    if(x !== this.state) {
+                        this.state = x;
+                    }
+                }
+            }
+
+            function loadStep(obj, parent) {
+                if(obj.children) {
+                    var multi = new MultiStep(parent, obj.text, obj.order);
+                    for(let o of obj.children) {
+                        multi.push(loadStep(o, multi));
+                    }
+                    return multi;
+                } else {
+                    return new SimpleStep(parent, obj.text, obj.duration || 0, obj.delay || 0);
+                }
+            }
+
+            const TEMP = {
+                text: "Some recipe",
+                order: false,
+                children: [
+                    {text: "Cook chips", order: true, children: [
+                        {text: "Put chips in", duration: 480, delay: 0},
+                        {text: "Shake chips", duration: 0, delay: 0},
+                        {text: "Put chips back in", duration: 480, delay: 0},
+                        {text: "Dish chips", duration: 0, delay: 0}
+                    ]},
+                    {text: "Cook hunters chicken", order: true, children: [
+                        {text: "Put chicken in", duration: 600, delay: 0},
+                        {text: "Apply sauce", duration: 0, delay: 0},
+                        {text: "Put chicken back in", duration: 600, delay: 0},
+                        {text: "Dish chicken"}
+                    ]}
+                ]
+            }
+            const STEP = loadStep(TEMP);
+            console.log(STEP);
+            console.log(STEP.current());
+
+            function stepc(delta) {
+                STEP.tick(delta || 60);
+                console.log(STEP, STEP.current());
+            }
+
+            /*
             var fullEndsAt = 0;
             var countTo = 0;
             var timerInterval = null;
@@ -355,7 +528,7 @@
                     editRemember.style.display = "none";
                 }
             }
-            init();
+            init();*/
         </script>
     </body>
 </html>
