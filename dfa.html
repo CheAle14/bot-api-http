@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>DFA</title>
+        <style>
+            div {
+                width: 100%;
+            }
+            #tabselect {
+                height: 30px;
+                border-bottom: 1px solid black;
+                padding: 0;
+            }
+            #edit_tab {
+                width: 5%;
+                border: 1px solid  black;
+                margin-bottom: 0;
+                height: 100%;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="tabselect">
+            <div id="edit_tab">
+                Editor
+            </div>
+        </div>
+        <canvas id="canvas" width="500" height="500" style="border: 1px solid black" onclick="onClick(event)">
+            Canvas is not supported on this browser or JS is disabled. Please rectify these errors of yours.
+        </canvas>
+
+
+        <script>
+            var canvas = document.getElementById("canvas");
+            var context = canvas.getContext("2d");
+
+
+            class Drawable {
+                constructor(x, y, width, height) {
+                    this.x = x;
+                    this.y = y;
+                    this.width = width;
+                    this.height = height;
+                    this.isHovered = false;
+                }
+                onClick(mouseX, mouseY, event) {
+                }
+                endClick() {}
+                onHoverEnter() {
+                    this.isHovered = true;
+                }
+                onHoverExit() {
+                    this.isHovered = false;
+                }
+                isBounded(x, y) {
+                    var right = this.x + this.width;
+                    var bottom = this.y + this.height;
+                    return x >= this.x && x < right && y >= this.y && y < bottom;
+                }
+
+                draw(ctx) {
+                }
+            }
+
+            class State extends Drawable {
+                constructor(x, y, text) {
+                    super(x, y, 25, 25);
+                    this.text = text;
+                    this.fg = "black";
+                    this.bg = null;
+                }
+
+                onClick(mouseX, mouseY, event) {
+                    this.bg = "red";
+                    return true;
+                }
+                endClick() {
+                    this.bg = null;
+                }
+
+                draw(ctx) {
+                    if(this.bg) {
+                        ctx.fillStyle = this.bg;
+                        ctx.fillRect(this.x, this.y, 
+                            this.width, this.height);
+                    }
+                    if(this.fg) {
+                        ctx.strokeStyle = this.fg;
+                        ctx.strokeRect(this.x, this.y, this.width, this.height);
+                    }
+
+                    ctx.font = '16px serif';
+                    ctx.fillStyle = "black";
+                    ctx.textAlign = "center";
+                    ctx.fillText(this.text, this.x + (this.width / 2), this.y + (this.height / 2), this.width - 2);
+                }
+            }
+
+            class Automaton {
+                constructor() {
+                    this.states = []
+                    this.priorClick = null;
+                }
+
+                createState(x, y) {
+                    var state = new State(x, y, "q" + this.states.length);
+                    this.states.push(state);
+                }
+
+                onClick(x, y, event) {
+                    // Clear previous click.
+                    if(this.priorClick) {
+                        this.priorClick.endClick();
+                        this.priorClick = null;
+                    }
+
+                    // Have we just clicked on a state?
+                    var hasClicked = false;
+                    for(let state of this.states) {
+                        if(state.isBounded(x, y)) {
+                            if(!!state.onClick(x, y, event)) {
+                                hasClicked = true;
+                                this.priorClick = state;
+                                break;
+                            }
+                        }
+                    }
+
+                    if(!hasClicked) {
+                        this.createState(x, y);
+                    }
+                }
+
+                draw(ctx) {
+                    for(let state of this.states) {
+                        state.draw(ctx);
+                    }
+                }
+            }
+
+            const MACHINE = new Automaton();
+
+            function redraw() {
+                context.clearRect(0, 0, canvas.width, canvas.height);
+                MACHINE.draw(context);
+            }
+
+            function onClick(event) {
+                console.log(event);
+                MACHINE.onClick(event.offsetX, event.offsetY, event);
+                redraw();
+            }
+
+        </script>
+    </body>
+</html>
