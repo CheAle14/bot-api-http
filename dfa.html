@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>
+            DFA
+        </title>
+    </head>
+    <body>
+        <canvas width="400" height="400" id="canvas" style="border: 1px solid black"></canvas>
+
+        <script>
+            const canvas = document.getElementById("canvas");
+
+            class Drawable {
+                constructor(x, y, width, height) {
+                    this.x = x;
+                    this.y = y;
+                    this.w = width;
+                    this.h = height;
+                }
+
+                /**
+                 * Draws this item to the canvas.
+                 * 
+                 * @param {CanvasRenderingContext2D} ctx  The canvas context
+                */
+                draw(ctx) {
+                }
+            }
+
+            class State extends Drawable {
+                constructor(x, y, text) {
+                    super(x, y, 2, 25);
+                    this.text = text;
+                }
+
+                /**
+                 * Draws this item to the canvas.
+                 * 
+                 * @param {CanvasRenderingContext2D} ctx  The canvas context
+                */
+                draw(ctx) {
+                    ctx.font = "16px Arial";
+                    var measure = ctx.measureText(this.text);
+                    var textWidth = measure.width;
+                    var textHeight = (measure.actualBoundingBoxAscent ?? 10) + (measure.actualBoundingBoxDescent ?? 10);
+                    this.w = textWidth + 10;
+                    this.h = textHeight + 10;
+
+                    var p0 = [this.x + (this.w / 2), this.y];
+                    var cp1 = [this.x + this.w, this.y];
+                    var p1 = [this.x + this.w, this.y + (this.h / 2)];
+                    var cp2 = [this.x + this.w, this.y + this.h];
+                    var p2 = [this.x + (this.w / 2), this.y + this.h];
+                    var cp3 = [this.x, this.y + this.h];
+                    var p3 = [this.x, this.y + (this.h / 2)];
+                    var cp4 = [this.x, this.y];
+                    ctx.lineWidth = 2.0;                        // set the line width for the stroke() call below
+                    ctx.strokeStyle = 'red';                    // set the color to 'red' for the stroke() call below
+                    ctx.beginPath();                            // start the new path
+                    ctx.moveTo (p0[0], p0[1]);                         // move to the top midpoint
+                    ctx.quadraticCurveTo (cp1[0], cp1[1], p1[0], p1[1]);       // curve from point 0 to point 1 at (275,75)
+                    ctx.quadraticCurveTo (cp2[0], cp2[1], p2[0], p2[1]);     // curve from point 1 to point 2 at (150,125)
+                    ctx.quadraticCurveTo (cp3[0], cp3[1], p3[0], p3[1]);        // curve from point 2 to point 3 at (25,75)
+                    ctx.quadraticCurveTo (cp4[0], cp4[1], p0[0], p0[1]);        // curve from point 3 back to point 0
+                    ctx.closePath();
+                    ctx.stroke();                               // draw the shape defined by the current path
+
+                    ctx.textAlign = "center";
+                    ctx.fillText(this.text, this.x + (this.w / 2), this.y + (this.h / 2) + 3, this.w - 4);
+                }
+            }
+
+            class StateTransit extends Drawable {
+                constructor(firstState, secondState, symbol) {
+                    
+                    this.p0 = firstState;
+                    this.p1 = secondState;
+                    this.symbol = symbol;
+                }
+            }
+
+            class Automaton {
+                constructor() {
+                    this.states = [];
+                    this.transitions = [];
+                }
+
+            }
+
+            var test = new State(25, 25, "p10000");
+            test.draw(canvas.getContext("2d"));
+        </script>
+    </body>
+</html>
