@@ -73,7 +73,7 @@
 
             class StateTransit extends Drawable {
                 constructor(firstState, secondState, symbol) {
-                    
+                    super(firstState.x, firstState.y, firstState)
                     this.p0 = firstState;
                     this.p1 = secondState;
                     this.symbol = symbol;
