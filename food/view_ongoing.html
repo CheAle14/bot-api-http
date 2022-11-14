@@ -362,6 +362,7 @@
                 volume = parseInt(this.value) / 100;
                 volumeLbl.innerText = "Volume: " + volume;
                 playAudio();
+                audio.volume = volume;
                 setTimeout(function() {
                     stopAudio();
                 }, 3000);
