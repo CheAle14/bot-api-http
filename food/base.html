@@ -25,9 +25,17 @@
         <REPLACE id='table'/>
 
         <script>
-            function removeInvItem(invId) {
-                console.log(invId);
-                fetch(`/api/food/inventory?invId=${invId}`, {
+            function removeInvItem(invId, shouldUse) {
+                var uses = 99;
+                if(shouldUse) {
+                    var test = parseInt(prompt(`Please enter uses for this item`, 1), 10);
+                    if(isNaN(test)) {
+                        alert("Number was not an integer. you fail");
+                        return;
+                    }
+                    uses = test;
+                }
+                fetch(`/api/food/inventory?invId=${invId}&uses=${uses}`, {
                     method: "DELETE"
                 }).then(function(r) {
                     if(r.ok) {

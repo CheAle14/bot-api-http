@@ -26,6 +26,44 @@
                 top: 0;
                 position: fixed;
             }
+            .slidecontainer {
+                width: 100%; /* Width of the outside container */
+            }
+
+            /* The slider itself */
+            .slider {
+                -webkit-appearance: none;  /* Override default CSS styles */
+                appearance: none;
+                width: 100%; /* Full-width */
+                height: 25px; /* Specified height */
+                background: #d3d3d3; /* Grey background */
+                outline: none; /* Remove outline */
+                opacity: 0.7; /* Set transparency (for mouse-over effects on hover) */
+                -webkit-transition: .2s; /* 0.2 seconds transition on hover */
+                transition: opacity .2s;
+            }
+
+            /* Mouse-over effects */
+            .slider:hover {
+                opacity: 1; /* Fully shown on mouse-over */
+            }
+
+            /* The slider handle (use -webkit- (Chrome, Opera, Safari, Edge) and -moz- (Firefox) to override default look) */
+            .slider::-webkit-slider-thumb {
+                -webkit-appearance: none; /* Override default look */
+                appearance: none;
+                width: 25px; /* Set a specific slider handle width */
+                height: 25px; /* Slider handle height */
+                background: #04AA6D; /* Green background */
+                cursor: pointer; /* Cursor on hover */
+            }
+
+            .slider::-moz-range-thumb {
+                width: 25px; /* Set a specific slider handle width */
+                height: 25px; /* Slider handle height */
+                background: #04AA6D; /* Green background */
+                cursor: pointer; /* Cursor on hover */
+            }
         </style>
         <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js"></script>
     </head>
@@ -44,6 +82,11 @@
             </table>
             <input type="button" id="editBtn" value="Enable Editing" onclick="enableEdit(this);">
             <input type="checkbox" id="editRemember" onclick="rememberEdit(this)">
+            <br/>
+            <label id="volumeLbl">Volume:</label>
+            <div class="sliderContainer">
+                <input type="range" min="0" max="100" value="100" class="slider" id="volumeSlider">
+            </div>
         </div>
         <script src="../_/js/bot-ws.js"></script>
         <script>
@@ -56,6 +99,8 @@
             const editRemember = document.getElementById("editRemember");
             const editBtn = document.getElementById("editBtn");
             const wsNext = document.getElementById("sentnext");
+            const volumeLbl = document.getElementById("volumeLbl");
+            const volumeSlider = document.getElementById("volumeSlider");
 
 
             class NotifyIcons {
@@ -97,6 +142,7 @@
             var started = false;
             var done = false;
             var audio = null;
+            var volume = 1.0;
 
             var interactable = false;
             function enableEdit(btn) {
@@ -131,8 +177,7 @@
                 timeElem.innerText = "Complete!";
                 document.body.style.backgroundColor = "green";
                 if(audio != null) {
-                    audio.pause();
-                    audio = null;
+                    stopAudio();
                     ICONS.update("muted", false);
                 }
             }
@@ -209,6 +254,22 @@
                 }
             }
 
+            function playAudio() {
+                if(audio === null) {
+                    audio = new Audio("/_/assets/alarm.mp3");
+                    audio.volume = volume;
+                    audio.loop = false;
+                    audio.muted = false;
+                }
+                audio.play();
+            }
+            function stopAudio() {
+                if(audio) {
+                    audio.pause();
+                    audio = null;
+                }
+            }
+
             function updateTimer() {
                 if(done) {
                     setDone();
@@ -239,14 +300,11 @@
                 if(msDiff < 3000) {
                     document.body.style.backgroundColor = "red";
                     if(audio === null && started) {
-                        audio = new Audio("/_/assets/alarm.mp3");
-                        audio.loop = false;
-                        audio.muted = false;
-                        audio.play();
+                        playAudio();
                     }
                     if(audio !== null) {
                         audio.loop = msDiff < -30000;
-                        audio.play();
+                        playAudio();
                     }
                 } else if(msDiff < 25000) {
                     document.body.style.backgroundColor = "orange";
@@ -271,8 +329,7 @@
                     setDone();
                 } else {
                     if(audio) {
-                        audio.pause();
-                        audio = null;
+                        stopAudio();
                         ICONS.update("muted", false);
                     }
                     const current = data.current;
@@ -299,6 +356,16 @@
 
             function onWsClose(e) {
                 ICONS.update("wsClosed", true);
+            }
+
+            volumeSlider.oninput = function() {
+                volume = parseInt(this.value) / 100;
+                volumeLbl.innerText = "Volume: " + volume;
+                playAudio();
+                audio.volume = volume;
+                setTimeout(function() {
+                    stopAudio();
+                }, 3000);
             }
 
             _goingNext = false;
