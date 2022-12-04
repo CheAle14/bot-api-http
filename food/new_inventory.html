@@ -29,8 +29,9 @@
         </form>
         <REPLACE id="existing"/>
         <script>
+            const red = "<REPLACE id='redirect'/>";
             function removeInvItem(invId) {
-                fetch(`/api/food/inventory?invId=${invId}`, {
+                fetch(`/api/food/inventory?redirect=${red}&invId=${invId}`, {
                     method: "DELETE"
                 }).then(function(r) {
                     if(r.ok) {
@@ -45,7 +46,7 @@
                 })
             }
             function markFrozen(invId) {
-                fetch(`/api/food/inventory?invId=${invId}`, {
+                fetch(`/api/food/inventory?redirect=${red}&invId=${invId}`, {
                     method: "PATCH",
                     body: "frozen=True"
                 }).then(function(r) {
