@@ -10,6 +10,9 @@
                 border: 1px solid black;
                 padding-left: 5px;
             }
+            .complete {
+                background-color: greenyellow;
+            }
             .alarm {
                 background-color: red;
             }
@@ -64,6 +67,9 @@
                 }
             }
             function formatTimer(seconds) {
+                if(seconds < 0) {
+                    return "-" + formatTimer(seconds * -1);
+                }
                 var hours = Math.floor(seconds / 3600);
                 if(hours > 0) {
                     seconds -= (hours * 3600);
@@ -72,6 +78,7 @@
                 if(minutes > 0) {
                     seconds -= (minutes * 60);
                 }
+                seconds = Math.round(seconds);
                 return pad(hours, 2) + ":" + pad(minutes, 2) + ":" + pad(seconds, 2);
             }
             const STATE = {
@@ -88,6 +95,10 @@
 
                     this.startedAt = null;
                     this.tentativeStartTime = null;
+                }
+
+                tick(elapsed) {
+                    this.remaining -= elapsed;
                 }
             }
             class Recipe {
@@ -132,12 +143,31 @@
                 }
             }
 
+            function getOrCreate(id, tag, parent) {
+                var d = document.getElementById(id);
+                if(d) return d;
+                d = document.createElement(tag);
+                d.id = id;
+                parent.appendChild(d);
+                return d;
+            }
+
             class RecipeGroup {
                 constructor(initRecipe) {
                     this.catalyst = initRecipe.catalyst;
                     this.recipes = [initRecipe];
                     this.simpleSteps = [];
                     this.delayTime = null;
+                    
+                    this.muted = null;
+                    this.alarm = false;
+                }
+
+                tick(elapsed) {
+                    for(let step of this.simpleSteps) {
+                        if(step.state === STATE.ONGOING)
+                            step.tick(elapsed);
+                    }
                 }
 
                 _sumLength(original) {
@@ -165,6 +195,7 @@
                     // e.g. target end is 200 seconds.
                     // recipe 
                     var simpleSteps = [];
+                    var lastTime = null;
                     for(let recipe of this.recipes) {
                         var recipeDelay = targetEnd - recipe.sumRemainLength();
                         for(let step of recipe.steps) {
@@ -173,17 +204,35 @@
                             if(step.state != STATE.COMPLETE) {
                                 recipeDelay += step.remaining;
                             }
+                            lastTime = step.tentativeStartTime + step.remaining;
                         }
                     }
+
                     this.simpleSteps = simpleSteps;
-                    this.delayTime = simpleSteps[0].tentativeStartTime;
-                    simpleSteps[0].remaining += this.delayTime;
+                    const end = this.simpleSteps.length - 1;
+                    if(this.simpleSteps[end].duration > 0) {
+                        var dishStep = new Step("Dish up", 0);
+                        dishStep.tentativeStartTime = lastTime || 0;
+                        this.simpleSteps.splice(end + 1, 0, dishStep);
+                    }
+                    this.delayTime = this.simpleSteps[0].tentativeStartTime;
+
+                    // go through and correct durations
+                    var nextStart  = null;
+                    for(let index = this.simpleSteps.length - 1; index >= 0; index--) {
+                        const step = this.simpleSteps[index];
+                        if(nextStart) {
+                            step.duration = nextStart - step.tentativeStartTime;
+                            step.remaining = step.duration;
+                        }
+                        nextStart = step.tentativeStartTime;
+                    }
                 }
                 withRecipe(recipe) {
                     this.recipes.push(recipe);
                 }
 
-                toHTML(isSelected) {
+                getDisplayText() {
                     var shownText = null;
                     var shownTime = null;
                     for(let index = 0; index < this.simpleSteps.length; index++) {
@@ -192,7 +241,7 @@
                             continue;
                         }
                         else if(step.state === STATE.ONGOING) {
-                            var next = simpleSteps[index + 1];
+                            var next = this.simpleSteps[index + 1];
                             if(next)
                                 shownText = next.text;
                             else 
@@ -203,7 +252,7 @@
                         else if(step.state === STATE.PENDING) {
                             shownText = step.text;
                             if(startedAt) {
-                                var diff = Date.now() - startedAt;
+                                var diff = (Date.now() - startedAt) / 1000;
                                 shownTime = step.tentativeStartTime - diff;
                             } else {
                                 shownTime = step.tentativeStartTime;
@@ -211,55 +260,129 @@
                             break;
                         }
                     }
+                    if(shownText === null) {
+                        // all complete
+                        shownText = "Complete";
+                        shownTime = 0;
+                    }
+                    if(this.muted) {
+                        shownText = "(M) " + shownText;
+                    }
+                    return {
+                        text: shownText,
+                        time: shownTime
+                    };
+                }
 
-                    var mainDiv = document.createElement("div");
+                toHTML(isSelected, parent) {
+                    const CAT = this.catalyst.replace(' ', '-');
+                    const ID = `timer-${CAT}`;                    
+                    const DATA = this.getDisplayText();
+                    const shownText = DATA.text;
+                    const shownTime = DATA.time;
+                    var mainDiv = getOrCreate(ID, "div", parent);
                     mainDiv.classList.add("group");
-                    mainDiv.classList.add(this.catalyst.replace(' ', '-'));
+                    mainDiv.classList.add(CAT);
+                    const _this = this;
+
+                    mainDiv.onclick = function() {
+                        _this.onAdvance();
+                    };
                     if(isSelected) {
                         mainDiv.classList.add("selected");
+                    } else {
+                        mainDiv.classList.remove("selected");
                     }
-                    if(shownTime < 3) {
-                        mainDiv.classList.add("alarm");
-                    } else if (shownTime < 30) {
-                        mainDiv.classList.add("notice");
+                    if(shownText === "Complete") {
+                        mainDiv.classList.add("complete");
+                        mainDiv.classList.remove("alarm", "notice");
+                    } else {
+                        mainDiv.classList.remove("complete");
+                        if(shownTime < 3) {
+                            mainDiv.classList.add("alarm");
+                            mainDiv.classList.remove("notice");
+                            this.alarm = true;
+                            if(this.muted === null) {
+                                this.muted = false;
+                            }
+                        } else if (shownTime < 30) {
+                            mainDiv.classList.remove("alarm");
+                            mainDiv.classList.add("notice");
+                        } else {
+                            mainDiv.classList.remove("alarm", "notice");
+                        }
                     }
-                    var text = document.createElement("h2");
+                    var text = getOrCreate(ID + "-text", "h2", mainDiv);
                     text.innerText = shownText;
-                    mainDiv.appendChild(text);
-                    var timer = document.createElement("h1");
+                    var timer = getOrCreate(ID + "-time", "h1", mainDiv);
                     timer.innerText = formatTimer(shownTime);
-                    mainDiv.appendChild(timer);
                     return mainDiv;
+                }
+
+                onMute() {
+                    console.log("Mute", this.catalyst);
+                    this.muted = true;
+                }
+                onAdvance() {
+                    console.log("Advance", this.catalyst);
+                    this.muted = null;
+                    this.alarm = false;
+                    refreshTableNextTick = true;
+
+                    if(startedAt === null) {
+                        startedAt = Date.now();
+                    }
+
+                    for(let index = 0; index < this.simpleSteps.length; index++) {
+                        const step = this.simpleSteps[index];
+                        if(step.state === STATE.COMPLETE) continue;
+                        if(step.state === STATE.PENDING) {
+                            step.state = STATE.ONGOING;
+                            this.startedAt = startedAt;
+                            console.log("Started with", step.text, ", next up is", this.simpleSteps[index + 1]);
+                            break;
+                        }
+                        if(step.state === STATE.ONGOING) {
+                            step.state = STATE.COMPLETE;
+                            var next = this.simpleSteps[index + 1];
+                            if(next) {
+                                next.state = STATE.ONGOING;
+                                console.log("Moving to", next.text, "in", step.duration);
+
+                                if(next.duration > 0) {
+                                    break;
+                                }
+                            } else {
+                                console.log("Finished group with final", step.text);
+                            }
+                        }
+                    }
                 }
             }
 
             var beans = new Recipe("microwave")
-            .withStep("Put baked beans in", 150)
-            .withStep("Put baked beans in again", 150)
-            .withStep("Put baked beans in third", 150)
-            .withStep("Dish baked beans");
+            .withStep("Put baked beans in", 15)
+            .withStep("Put baked beans in again", 15)
+            .withStep("Put baked beans in third", 15);
 
             var soup = new Recipe("microwave")
-            .withStep("Put soup in", 75)
-            .withStep("Stir soup", 125);
+            .withStep("Put soup in", 7.5)
+            .withStep("Stir soup", 12.5);
 
             var sausages = new Recipe("oven")
-            .withStep("Put sausages in", 10 * 60)
-            .withStep("Flip sausages", 10 * 60)
-            .withStep("Dish sausages");
+            .withStep("Put sausages in", 10 * 6)
+            .withStep("Flip sausages", 10 * 6);
 
             var chips = new Recipe("air fryer")
-            .withStep("Put chips in", 8 * 60)
-            .withStep("Shake chips and put back on", 8 * 60)
-            .withStep("Dish chips");
+            .withStep("Put chips in", 8 * 6)
+            .withStep("Shake chips and put back on", 8 * 6);
 
             var burgers = new Recipe("grill")
-            .withStep("Put burgers in", 4 * 60)
-            .withStep("Flip burgers first", 4 * 60)
-            .withStep("Flip burgers second", 4 * 60)
-            .withStep("Flip burgers third", 4 * 60)
-            .withStep("Flip burgers fourth, apply cheese", 4 * 60)
-            .withStep("Dish burgers")
+            .withStep("Put burgers in", 4 * 6)
+            .withStep("Flip burgers first", 4 * 6)
+            .withStep("Flip burgers second", 4 * 6)
+            .withStep("Flip burgers third", 4 * 6)
+            .withStep("Flip burgers fourth, apply cheese", 4 * 6);
 
             var recipes = [beans, soup, sausages, chips, burgers];
 
@@ -280,6 +403,8 @@
             var recipeGroups = groupRecipes(recipes);
             var catalystOrder = [];
             var selected = null;
+            var lastTick = null;
+            var refreshTableNextTick = false;
 
             function init(recipeGroups) {
                 var longest = 0;
@@ -298,7 +423,10 @@
                         selected = catalyst;
                     }
                 }
-                refreshHtml();
+                refreshHtml(true);
+
+                lastTick = window.performance.now() / 1000;
+                setInterval(globalTick, 50);
             }
 
             class Row {
@@ -396,23 +524,66 @@
                 return table;
             }
 
-            function refreshHtml() {
+            function refreshHtml(updateTable) {
                 var container = document.getElementById("container");
-                container.innerHTML = "";
                 var widthPerc = (1 / catalystOrder.length) * 100;
                 for(let catalyst of catalystOrder) {
                     const group = recipeGroups[catalyst];
-                    var div = group.toHTML(group.catalyst === selected);
+                    var div = group.toHTML(group.catalyst === selected, container);
                     div.style.flex = `${widthPerc}%`;
-                    container.appendChild(div);
                 }
-
+                if(!updateTable) return;
                 var table = document.getElementById("tableContainer");
                 table.innerHTML = "";
                 table.appendChild(generateTable());
             }
 
             init(recipeGroups);
+
+
+            function globalTick() {
+                var nextTick = window.performance.now() / 1000;
+                var tickDelta = nextTick - lastTick;
+                lastTick = nextTick;
+
+                for(let catalyst of catalystOrder) {
+                    const group = recipeGroups[catalyst];
+                    group.tick(tickDelta);
+                }
+
+
+                refreshHtml(refreshTableNextTick);
+                refreshTableNextTick = false;
+            }
+
+            document.body.onkeyup = function(event) {
+                if(event.key === "Enter") {
+                    const group = recipeGroups[selected];
+                    if(group) {
+                        if(group.muted) {
+                            group.onAdvance();
+                        } else {
+                            group.onMute();
+                        }
+                    }
+                    event.preventDefault();
+                    return false;
+                } else if(event.key === "Tab" || event.key === "t" || event.key === "T") {
+                    var found = false;
+                    var curIndex = catalystOrder.indexOf(selected);
+                    if(curIndex === -1) curIndex = 0;
+                    if(event.shiftKey) {
+                        curIndex -= 1;
+                    } else {
+                        curIndex += 1;
+                    }
+                    if(curIndex >= catalystOrder.length)
+                        curIndex = 0;
+                    if(curIndex < 0)
+                        curIndex = catalystOrder.length - 1;
+                    selected = catalystOrder[curIndex];
+                }
+            }
         </script>
     </body>
 </html>
