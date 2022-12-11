@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Recipe</title>
+        <style>
+            #container {
+                display: flex;
+            }
+            .group {
+                border: 1px solid black;
+                padding-left: 5px;
+            }
+            .alarm {
+                background-color: red;
+            }
+            .notice {
+                background-color: orange;
+            }
+            .selected {
+                border: 5px solid blue;
+            }
+            table {
+                border-collapse: collapse;
+                width: 100%;
+                border: 1px solid #ddd;
+                font-size: 18px;
+            }
+
+            th, td {
+                text-align: left;
+                padding: 12px;
+            }
+
+            tr {
+                border-bottom: 1px solid #ddd;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="container">
+        </div>
+        <div id="tableContainer">
+        </div>
+
+        <script>
+            function orderedInsert(array, element, isBefore) {
+                var ind = 0;
+                for(let other of array) {
+                    if(isBefore(other, element) ) {
+                        ind += 1;
+                    } else {
+                        break;
+                    }
+                }
+                array.splice(ind, 0, element);
+                return array;
+            }
+            function pad(str, nfill, chr = '0') {
+                str = `${str}`;
+                if(str.length > nfill) {
+                    return str;
+                } else {
+                    return (chr.repeat(nfill - str.length)) + str;
+                }
+            }
+            function formatTimer(seconds) {
+                var hours = Math.floor(seconds / 3600);
+                if(hours > 0) {
+                    seconds -= (hours * 3600);
+                }
+                var minutes = Math.floor(seconds / 60);
+                if(minutes > 0) {
+                    seconds -= (minutes * 60);
+                }
+                return pad(hours, 2) + ":" + pad(minutes, 2) + ":" + pad(seconds, 2);
+            }
+            const STATE = {
+                PENDING: "pending",
+                ONGOING: "ongoing",
+                COMPLETE: "complete"
+            };
+            class Step {
+                constructor(text, originalDuration) {
+                    this.text = text;
+                    this.duration = originalDuration;
+                    this.remaining = originalDuration;
+                    this.state = STATE.PENDING;
+
+                    this.startedAt = null;
+                    this.tentativeStartTime = null;
+                }
+            }
+            class Recipe {
+                constructor(catalyst) {
+                    this.steps = [];
+                    this.current = 0;
+                    this.catalyst = catalyst;
+                }
+                get workingOn() {
+                    if(this.current >= this.steps.length) return null;
+                    return this.steps[this.current];
+                }
+                get nextUp() {
+                    var n = this.current + 1;
+                    if(n >= this.steps.length) return null;
+                    return this.steps[n];
+                }
+
+                withStep(text, duration) {
+                    var s = new Step(text, duration || 0);
+                    this.steps.push(s);
+                    return this;
+                }
+
+                _sumLength(original) {
+                    var sum = 0;
+                    for(let step of this.steps) {
+                        if(original) {
+                            sum += step.duration;
+                        } else {
+                            sum += step.remaining;
+                        }
+                    }
+                    return sum;
+                }
+
+                sumOriginalLength() {
+                    return this._sumLength(true);
+                }
+                sumRemainLength() {
+                    return this._sumLength(false);
+                }
+            }
+
+            class RecipeGroup {
+                constructor(initRecipe) {
+                    this.catalyst = initRecipe.catalyst;
+                    this.recipes = [initRecipe];
+                    this.simpleSteps = [];
+                    this.delayTime = null;
+                }
+
+                _sumLength(original) {
+                    var longest = 0;
+                    for(let recipe of this.recipes) {
+                        var length;
+                        if(original) {
+                            length = recipe.sumOriginalLength();
+                        } else {
+                            length = recipe.sumRemainLength();
+                        }
+                        if(length > longest) {
+                            longest = length;
+                        }
+                    }
+                    return longest;
+                }
+                sumOriginalLength() {
+                    return this._sumLength(true);
+                }
+                sumRemainLength() {
+                    return this._sumLength(false);
+                }
+                flattenForEnd(targetEnd) {
+                    // e.g. target end is 200 seconds.
+                    // recipe 
+                    var simpleSteps = [];
+                    for(let recipe of this.recipes) {
+                        var recipeDelay = targetEnd - recipe.sumRemainLength();
+                        for(let step of recipe.steps) {
+                            step.tentativeStartTime = recipeDelay;
+                            simpleSteps = orderedInsert(simpleSteps, step, (other, inserting) => other.tentativeStartTime < inserting.tentativeStartTime);
+                            if(step.state != STATE.COMPLETE) {
+                                recipeDelay += step.remaining;
+                            }
+                        }
+                    }
+                    this.simpleSteps = simpleSteps;
+                    this.delayTime = simpleSteps[0].tentativeStartTime;
+                    simpleSteps[0].remaining += this.delayTime;
+                }
+                withRecipe(recipe) {
+                    this.recipes.push(recipe);
+                }
+
+                toHTML(isSelected) {
+                    var shownText = null;
+                    var shownTime = null;
+                    for(let index = 0; index < this.simpleSteps.length; index++) {
+                        const step = this.simpleSteps[index];
+                        if(step.state === STATE.COMPLETE) {
+                            continue;
+                        }
+                        else if(step.state === STATE.ONGOING) {
+                            var next = simpleSteps[index + 1];
+                            if(next)
+                                shownText = next.text;
+                            else 
+                                shownText = "Dish up";
+                            shownTime = step.remaining;
+                            break;
+                        }
+                        else if(step.state === STATE.PENDING) {
+                            shownText = step.text;
+                            if(startedAt) {
+                                var diff = Date.now() - startedAt;
+                                shownTime = step.tentativeStartTime - diff;
+                            } else {
+                                shownTime = step.tentativeStartTime;
+                            }
+                            break;
+                        }
+                    }
+
+                    var mainDiv = document.createElement("div");
+                    mainDiv.classList.add("group");
+                    mainDiv.classList.add(this.catalyst.replace(' ', '-'));
+                    if(isSelected) {
+                        mainDiv.classList.add("selected");
+                    }
+                    if(shownTime < 3) {
+                        mainDiv.classList.add("alarm");
+                    } else if (shownTime < 30) {
+                        mainDiv.classList.add("notice");
+                    }
+                    var text = document.createElement("h2");
+                    text.innerText = shownText;
+                    mainDiv.appendChild(text);
+                    var timer = document.createElement("h1");
+                    timer.innerText = formatTimer(shownTime);
+                    mainDiv.appendChild(timer);
+                    return mainDiv;
+                }
+            }
+
+            var beans = new Recipe("microwave")
+            .withStep("Put baked beans in", 150)
+            .withStep("Put baked beans in again", 150)
+            .withStep("Put baked beans in third", 150)
+            .withStep("Dish baked beans");
+
+            var soup = new Recipe("microwave")
+            .withStep("Put soup in", 75)
+            .withStep("Stir soup", 125);
+
+            var sausages = new Recipe("oven")
+            .withStep("Put sausages in", 10 * 60)
+            .withStep("Flip sausages", 10 * 60)
+            .withStep("Dish sausages");
+
+            var chips = new Recipe("air fryer")
+            .withStep("Put chips in", 8 * 60)
+            .withStep("Shake chips and put back on", 8 * 60)
+            .withStep("Dish chips");
+
+            var burgers = new Recipe("grill")
+            .withStep("Put burgers in", 4 * 60)
+            .withStep("Flip burgers first", 4 * 60)
+            .withStep("Flip burgers second", 4 * 60)
+            .withStep("Flip burgers third", 4 * 60)
+            .withStep("Flip burgers fourth, apply cheese", 4 * 60)
+            .withStep("Dish burgers")
+
+            var recipes = [beans, soup, sausages, chips, burgers];
+
+            function groupRecipes(recipes) {
+                var groups = {};
+                for(let recipe of recipes) {
+                    var existing = groups[recipe.catalyst];
+                    if(existing) {
+                        existing.withRecipe(recipe);
+                    } else {
+                        groups[recipe.catalyst] = new RecipeGroup(recipe);
+                    }
+                }
+                return groups;
+            }
+
+            var startedAt = null;
+            var recipeGroups = groupRecipes(recipes);
+            var catalystOrder = [];
+            var selected = null;
+
+            function init(recipeGroups) {
+                var longest = 0;
+                for(let catalyst in recipeGroups) {
+                    catalystOrder.push(catalyst);
+                    var group = recipeGroups[catalyst];
+                    var length = group.sumRemainLength();
+                    if(length > longest) {
+                        longest = length;
+                    }
+                }
+                for(let catalyst of catalystOrder) {
+                    var group = recipeGroups[catalyst];
+                    group.flattenForEnd(longest);
+                    if(selected === null && group.delayTime === 0) {
+                        selected = catalyst;
+                    }
+                }
+                refreshHtml();
+            }
+
+            class Row {
+                constructor(initStep, catalyst) {
+                    this.time = initStep.tentativeStartTime;
+                    this.steps = [];
+                    for(let other of catalystOrder) {
+                        if(other === catalyst) {
+                            this.steps.push(initStep);
+                        } else {
+                            this.steps.push(null);
+                        }
+                    }
+                }
+                tryAdd(step, catalystIndex) {
+                    var diff = Math.abs(this.time - step.tentativeStartTime);
+                    if(diff <= 1) {
+                        this.steps[catalystIndex] = step;
+                        return true;
+                    }
+                    return false;
+                }
+                toHTML() {
+                    var tr = document.createElement("tr");
+
+                    var tdTime = document.createElement("td");
+                    tdTime.innerText = formatTimer(this.time);
+                    tr.appendChild(tdTime);
+
+                    var numNulls = 0;
+                    for(let step of this.steps) {
+                        if(step === null) {
+                            numNulls += 1;
+                            continue;
+                        }
+                        if(numNulls > 0) {
+                            var nltd = document.createElement("td");
+                            nltd.colSpan = numNulls;
+                            tr.appendChild(nltd);
+                            numNulls = 0;
+                        }
+                        var td = document.createElement("td");
+                        if(step.state === STATE.PENDING) {
+                            td.innerText = step.text;
+                        } else {
+                            var st = document.createElement("del");
+                            st.innerText = step.text;
+                            td.appendChild(st);
+                        }
+                        tr.appendChild(td);
+                    }
+                    if(numNulls > 0) {
+                        var nltd = document.createElement("td");
+                        nltd.colSpan = numNulls;
+                        tr.appendChild(nltd);
+                    }
+                    return tr;
+                }
+            }
+
+            function generateTable() {
+                var rows = [];
+                var catIndex = 0;
+                for(let catalyst of catalystOrder) {
+                    const group = recipeGroups[catalyst];
+                    for(let step of group.simpleSteps) {
+                        var done = false;
+                        for(var row of rows) {
+                            if(row.tryAdd(step, catIndex)) {
+                                done = true;
+                                break;
+                            }
+                        }
+                        if(done) continue;
+
+                        var newRow = new Row(step, catalyst);
+                        rows = orderedInsert(rows, newRow, (before, next) => before.time < next.time);
+                    }
+                    catIndex += 1;
+                }
+                var table = document.createElement("table");
+                var headTr = document.createElement("tr");
+                var timeTh = document.createElement("th");
+                timeTh.innerText = "Time";
+                headTr.appendChild(timeTh);
+                table.appendChild(headTr);
+                for(let catalyst of catalystOrder) {
+                    var th = document.createElement("th");
+                    th.innerText = catalyst;
+                    headTr.appendChild(th);
+                }
+                for(var row of rows) {
+                    table.appendChild(row.toHTML());
+                }
+                return table;
+            }
+
+            function refreshHtml() {
+                var container = document.getElementById("container");
+                container.innerHTML = "";
+                var widthPerc = (1 / catalystOrder.length) * 100;
+                for(let catalyst of catalystOrder) {
+                    const group = recipeGroups[catalyst];
+                    var div = group.toHTML(group.catalyst === selected);
+                    div.style.flex = `${widthPerc}%`;
+                    container.appendChild(div);
+                }
+
+                var table = document.getElementById("tableContainer");
+                table.innerHTML = "";
+                table.appendChild(generateTable());
+            }
+
+            init(recipeGroups);
+        </script>
+    </body>
+</html>
