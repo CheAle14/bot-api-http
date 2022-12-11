@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Ongoing recipe</title>
+    </head>
+    <body>
+        <div id="containers" class="split-container">
+
+        </div>
+
+        <table id="table">
+
+        </table>
+
+        <script>
+            class RecipeStep {
+                constructor(text, duration, delay) {
+                    this.text = text;
+                    this.duration = duration;
+                    this.delay = delay;
+                }
+            }
+            const KNOB_SETTINGS = [
+                "Low 1",
+                "Low 2",
+                "Medium 3",
+                "Medium 4",
+                "High 5",
+                "High 6"
+            ]
+            const CATALYST = {
+                MICROWAVE: "microwave",
+                OVEN: "oven",
+                TOASTER: "toaster",
+                TOASTER_GRILL: "toaster_grill",
+                OVEN_GRILL: "oven_grill",
+                AIR_FRYER: "air_fryer",
+                HOB_SAUCEPAN: "hob_saucepan",
+                HOB_FRYINGPAN: "hob_fryingpan",
+                HOB_WOK: "hob_wok"
+            }
+            class RecipeCatalyst {
+                constructor(kind, value) {
+                    this.kind = kind;
+                    this.value = value;
+                }
+                toString() {
+                    switch(this.kind) {
+                        case CATALYST.MICROWAVE:
+                            return `Microwave at ${this.value}W`;
+                        case CATALYST.OVEN:
+                            return `Oven at ${this.value}'c`;
+                        case CATALYST.TOASTER:
+                            return `Toaster`;
+                        case CATALYST.TOASTER_GRILL:
+                            return `Small grill`;
+                        case CATALYST.OVEN_GRILL:
+                            return `Grill on ${KNOB_SETTINGS[this.value]}`;
+                        case CATALYST.AIR_FRYER:
+                            return `Air fryer at ${this.value}'c`;
+                        case CATALYST.HOB_SAUCEPAN:
+                            return `Saucepan ${KNOB_SETTINGS[this.value]}`;
+                        case CATALYST.HOB_FRYINGPAN:
+                            return `Frying pan ${KNOB_SETTINGS[this.value]}`;
+                        case CATALYST.HOB_WOK:
+                            return `Wok ${KNOB_SETTINGS[this.value]}`;
+                        default: return `${this.kind}: ${this.value}`;
+                    }
+                }
+            }
+            class Recipe {
+                constructor(title, catalyst, steps) {
+                    this.title = title;
+                    this.catalyst = catalyst;
+                    this.inOrder = true;
+                    if(steps) 
+                        this.steps = steps;
+                    else
+                        this.steps = [];
+                    
+                }
+                addStep(text, duration = 0, delay = 0) {
+                    var s = new RecipeStep(text, duration, delay);
+                    this.steps.push(s);
+                }
+            }
+            class CombinedRecipe {
+                constructor(title, inOrder = true, offset = 0) {
+                    this.title = title;
+                    if(this.children) {
+                        this.children = children;
+                    } else {
+                        this.children = [];
+                    }
+                    this.inOrder = inOrder;
+                    this.offset = offset;
+                }
+                addChild(recipe, offset = 0) {
+                    this.children.push({recipe: recipe, offset: offset});
+                    return this;
+                }
+            }
+
+            var noodleRecipe = new Recipe("Noodles", new RecipeCatalyst(CATALYST.HOB_SAUCEPAN, 6), [
+                new RecipeStep("Put water on to boil", 8 * 60, 0),
+                new RecipeStep("Put noodles in to cook", 4 * 60, 0),
+                new RecipeStep("Drain noodles")
+            ]);
+            var stirfryRecipe = new Recipe("Stir fry", new RecipeCatalyst(CATALYST.HOB_WOK, 6), [
+                new RecipeStep("Heat wok", 2 * 60, 0),
+                new RecipeStep("Put chicken with cooked noodles", 2.5 * 60),
+                new RecipeStep("Add sauce", 2.5 * 60),
+                new RecipeStep("Dish stir fry")
+            ]);
+            var combined = new CombinedRecipe("Noodle Stir Fry", true, -120);
+            combined.addChild(noodleRecipe);
+            combined.addChild(stirfryRecipe, -120);
+        </script>
+    </body>
+</html>
