@@ -44,6 +44,10 @@
         </div>
         <div id="tableContainer">
         </div>
+        <div>
+            <h2>Time since start</h2>
+            <h1 id="startTimer"></h1>
+        </div>
 
         <script>
             function orderedInsert(array, element, isBefore) {
@@ -161,6 +165,7 @@
                     
                     this.muted = null;
                     this.alarm = false;
+                    this.completedAt = null;
                 }
 
                 tick(elapsed) {
@@ -264,6 +269,9 @@
                         // all complete
                         shownText = "Complete";
                         shownTime = 0;
+                        if(this.completedAt == null) {
+                            this.completedAt = Date.now();
+                        }
                     }
                     if(this.muted) {
                         shownText = "(M) " + shownText;
@@ -293,9 +301,20 @@
                     } else {
                         mainDiv.classList.remove("selected");
                     }
-                    if(shownText === "Complete") {
+                    var text = getOrCreate(ID + "-text", "h2", mainDiv);
+                    text.innerText = shownText;
+                    var timer = getOrCreate(ID + "-time", "h1", mainDiv);
+                    if(this.completedAt) {
                         mainDiv.classList.add("complete");
                         mainDiv.classList.remove("alarm", "notice");
+                        var diffS = (this.completedAt - this.startedAt) / 1000;
+                        var targetS = this.sumOriginalLength();
+                        var diffFromTarget = diffS - targetS;
+                        if(diffFromTarget > 0) {
+                            timer.innerText = "over +" + formatTimer(diffS - targetS) + "+";
+                        } else {
+                            timer.innerText = "under " + formatTimer(diffS - targetS) + "-";
+                        }
                     } else {
                         mainDiv.classList.remove("complete");
                         if(shownTime < 3) {
@@ -305,23 +324,24 @@
                             if(this.muted === null) {
                                 this.muted = false;
                             }
+                            checkAudio();
                         } else if (shownTime < 30) {
                             mainDiv.classList.remove("alarm");
                             mainDiv.classList.add("notice");
                         } else {
                             mainDiv.classList.remove("alarm", "notice");
                         }
+                        timer.innerText = formatTimer(shownTime);
                     }
-                    var text = getOrCreate(ID + "-text", "h2", mainDiv);
-                    text.innerText = shownText;
-                    var timer = getOrCreate(ID + "-time", "h1", mainDiv);
-                    timer.innerText = formatTimer(shownTime);
                     return mainDiv;
                 }
 
                 onMute() {
-                    console.log("Mute", this.catalyst);
-                    this.muted = true;
+                    const data = this.getDisplayText();
+                    console.log("Try", this.catalyst, data);
+                    if(data.time <= 3) {
+                        this.muted = true;
+                    }
                 }
                 onAdvance() {
                     console.log("Advance", this.catalyst);
@@ -361,21 +381,34 @@
             }
 
             var beans = new Recipe("microwave")
-            .withStep("Put baked beans in", 15)
-            .withStep("Put baked beans in again", 15)
-            .withStep("Put baked beans in third", 15);
+            .withStep("Put baked beans in", 1.5 * 60)
+            .withStep("Stir beans first", 1.5 * 60)
+            .withStep("Stir beans second", 1.5 * 60)
+            .withStep("Stir beans third", 1.5 * 60)
+            .withStep("Stir beans final", 1.5 * 60);
 
-            var soup = new Recipe("microwave")
-            .withStep("Put soup in", 7.5)
-            .withStep("Stir soup", 12.5);
 
             var sausages = new Recipe("oven")
-            .withStep("Put sausages in", 10 * 6)
-            .withStep("Flip sausages", 10 * 6);
+            .withStep("Put sausages in", 10 * 60)
+            .withStep("Flip sausages", 10 * 60);
+
+            var toast = new Recipe("toaster")
+            .withStep("Put toast on", 160);
+
+            var bacon = new Recipe("frying pan")
+            .withStep("Heat frying pan", 120)
+            .withStep("Put bacon on pan", 1.5 * 60)
+            .withStep("Flip bacon first", 1.5 * 60)
+            .withStep("Flip bacon second", 1.5 * 60)
+            .withStep("Flip bacon third", 1.5 * 60);
+
+            var scrambledEggs = new Recipe("small pan")
+            .withStep("Heat pan up", 60)
+            .withStep("Begin scrambled eggs", 5 * 60);
 
             var chips = new Recipe("air fryer")
-            .withStep("Put chips in", 8 * 6)
-            .withStep("Shake chips and put back on", 8 * 6);
+            .withStep("Put chips in", 8 * 60)
+            .withStep("Shake chips and put back on", 8 * 60);
 
             var burgers = new Recipe("grill")
             .withStep("Put burgers in", 4 * 6)
@@ -384,7 +417,7 @@
             .withStep("Flip burgers third", 4 * 6)
             .withStep("Flip burgers fourth, apply cheese", 4 * 6);
 
-            var recipes = [beans, soup, sausages, chips, burgers];
+            var recipes = [beans, sausages, toast, bacon, scrambledEggs];
 
             function groupRecipes(recipes) {
                 var groups = {};
@@ -405,6 +438,31 @@
             var selected = null;
             var lastTick = null;
             var refreshTableNextTick = false;
+            var audio = new Audio("../_/assets/alarm.mp3");
+            var intervalId = null;
+
+            function checkAudio() {
+                if(startedAt == null) {
+                    audio.pause();
+                    return;
+                }
+                var anyAlarm = false;
+                var allMuted = true;
+                for(let catalyst of catalystOrder) {
+                    const group = recipeGroups[catalyst];
+                    if(group.alarm) {
+                        anyAlarm = true;
+                        if(!group.muted) {
+                            allMuted = false;
+                        }
+                    }
+                }
+                if(anyAlarm && !allMuted) {
+                    audio.play();
+                } else {
+                    audio.pause();
+                }
+            }
 
             function init(recipeGroups) {
                 var longest = 0;
@@ -426,7 +484,7 @@
                 refreshHtml(true);
 
                 lastTick = window.performance.now() / 1000;
-                setInterval(globalTick, 50);
+                intervalId = setInterval(globalTick, 50);
             }
 
             class Row {
@@ -532,10 +590,19 @@
                     var div = group.toHTML(group.catalyst === selected, container);
                     div.style.flex = `${widthPerc}%`;
                 }
+
+                if(startedAt) {
+                    var startDiff = Math.round((Date.now() - startedAt) / 1000);
+                    document.getElementById("startTimer").innerText = formatTimer(startDiff);
+                } else {
+                    document.getElementById("startTimer").innerText = "n.y.s";
+                }
+
                 if(!updateTable) return;
                 var table = document.getElementById("tableContainer");
                 table.innerHTML = "";
                 table.appendChild(generateTable());
+                checkAudio();
             }
 
             init(recipeGroups);
@@ -546,9 +613,18 @@
                 var tickDelta = nextTick - lastTick;
                 lastTick = nextTick;
 
+                var allcomplete = true;
                 for(let catalyst of catalystOrder) {
                     const group = recipeGroups[catalyst];
                     group.tick(tickDelta);
+                    if(group.completedAt == null) {
+                        allcomplete = false;
+                    }
+                }
+                if(allcomplete) {
+                    console.log("Done!");
+                    clearInterval(intervalId);
+                    audio.pause();
                 }
 
 
@@ -566,6 +642,7 @@
                             group.onMute();
                         }
                     }
+                    checkAudio();
                     event.preventDefault();
                     return false;
                 } else if(event.key === "Tab" || event.key === "t" || event.key === "T") {
@@ -582,6 +659,21 @@
                     if(curIndex < 0)
                         curIndex = catalystOrder.length - 1;
                     selected = catalystOrder[curIndex];
+                } else if(event.key === "ArrowRight") {
+                    var time = 1;
+                    if(event.ctrlKey) {
+                        time = 10;
+                    }
+                    if(event.shiftKey) {
+                        time *= 6;
+                    }
+                    console.log("Skipping", time);
+
+                    for(let catalyst of catalystOrder) {
+                        const group = recipeGroups[catalyst];
+                        group.tick(time);
+                    }
+                    startedAt -= (time * 1000);
                 }
             }
         </script>
