@@ -294,7 +294,11 @@
                     const _this = this;
 
                     mainDiv.onclick = function() {
-                        _this.onAdvance();
+                        if(_this.muted) {
+                            _this.onAdvance();
+                        } else {
+                            _this.onMute();
+                        }
                     };
                     if(isSelected) {
                         mainDiv.classList.add("selected");
