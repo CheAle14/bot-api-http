@@ -401,6 +401,11 @@
             .withStep("Flip bacon second", 1.5 * 60)
             .withStep("Flip bacon third", 1.5 * 60);
 
+            var ovenBacon = new Recipe("oven")
+            .withStep("Put bacon in oven", 10 * 60)
+            .withStep("Check bacon", 60)
+            .withStep("Check bacon", 60)
+
             var scrambledEggs = new Recipe("small pan")
             .withStep("Heat pan up", 60)
             .withStep("Begin scrambled eggs", 5 * 60);
@@ -416,7 +421,11 @@
             .withStep("Flip burgers third", 4 * 6)
             .withStep("Flip burgers fourth, apply cheese", 4 * 6);
 
-            var recipes = [beans, sausages, toast, bacon, scrambledEggs];
+            var hashbrowns = new Recipe("air fryer")
+            .withStep("Put hash browns in", 6 * 60)
+            .withStep("Flip hash browns", 6 * 60);
+
+            var recipes = [beans, sausages, toast, ovenBacon, scrambledEggs, hashbrowns];
 
             function groupRecipes(recipes) {
                 var groups = {};
