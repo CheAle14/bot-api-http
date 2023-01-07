@@ -429,7 +429,36 @@
             .withStep("Put hash browns in", 6 * 60)
             .withStep("Flip hash browns", 6 * 60);
 
-            var recipes = [beans, sausages, toast, ovenBacon, scrambledEggs, hashbrowns];
+
+            var recipes = [beans, sausages, toast, ovenBacon, scrambledEggs];
+
+            var mash = new Recipe("microwave")
+            .withStep("Put mash potato in", 3 * 60)
+            .withStep("Stir and put back in", 2.5 * 60);
+
+            var yorkshirePuds = new Recipe("oven")
+            .withStep("Put yorks in", 3 * 60);
+
+            var gravy = new Recipe("kettle")
+            .withStep("Boil water and do gravy", 180);
+
+            var carrotsAndPeas = new Recipe("microwave")
+            .withStep("Put carrots+peas in", 3 * 60);
+
+            var pigsBlankets = new Recipe("oven")
+            .withStep("Put pigs in blankets in", 25 * 60);
+
+            var stuffing = new Recipe("oven")
+            .withStep("Put stuffing in", 18 * 60);
+
+            var lambSteaks = new Recipe("grill")
+            .withStep("Put lamb steaks in", 4.5 * 60)
+            .withStep("Flip lamb steaks, put back", 4.5 * 60);
+
+            //var recipes = [mash, yorkshirePuds, gravy, carrotsAndPeas, pigsBlankets, stuffing, lambSteaks];
+
+
+
 
             function groupRecipes(recipes) {
                 var groups = {};
