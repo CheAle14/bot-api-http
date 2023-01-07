@@ -14,7 +14,7 @@ function closeNav() {
  */
 function getUrl(pathAndQuery, httpOrWss = true, localPort = 8887) {
     var prot = httpOrWss ? "http" : "ws";
-    var domain = "ml-api.uk.ms";
+    var domain = document.location.hostname;
     if(document.location.protocol === "http:") {
         domain = "localhost:" + localPort
     } else {

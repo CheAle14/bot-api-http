@@ -32,11 +32,10 @@
             var btnDiscuss = document.getElementById("btnDiscuss");
             var btnDead = document.getElementById("btnDead");
             var userList = document.getElementById("userList");
-            let url = "ws://localhost:4650/group-game";
+            let prot = document.location.protocol === "http:" ? "ws" : "wss";
+            let host = prot === "wss" ? document.location.hostname : `${document.location.hostname}:4650`;
             console.log(window.location.protocol);
-            if(window.location.protocol === "https:")
-                url = "wss://ml-api.uk.ms/group-game";
-            var WS = new WebSocket(url);
+            var WS = new WebSocket(host);
             WS.onopen = function(e) {
                 console.log("[WS] Connection establised.");
             };
