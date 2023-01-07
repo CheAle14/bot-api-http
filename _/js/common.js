@@ -18,7 +18,7 @@ function getUrl(pathAndQuery, httpOrWss = true, localPort = 8887) {
     if(document.location.protocol === "http:") {
         domain = "localhost:" + localPort
     } else {
-
+        domain += "/wss";
         prot += "s";
     }
     return prot + "://" + domain + pathAndQuery;

@@ -2,7 +2,7 @@ let WSC = {}
 WSC.initWS = function (msgCallback) {
     console.log("Starting WS");
     let prot = document.location.protocol === "http:" ? "ws" : "wss";
-    let host = prot === "wss" ? document.location.hostname : `${document.location.hostname}:4650`;
+    let host = prot === "wss" ? `${document.location.hostname}/wss` : `${document.location.hostname}:4650`;
     let fullUrl = `${prot}://${host}/chess-monitor`;
     console.log(fullUrl);
     this.socket = new WebSocket(fullUrl);

@@ -33,7 +33,7 @@
             var btnDead = document.getElementById("btnDead");
             var userList = document.getElementById("userList");
             let prot = document.location.protocol === "http:" ? "ws" : "wss";
-            let host = prot === "wss" ? document.location.hostname : `${document.location.hostname}:4650`;
+            let host = prot === "wss" ? `${document.location.hostname}/wss` : `${document.location.hostname}:4650`;
             console.log(window.location.protocol);
             var WS = new WebSocket(host);
             WS.onopen = function(e) {

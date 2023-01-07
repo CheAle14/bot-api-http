@@ -24,7 +24,7 @@ class TimedGame {
     }
     Init() {
         let prot = document.location.protocol === "http:" ? "ws" : "wss";
-        let host = prot === "wss" ? document.location.hostname : `${document.location.hostname}:4650`;
+        let host = prot === "wss" ? `${document.location.hostname}/wss` : `${document.location.hostname}:4650`;
         this.socket = new WebSocket(`${prot}://${host}/chess-timer?id=${this.ID}`);
         this.socket.parent = this;
         this.socket.onopen = function() {

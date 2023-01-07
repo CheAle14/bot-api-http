@@ -132,7 +132,7 @@
             const USER_ID = "<REPLACE id='user.id'/>"
             var MUTED = "<REPLACE id='appeal.IsMuted'/>".toLowerCase() == "true";
             let prot = document.location.protocol === "http:" ? "ws" : "wss";
-            let host = prot === "wss" ? document.location.hostname : `${document.location.hostname}:4650`;
+            let host = prot === "wss" ? `${document.location.hostname}/wss` : `${document.location.hostname}:4650`;
             let fullUrl = `${prot}://${host}/ban-appeal?id=${GUILD_ID}`;
             var WS = new WebSocket(fullUrl);
             WS.onopen = function(e) {

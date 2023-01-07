@@ -36,7 +36,7 @@
         var WS = null;
         function openWs() {
             let prot = document.location.protocol === "http:" ? "ws" : "wss";
-            let host = prot === "wss" ? document.location.hostname : `${document.location.hostname}:4650`;
+            let host = prot === "wss" ? `${document.location.hostname}/wss` : `${document.location.hostname}:4650`;
             let fullUrl = `${prot}://${host}/log`;
             WS = new WebSocket(fullUrl);
             WS.onopen = opened;

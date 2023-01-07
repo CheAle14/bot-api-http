@@ -2,7 +2,7 @@ let WSC = {}
 WSC.initWS = function (path, retryLimit, onMessage, onClose, onReconnectLimit, onError, onOpen) {
     console.log("Starting WS");
     let prot = document.location.protocol === "http:" ? "ws" : "wss";
-    let host = prot === "wss" ? document.location.hostname : `${document.location.hostname}:4650`;
+    let host = prot === "wss" ? `${document.location.hostname}/wss` : `${document.location.hostname}:4650`;
     WSC.fullUrl = `${prot}://${host}/${path}`;
     console.log(WSC.fullUrl);
     WSC.socket = new WebSocket(WSC.fullUrl);
