@@ -38,6 +38,7 @@
                 border-bottom: 1px solid #ddd;
             }
         </style>
+        <script src="/_/js/bot-ws.js"></script>
     </head>
     <body>
         <div id="container">
@@ -101,6 +102,15 @@
                     this.tentativeStartTime = null;
                 }
 
+                static load(obj) {
+                    var step = new Step(obj.text, obj.duration);
+                    step.remaining = obj.remain;
+                    step.state = `${obj.state}`.toLowerCase();
+                    step.startedAt = obj.startedAt;
+                    step.tentativeStartTime = obj.tentativeStart;
+                    return step;
+                }
+
                 tick(elapsed) {
                     this.remaining -= elapsed;
                 }
@@ -110,6 +120,15 @@
                     this.steps = [];
                     this.current = 0;
                     this.catalyst = catalyst;
+                }
+                static load(obj) {
+                    var recipe = new Recipe(obj.catalyst);
+                    recipe.current = obj.current;
+                    for(let ostep of obj.steps) {
+                        var step = Step.load(ostep);
+                        recipe.steps.push(step);
+                    }
+                    return recipe;
                 }
                 get workingOn() {
                     if(this.current >= this.steps.length) return null;
@@ -158,14 +177,29 @@
 
             class RecipeGroup {
                 constructor(initRecipe) {
-                    this.catalyst = initRecipe.catalyst;
-                    this.recipes = [initRecipe];
+                    if(initRecipe) {
+                        this.catalyst = initRecipe.catalyst;
+                        this.recipes = [initRecipe];
+                    } else {
+                        this.catalyst = null;
+                        this.recipes = [];
+                    }
                     this.simpleSteps = [];
                     this.delayTime = null;
                     
                     this.muted = null;
                     this.alarm = false;
                     this.completedAt = null;
+                }
+
+                static load(obj) {
+                    var group = new RecipeGroup();
+                    group.catalyst = obj.catalyst;
+                    for(let recipe of obj.recipes) {
+                        var loaded = Recipe.load(recipe);
+                        group.withRecipe(loaded);
+                    }
+                    return group;
                 }
 
                 tick(elapsed) {
@@ -430,7 +464,7 @@
             .withStep("Flip hash browns", 6 * 60);
 
 
-            var recipes = [sausages, scrambledEggs, hashbrowns, beans, ovenBacon];
+            //var recipes = [sausages, scrambledEggs, hashbrowns, beans, ovenBacon];
 
             var mash = new Recipe("microwave")
             .withStep("Put mash potato in", 3 * 60)
@@ -457,6 +491,33 @@
 
             //var recipes = [mash, yorkshirePuds, gravy, carrotsAndPeas, pigsBlankets, stuffing, lambSteaks];
 
+            const RECIPE_ID = "<REPLACE id='id'/>";
+
+            function wsOpen(e) {
+                //console.log("[WS/Open] ", e);
+            }
+            function wsMessage(e) {
+                //console.log("[WS/Msg] ", e);
+                const jobj = JSON.parse(e.data);
+                if(recipeGroups === null && jobj.recipe) {
+                    recipeGroups = {};
+                    for(let key in jobj.recipe) {
+                        const value = jobj.recipe[key];
+                        var group = RecipeGroup.load(value);
+                        recipeGroups[key] = group;
+                    }
+                    console.log(recipeGroups);
+                    init(recipeGroups);
+                }
+            }
+            function wsClose(e) {
+                //console.warn("[WS/Close] ", e);
+            }
+            function wsError(e) {
+                //console.error("[WS/Err] ", e);
+            }
+
+            WSC.initWS(`food?id=${RECIPE_ID}`, null, wsMessage, wsClose, null, wsError, wsOpen);
 
 
 
@@ -474,7 +535,7 @@
             }
 
             var startedAt = null;
-            var recipeGroups = groupRecipes(recipes);
+            var recipeGroups = null; //groupRecipes(recipes);
             var catalystOrder = [];
             var selected = null;
             var lastTick = null;
@@ -646,7 +707,7 @@
                 checkAudio();
             }
 
-            init(recipeGroups);
+            //init(recipeGroups);
 
 
             function globalTick() {
@@ -666,6 +727,7 @@
                     console.log("Done!");
                     clearInterval(intervalId);
                     audio.pause();
+                    WSC.socket.send(JSON.stringify({"done": "done"}));
                 }
 
 
