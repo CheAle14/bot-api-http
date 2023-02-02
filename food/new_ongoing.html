@@ -37,7 +37,47 @@
             tr {
                 border-bottom: 1px solid #ddd;
             }
+            
+            .slidecontainer {
+                width: 100%; /* Width of the outside container */
+            }
+
+            /* The slider itself */
+            .slider {
+                -webkit-appearance: none;  /* Override default CSS styles */
+                appearance: none;
+                width: 100%; /* Full-width */
+                height: 25px; /* Specified height */
+                background: #d3d3d3; /* Grey background */
+                outline: none; /* Remove outline */
+                opacity: 0.7; /* Set transparency (for mouse-over effects on hover) */
+                -webkit-transition: .2s; /* 0.2 seconds transition on hover */
+                transition: opacity .2s;
+            }
+
+            /* Mouse-over effects */
+            .slider:hover {
+                opacity: 1; /* Fully shown on mouse-over */
+            }
+
+            /* The slider handle (use -webkit- (Chrome, Opera, Safari, Edge) and -moz- (Firefox) to override default look) */
+            .slider::-webkit-slider-thumb {
+                -webkit-appearance: none; /* Override default look */
+                appearance: none;
+                width: 25px; /* Set a specific slider handle width */
+                height: 25px; /* Slider handle height */
+                background: #04AA6D; /* Green background */
+                cursor: pointer; /* Cursor on hover */
+            }
+
+            .slider::-moz-range-thumb {
+                width: 25px; /* Set a specific slider handle width */
+                height: 25px; /* Slider handle height */
+                background: #04AA6D; /* Green background */
+                cursor: pointer; /* Cursor on hover */
+            }
         </style>
+        <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js"></script>
         <script src="/_/js/bot-ws.js"></script>
     </head>
     <body>
@@ -49,8 +89,38 @@
             <h2>Time since start</h2>
             <h1 id="startTimer"></h1>
         </div>
+        <br/>
+        <label id="volumeLbl">Volume:</label>
+        <div class="sliderContainer">
+            <input type="range" min="0" max="100" value="100" class="slider" id="volumeSlider">
+        </div>
 
         <script>
+            const volumeLbl = document.getElementById("volumeLbl");
+            const volumeSlider = document.getElementById("volumeSlider");
+            function setVolume(volume, muted) {
+                console.log(`setVolume(${volume}, ${muted})`)
+                if(muted === undefined) 
+                    muted = false;
+                volumeLbl.innerText = "Volume: " + volume;
+                audio.volume = volume;
+                if(!muted) {
+                    forceAudio = true;
+                    checkAudio();
+                }
+                setTimeout(function() {
+                    forceAudio = null;
+                    if(!muted) {
+                        forceAudio = null;
+                        checkAudio();
+                    }
+                }, 3000);
+                Cookies.set("volume", volume, { expires: 365 });
+            }
+            volumeSlider.oninput = function() {
+                volume = parseInt(this.value) / 100;
+                setVolume(volume);
+            }
             function orderedInsert(array, element, isBefore) {
                 var ind = 0;
                 for(let other of array) {
@@ -195,9 +265,25 @@
                 static load(obj) {
                     var group = new RecipeGroup();
                     group.catalyst = obj.catalyst;
-                    for(let recipe of obj.recipes) {
-                        var loaded = Recipe.load(recipe);
-                        group.withRecipe(loaded);
+                    group.alarm = obj.alarm;
+                    if(obj.muted !== undefined) {
+                        group.muted = obj.muted;
+                    }
+                    if(obj.completedAt !== undefined) {
+                        group.completedAt = obj.completedAt;
+                    }
+                    if(obj.recipe) {
+                        for(let recipe of obj.recipes) {
+                            var loaded = Recipe.load(recipe);
+                            group.withRecipe(loaded);
+                        }
+                    }
+                    if(obj.steps) {
+                        group.simpleSteps = [];
+                        for(let ostep of obj.steps) {
+                            var step = Step.load(ostep);
+                            group.simpleSteps.push(step);
+                        }
                     }
                     return group;
                 }
@@ -210,19 +296,15 @@
                 }
 
                 _sumLength(original) {
-                    var longest = 0;
-                    for(let recipe of this.recipes) {
-                        var length;
+                    var length = 0;
+                    for(let step of this.simpleSteps) {
                         if(original) {
-                            length = recipe.sumOriginalLength();
+                            length += step.duration;
                         } else {
-                            length = recipe.sumRemainLength();
-                        }
-                        if(length > longest) {
-                            longest = length;
+                            length += step.remaining;
                         }
                     }
-                    return longest;
+                    return length;
                 }
                 sumOriginalLength() {
                     return this._sumLength(true);
@@ -230,7 +312,7 @@
                 sumRemainLength() {
                     return this._sumLength(false);
                 }
-                flattenForEnd(targetEnd) {
+                /*flattenForEnd(targetEnd) {
                     // e.g. target end is 200 seconds.
                     // recipe 
                     var simpleSteps = [];
@@ -266,7 +348,7 @@
                         }
                         nextStart = step.tentativeStartTime;
                     }
-                }
+                }*/
                 withRecipe(recipe) {
                     this.recipes.push(recipe);
                 }
@@ -304,6 +386,7 @@
                         shownText = "Complete";
                         shownTime = 0;
                         if(this.completedAt == null) {
+                            console.log("Setting all complete since all steps done:", this.simpleSteps);
                             this.completedAt = Date.now();
                         }
                     }
@@ -345,9 +428,10 @@
                     if(this.completedAt) {
                         mainDiv.classList.add("complete");
                         mainDiv.classList.remove("alarm", "notice");
-                        var diffS = (this.completedAt - this.startedAt) / 1000;
+                        var diffS = (this.completedAt - startedAt) / 1000;
                         var targetS = this.sumOriginalLength();
                         var diffFromTarget = diffS - targetS;
+                        console.log("Completed:", diffS, targetS);
                         if(diffFromTarget > 0) {
                             timer.innerText = "over +" + formatTimer(diffS - targetS) + "+";
                         } else {
@@ -379,6 +463,8 @@
                     console.log("Try", this.catalyst, data);
                     if(data.time <= 3) {
                         this.muted = true;
+                        var ws = {};
+                        sendWs({mute: this.catalyst});
                     }
                 }
                 onAdvance() {
@@ -415,6 +501,12 @@
                             }
                         }
                     }
+                    sendWs({advance: {
+                        id: this.catalyst,
+                        started: startedAt,
+                        time: `${Date.now()}`
+                        }
+                    });
                 }
             }
 
@@ -492,22 +584,36 @@
             //var recipes = [mash, yorkshirePuds, gravy, carrotsAndPeas, pigsBlankets, stuffing, lambSteaks];
 
             const RECIPE_ID = "<REPLACE id='id'/>";
+            var startedAt = null;
+            var recipeGroups = null; //groupRecipes(recipes);
+            var catalystOrder = [];
+            var selected = null;
+            var lastTick = null;
+            var refreshTableNextTick = false;
+            var audio = new Audio("../_/assets/alarm.mp3");
+            var intervalId = null;
+            var forceAudio = null;
 
             function wsOpen(e) {
                 //console.log("[WS/Open] ", e);
             }
             function wsMessage(e) {
                 //console.log("[WS/Msg] ", e);
+
                 const jobj = JSON.parse(e.data);
+                console.log("[WS/JSON]", jobj);
                 if(recipeGroups === null && jobj.recipe) {
                     recipeGroups = {};
+                    if(jobj.startedAt) {
+                        startedAt = parseInt(jobj.startedAt);
+                    }
                     for(let key in jobj.recipe) {
                         const value = jobj.recipe[key];
                         var group = RecipeGroup.load(value);
                         recipeGroups[key] = group;
                     }
-                    console.log(recipeGroups);
-                    init(recipeGroups);
+                    console.log("Set groups:", recipeGroups);
+                    init();
                 }
             }
             function wsClose(e) {
@@ -517,7 +623,14 @@
                 //console.error("[WS/Err] ", e);
             }
 
-            WSC.initWS(`food?id=${RECIPE_ID}`, null, wsMessage, wsClose, null, wsError, wsOpen);
+            function sendWs(data) {
+                const packet = {
+                    data: data
+                }
+                WSC.socket.send(JSON.stringify(packet));
+            }
+
+            WSC.initWS(`food?id=${RECIPE_ID}`, 0, wsMessage, wsClose, null, wsError, wsOpen);
 
 
 
@@ -534,18 +647,27 @@
                 return groups;
             }
 
-            var startedAt = null;
-            var recipeGroups = null; //groupRecipes(recipes);
-            var catalystOrder = [];
-            var selected = null;
-            var lastTick = null;
-            var refreshTableNextTick = false;
-            var audio = new Audio("../_/assets/alarm.mp3");
-            var intervalId = null;
+            function setAudio(v, reason) {
+                try {
+                    if(v && audio.paused) {
+                        console.debug("[audio/play]", reason)
+                        audio.play().catch(function(err) {});
+                    }
+                    else if(!v && !audio.paused) {
+                        console.debug("[audio/pause]", reason)   
+                        audio.pause();
+                    }
+                } catch {}
+            }
 
+            var forceAudio = null;
             function checkAudio() {
+                if(forceAudio !== null) {
+                    setAudio(forceAudio, "force audio");
+                    return;
+                }
                 if(startedAt == null) {
-                    audio.pause();
+                    setAudio(false, "not yet started");
                     return;
                 }
                 var anyAlarm = false;
@@ -560,14 +682,14 @@
                     }
                 }
                 if(anyAlarm && !allMuted) {
-                    audio.play();
+                    setAudio(true, "active group");
                 } else {
-                    audio.pause();
+                    setAudio(false, `no active group (${forceAudio})`);
                 }
             }
 
-            function init(recipeGroups) {
-                var longest = 0;
+            function init() {
+                /*var longest = 0;
                 for(let catalyst in recipeGroups) {
                     catalystOrder.push(catalyst);
                     var group = recipeGroups[catalyst];
@@ -575,10 +697,11 @@
                     if(length > longest) {
                         longest = length;
                     }
-                }
-                for(let catalyst of catalystOrder) {
+                }*/
+                for(let catalyst in recipeGroups) {
+                    catalystOrder.push(catalyst);
                     var group = recipeGroups[catalyst];
-                    group.flattenForEnd(longest);
+                    //group.flattenForEnd(longest);
                     if(selected === null && group.delayTime === 0) {
                         selected = catalyst;
                     }
@@ -724,7 +847,7 @@
                     }
                 }
                 if(allcomplete) {
-                    console.log("Done!");
+                    console.log("All", catalystOrder.length,"groups are complete!");
                     clearInterval(intervalId);
                     audio.pause();
                     WSC.socket.send(JSON.stringify({"done": "done"}));
@@ -778,6 +901,11 @@
                     }
                     startedAt -= (time * 1000);
                 }
+            }
+            var maybeVolume = Cookies.get("volume");
+            if(maybeVolume) {
+                volumeSlider.value = parseFloat(maybeVolume) * 100;
+                setVolume(parseFloat(maybeVolume), true);
             }
         </script>
     </body>
