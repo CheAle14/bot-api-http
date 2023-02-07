@@ -158,6 +158,23 @@
                     console.error(err);
                 })
             }
+            function togglemanual(event) {
+                if(!EDITING) return;
+                var td = event.target.parentElement;
+                var tr = td.parentElement;
+                fetch(`/api/food/menu/manual?day=${tr.id.split('-')[1]}&manual=${event.target.checked}`, {
+                    method: "PATCH"
+                })
+                .then(function(resp) {
+                    if(resp.ok) {
+                        window.location.reload();
+                    } else {
+                        alert("Failed!");
+                    }
+                }).catch(function(err) {
+                    console.error(err);
+                })
+            }
             function getTd(elem) {
                 if(elem === null) return null;
                 if(elem.tagName === "TD") return elem;
