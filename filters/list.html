@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Your filters</title>
+    </head>
+    <body>
+        <p>Your filters:</p>
+        <REPLACE id="list"/>
+
+        <script>
+            document.getElementById("new").onclick = async function() {
+                var response = await fetch("/filters/new", {
+                    method: "POST"
+                });
+                if(response.redirected) {
+                    window.location.href = response.url;
+                }
+                console.log(response);
+                console.log(response.headers);
+            }
+        </script>
+    </body>
+</html>
