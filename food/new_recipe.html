@@ -6,6 +6,7 @@
     <body>
         <div>
             <label>Title: </label> <input id="title" type="text" onchange="updateTitle(event)">
+            <label>Catalyst: </label> <input id="catalyst" type="text" onchange="updateCatalyst(event)">
         </div>
         <div>
             <p>Ingredients</p>
@@ -44,6 +45,7 @@
             const ulSteps = document.getElementById("steps");
             const ulChildren = document.getElementById("children");
             const rTitle = document.getElementById("title");
+            const rCatalyst = document.getElementById("catalyst");
             const rOrder = document.getElementById("rootOrder");
             const disableValue = 123765;
             const idempotent = getRandomInt(65565);
@@ -275,6 +277,7 @@
                     this.steps = [];
                     this.order = false;
                     this.title = null;
+                    this.catalyst = null;
                     this.children = [];
                 }
 
@@ -300,6 +303,7 @@
 
                 toHTML() {
                     rTitle.value = this.title;
+                    rCatalyst.value = this.catalyst;
                     rOrder.checked = this.order;
 
                     ulIngredients.innerHTML = "";
@@ -320,6 +324,7 @@
 
                 load(obj) {
                     this.title = obj.title;
+                    this.catalyst = obj.catalyst;
                     this.order = obj.order;
 
                     for(let i of obj.ingredients) {
@@ -352,6 +357,10 @@
             function updateTitle(event) {
                 MAKING.title = event.target.value;
                 console.log("updateTitle", MAKING);
+            }
+            function updateCatalyst(event) {
+                MAKING.catalyst = event.target.value;
+                console.log("updateCatalyst", MAKING);
             }
 
             function addNewIngredient(optId) {
