@@ -88,7 +88,7 @@
                     method: "POST",
                     body: `query=${encodeURIComponent(event.target.value)}&sort=expires`,
                     headers: {
-                        "Content-Type": "x-form-data"
+                        "Content-Type": "application/x-www-form-urlencoded"
                     }
                 })
                 .then(function(resp) {
