@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Upload</title>
+    </head>
+    <body>
+        <form method="post" enctype="multipart/form-data">
+            <label for="recipient">Sent to: </label><input type="text" id="recipient" name="recipient"><br/>
+            <label for="sender">From: </label><input type="text" id="sender" name="sender"><br/>
+            <label for="date">Date: </label><input type="date" id="date" name="date"><br/>
+
+            <label for="files">Images: </label><input type="file" multiple minlength="1" id="files" name="files">
+            <input type="submit" value="Submit">
+        </form>
+
+        <script>
+            document.body.onload = function() {
+                const today = new Date();
+                const yyyy = today.getFullYear();
+                let mm = today.getMonth() + 1; // Months start at 0!
+                let dd = today.getDate();
+
+                if (dd < 10) dd = '0' + dd;
+                if (mm < 10) mm = '0' + mm;
+
+                const formattedToday = yyyy + '-' + mm + '-' + dd;
+                document.getElementById("date").value = formattedToday;
+            }
+        </script>
+    </body>
+</html>

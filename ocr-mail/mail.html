@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Scanned Mails</title>
+        <style>
+            html, body, .file {
+                width: 100%;
+                height: 100%;
+            }
+            .file {
+                margin: 0 0 3px 0;
+                display: flex;
+            }
+            iframe, img {
+                width: 50%;
+                height: 100%;
+            }
+            img {
+                max-width: 50%;
+            }
+        </style>
+    </head>
+    <body>
+        <h2>Add additional page(s)</h2>
+        <form method="post" enctype="multipart/form-data" action="/ocr/upload">
+            <label for="recipient">Sent to: </label><input type="text" id="recipient" name="recipient"><br/>
+            <label for="sender">From: </label><input type="text" id="sender" name="sender"><br/>
+            <label for="date">Date: </label><input type="date" id="date" name="date"><br/>
+
+            <label for="files">Images: </label><input type="file" multiple minlength="1" id="files" name="files">
+            <input type="submit" value="Submit">
+        </form>
+        <h2>Scanned pages:</h2>
+        <REPLACE id="pages"/>
+        <script>
+            document.body.onload = function() {
+                const loc = window.location.href.split('/');
+                document.getElementById("recipient").value = loc[5];
+                document.getElementById("sender").value = loc[6];
+                document.getElementById("date").value = loc[7];
+            }
+        </script>
+    </body>
+</html>

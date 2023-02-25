@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Scanned Mails</title>
+    </head>
+    <body>
+        <p>All scanned mail:</p>
+        <REPLACE id="table"/>
+
+        <script>
+            function gotorow(event) {
+                var tr = event.currentTarget;
+                window.location.href = tr.getAttribute("data-link");
+            }
+        </script>
+    </body>
+</html>
