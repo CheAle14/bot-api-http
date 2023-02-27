@@ -25,6 +25,18 @@
             function deny(id) {
                 callT(id, false);
             }
+            function rmusr(id) {
+                fetch(`/api/bot/user?id=${id}`, {
+                    "method": "DELETE"
+                })
+                .then(function(response) {
+                    document.location.reload();
+                })
+                .catch(function(err) {
+                    console.error(err);
+                    alert("Error! See console.")
+                })
+            }
         </script>
     </body>
 </html>

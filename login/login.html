@@ -38,15 +38,28 @@
         <img src="/_/img/discord.png" width="25%" alt="Discord Blocked?" onclick="dsLogin();">
     </div>
     <div id="login">
-        <p>Login now requires either the above Oauth flow, or a pre-set password</p>
-        <input id="username" type="text" placeholder="Login Username"/>
-        <br>
-        <label>Password </label><br/><input id="password" type="password" placeholder="(Bot) Password (must provide user)" />
-        <br>
-        <input type="button" onclick="submit();" value="Submit" />
-        <br>
-        <input id="number" type="number" placeholder="Discord ID"/><br>
-        <p id="fb" style="display: none; color: darkred; font-weight: bold;">Feedback....</p>
+        <p>Alternatively, you can login below:</p>
+
+
+        <form method="post" action="/login">
+            <label>Username </label><br/>
+            <input id="login_username" name="username" type="text" placeholder="Login Username" required/><br>
+            <label>Password </label><br/>
+            <input name="password" type="password" placeholder="Password" required />
+            <br>
+            <input type="submit" value="Login" />
+            <p id="fbl" style="display: none; color: darkred; font-weight: bold;">Feedback....</p>
+        </form>
+        <p>Don't have an account? Submit a registration application via</p>
+        <form method="post" action="/register">
+            <label>Desired username </label><br/>
+            <input id="register_username" name="username" type="text" placeholder="Login Username" required/><br>
+            <label>Desired password </label><br/>
+            <input name="password" type="password" placeholder="Password" required/>
+            <br>
+            <input type="submit" value="Register" />
+            <p id="fbr" style="display: none; color: darkred; font-weight: bold;">Feedback....</p>
+        </form>
     </div>
 
     <script>
@@ -70,44 +83,26 @@
         }
 
 
-        function display(message) {
-            var doc = document.getElementById("fb");
+        function display(doc, message) {
             doc.innerText = message;
             if(message)
                 doc.style.display = "";
             else
                 doc.style.display = "none";
         }
-
-        function rnd(min, max) {
-            return Math.floor(Math.random() * (+max - +min)) + +min; 
+        
+        var p = new URLSearchParams(window.location.hash.substring(1));
+        
+        var loginFeedback = p.get("fbl");
+        var registerFeedback = p.get("fbr");
+        var username = p.get("username");
+        if(loginFeedback) {
+            document.getElementById("login_username").value = username;
+            display(document.getElementById("fbl"), loginFeedback);
+        } else if(registerFeedback) {
+            document.getElementById("register_username").value = username;
+            display(document.getElementById("fbr"), registerFeedback);
         }
 
-        function submit() {
-            var uname = document.getElementById("username");
-            var id = document.getElementById("number");
-            var pwd = document.getElementById("password");
-            display("Submitting: " + uname.value.toString() + " " + id.value.toString());
-            var iden = id.value || uname.value;
-            fetch("/login",
-            {
-                method: "POST",
-                body: `identifier=${encodeURI(iden)}&password=${pwd.value}`,
-            })
-            .then(function(res)
-            { 
-                if(res.ok) {
-                    var urlA = getCookie("redirect")
-                    window.location.href = urlA || "/";
-                } else {
-                    console.log(res);
-                    res.text().then(function(t) {
-                        display("Failed to log in: " + t);
-                        console.log(t) 
-                    });
-                }
-            })
-            .catch(function(res){ console.log(res) })
-        }
     </script>
 </body>
