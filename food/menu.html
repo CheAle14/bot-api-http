@@ -175,6 +175,29 @@
                     console.error(err);
                 })
             }
+            function setText(event) {
+                if(!EDITING) return;
+                if(event.altKey) {
+                    var td = event.currentTarget;
+                    var tr = td.parentElement;
+                    var group = td.getAttribute("data-group");
+                    var text = prompt("What text to set, or 'none' to remove", td.innerText);
+                    if(text) {
+                        fetch(`/api/food/menu/text?day=${encodeURIComponent(tr.id.split('-')[1])}&group=${encodeURIComponent(group)}&text=${encodeURIComponent(text)}`, {
+                            method: "PATCH"
+                        })
+                        .then(function(resp) {
+                            if(resp.ok) {
+                                window.location.reload();
+                            } else {
+                                alert("Failed!");
+                            }
+                        }).catch(function(err) {
+                            console.error(err);
+                        })
+                    }
+                }
+            }
             function getTd(elem) {
                 if(elem === null) return null;
                 if(elem.tagName === "TD") return elem;
@@ -187,7 +210,6 @@
                 var thing = getTd(event.target);
                 var curTarget = event.currentTarget;
                 if(event.ctrlKey) {
-
                     var uses = parseInt(prompt("How many uses?", curTarget.getAttribute("data-uses")));
                     fetch(`/api/food/menu/item?day=${thing.getAttribute("data-date")}&group=${thing.getAttribute("data-group")}&id=${curTarget.getAttribute("data-id")}&uses=${uses}`, {
                         method: "PATCH"
