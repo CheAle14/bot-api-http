@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Select posts to republish</title>
+        <style>
+            .column {
+                float: left;
+                width: 50%;
+            }
+            /* Clear floats after the columns */
+            .container:after {
+                content: "";
+                display: table;
+                clear: both;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>Instagram</h1>
+        <div class="container">
+            <div class="column left">
+                <h2>Original</h2>
+                <REPLACE id="instagramPosts"/>
+            </div>
+            <div class="column right">
+                <h2>Republish as</h2>
+                <select>
+                    <option>Do not republish on Instagram</option>
+                    <option>Republish with:</option>
+                </select>
+                <form id="instagram">
+                    <label>Caption:</label> <input type="text" id="caption" placeholder="Caption"><br/>
+                    <label>Image: </label> <img id="ig_image"/>
+                </form>
+            </div>
+        </div>
+        <hr>
+        <h1>Twitter</h1>
+        <div class="container">
+            <div class="column left">
+                <h2>Original</h2>
+                <p>(tweets here etc)</p>
+            </div>
+            <div class="column right">
+                <h2>Republish as</h2>
+                <select>
+                    <option>Do not republish on Twitter</option>
+                    <option>Retweet exactly</option>
+                    <option>Make new tweet with:</option>
+                </select>
+                <form id="instagram">
+                    <label>Caption:</label> <input type="text" id="caption" placeholder="Caption"><br/>
+                    <label>Image: </label> <img id="ig_image"/>
+                </form>
+            </div>
+        </div>
+        <hr>
+        <strong>Raw data returned from Instagram:</strong>
+        <pre><code><REPLACE id='rawcode'/></code></pre>
+    </body>
+</html>
