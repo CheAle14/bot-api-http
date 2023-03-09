@@ -17,12 +17,54 @@
                 border: 1px solid red;
                 background-color: rgba(255, 0, 0, 0.2);
             }
+            div.ig_media:hover, div.selected {
+                border: 2px solid black;
+                background-color: grey;
+                cursor: pointer;
+            }
+            input.unsaved {
+                background-color: rgba(0, 0, 255, 0.171);
+            }
         </style>
+        <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js"></script>
     </head>
     <body>
         <REPLACE id="content"/>
 
         <script>
+            class PublishPost {
+                constructor(data) {
+                    this.defaultText = data.defaultText;
+                    this.defaultMediaUrl = data.defaultMediaUrl;
+                    this.instagram = new PublishInstagram(data.instagram ?? {});
+                }
+            }
+            class PublishInstagram {
+                constructor(data) {
+                    this.originalId = data.originalId;
+                    this.caption = data.caption;
+                    this.mediaUrl = data.mediaUrl;
+                    this.kind = data.kind;
+                }
+                reset() {
+                    this.originalId = null;
+                    this.caption = null;
+                    this.mediaUrl = null;
+                    this.kind = "DoNotPublish";
+                }
+            }
+            function getPost() {
+                var value = Cookies.get("current-post");
+                if(value) {
+                    var j = JSON.parse(value);
+                    return new PublishPost(j);
+                }
+                return new PublishPost({});
+            }
+            function setPost(post) {
+                var t = JSON.stringify(post);
+                Cookies.set("current-post", t);
+            }
 
             function redirectErr(urlOrEvent) {
                 var url = "";
@@ -37,6 +79,30 @@
                 }
             }
 
+            async function setKind() {
+                var select = event.currentTarget;
+                var platformName = select.getAttribute("for");
+                var post = getPost();
+                post[platformName].kind = select.value;
+                if(select.value == "DoNotPublish") {
+                    post[platformName].reset();
+                }
+                setPost(post);
+                window.location.reload();
+            }
+            async function setDirty() {
+                var input = event.currentTarget;
+                input.classList.add("unsaved");
+            }
+            async function setValue() {
+                var input = event.currentTarget;
+                var propertyName = input.id;
+                var platformName = input.parentElement.id;
+                var post = getPost();
+                post[platformName][propertyName] = input.value;
+                setPost(post);
+                input.classList.remove("unsaved");
+            }
             async function igSearch() {
                 event.currentTarget.toggleAttribute("disabled", true);
                 event.currentTarget.value = "Fetching...";
@@ -60,6 +126,28 @@
                         alert("An error occured.");
                     }
                 }
+            }
+            async function igSelectPost(event) {
+                var div = event.currentTarget;
+                var id = div.id.split("_")[1];
+                var current = getPost();
+                console.log("Get:", current);
+
+                var url = div.children[0].src;
+                var caption = div.children[1].innerText;
+                current.instagram.originalId = id;
+                current.instagram.caption = caption;
+                current.instagram.mediaUrl = url;
+                current.instagram.kind = "PublishWithText";
+                if(!current.defaultText) {
+                    current.defaultText = caption;
+                }
+                if(!current.defaultMediaUrl) {
+                    current.defaultMediaUrl = url;
+                }
+                console.log("Set:", current);
+                setPost(current);
+                window.location.reload();
             }
         </script>
     </body>
