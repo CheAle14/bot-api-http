@@ -13,49 +13,54 @@
                 display: table;
                 clear: both;
             }
+            div.error {
+                border: 1px solid red;
+                background-color: rgba(255, 0, 0, 0.2);
+            }
         </style>
     </head>
     <body>
-        <h1>Instagram</h1>
-        <div class="container">
-            <div class="column left">
-                <h2>Original</h2>
-                <REPLACE id="instagramPosts"/>
-            </div>
-            <div class="column right">
-                <h2>Republish as</h2>
-                <select>
-                    <option>Do not republish on Instagram</option>
-                    <option>Republish with:</option>
-                </select>
-                <form id="instagram">
-                    <label>Caption:</label> <input type="text" id="caption" placeholder="Caption"><br/>
-                    <label>Image: </label> <img id="ig_image"/>
-                </form>
-            </div>
-        </div>
-        <hr>
-        <h1>Twitter</h1>
-        <div class="container">
-            <div class="column left">
-                <h2>Original</h2>
-                <p>(tweets here etc)</p>
-            </div>
-            <div class="column right">
-                <h2>Republish as</h2>
-                <select>
-                    <option>Do not republish on Twitter</option>
-                    <option>Retweet exactly</option>
-                    <option>Make new tweet with:</option>
-                </select>
-                <form id="instagram">
-                    <label>Caption:</label> <input type="text" id="caption" placeholder="Caption"><br/>
-                    <label>Image: </label> <img id="ig_image"/>
-                </form>
-            </div>
-        </div>
-        <hr>
-        <strong>Raw data returned from Instagram:</strong>
-        <pre><code><REPLACE id='rawcode'/></code></pre>
+        <REPLACE id="content"/>
+
+        <script>
+
+            function redirectErr(urlOrEvent) {
+                var url = "";
+                if(typeof(urlOrEvent) === "string") {
+                    url = urlOrEvent;
+                } else {
+                    url = urlOrEvent.currentTarget.getAttribute("data-url");
+                }
+                var domain = new URL(url).hostname;
+                if(prompt(`This action requires that you authorize through ${domain}, which will DISCARD YOUR CURRENT INPUTS\nType 'yes' to proceed`) == "yes") {
+                    window.location.href = url;
+                }
+            }
+
+            async function igSearch() {
+                event.currentTarget.toggleAttribute("disabled", true);
+                event.currentTarget.value = "Fetching...";
+                var t = event.currentTarget;
+                var response = await fetch("/api/republisher/ig", {
+                    redirect: "manual"
+                });
+                t.toggleAttribute("disabled", false);
+                console.log(response, response.headers.get("location"));
+                if(response.ok) {
+                    var html = await response.text();
+                    document.getElementById("instaPosts").innerHTML = html;
+                    t.style.display = "none";
+                } else {
+                    var loc = response.headers.get("location");
+                    if(loc) {
+                        redirectErr(loc);
+                    } else {
+                        var body = await response.text();
+                        console.error(body);
+                        alert("An error occured.");
+                    }
+                }
+            }
+        </script>
     </body>
 </html>
