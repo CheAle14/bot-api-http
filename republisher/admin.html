@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Republisher Admin page</title>
+    </head>
+    <body>
+        <h2>Facebook & Instagram</h2>
+        <REPLACE id="facebook"/>
+
+        <hr>
+
+        <h3>Manage User Access Levels</h3>
+        <REPLACE id="userTable"/>
+
+        <script>
+            async function updateAccess() {
+                var select = event.currentTarget;
+                console.log(select.value, select);
+            }
+        </script>
+    </body>
+</html>
