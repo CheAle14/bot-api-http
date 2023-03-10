@@ -31,26 +31,66 @@
     <body>
         <REPLACE id="content"/>
 
+        <hr/>
+        <REPLACE id="actions"/>
+        <div id="errors">
+        </div>
+
         <script>
             class PublishPost {
                 constructor(data) {
-                    this.defaultText = data.defaultText;
-                    this.defaultMediaUrl = data.defaultMediaUrl;
+                    this.defaultText = data.defaultText ?? null;
+                    this.defaultMediaUrl = data.defaultMediaUrl ?? null;
                     this.instagram = new PublishInstagram(data.instagram ?? {});
+                }
+                checkValid() {
+                    var errs = {};
+                    var noPublish = 0;
+                    for(let name of ["instagram"]) {
+                        var platform = this[name];
+                        try {
+                            if(!platform.checkValid(this.defaultText, this.defaultMediaUrl)) {
+                                noPublish++;
+                            } else {
+                                console.log(name, "is valid", platform);
+                            }
+                        } catch(err) {
+                            console.log(name, err);
+                            errs[name] = err;
+                        }
+                    }
+                    console.log(errs, noPublish);
+                    if(noPublish === 1)
+                        errs["*"] = "There are no social media platforms configured to publish.";
+                    return errs;
                 }
             }
             class PublishInstagram {
                 constructor(data) {
-                    this.originalId = data.originalId;
-                    this.caption = data.caption;
-                    this.mediaUrl = data.mediaUrl;
-                    this.kind = data.kind;
+                    this.originalId = data.originalId ?? null;
+                    this.caption = data.caption ?? null;
+                    this.mediaUrl = data.mediaUrl ?? null;
+                    this.kind = data.kind ?? "DoNotPublish";
                 }
                 reset() {
                     this.originalId = null;
                     this.caption = null;
                     this.mediaUrl = null;
                     this.kind = "DoNotPublish";
+                }
+                checkValid(defText, defMed) {
+                    if(this.kind === "DoNotPublish") return false;
+                    if(this.caption === null && defText === null)
+                        throw "Caption is null and no global default is provided.";
+                    var url = this.mediaUrl ?? defMed;
+                    if(url === null)
+                        throw "Media URL is null and no global default is provided.";
+                    try {
+                        var x = new URL(url);
+                    } catch(err) {
+                        throw "Media URL is not a valid URL";
+                    }
+                    return true;
                 }
             }
             function getPost() {
@@ -98,6 +138,7 @@
                 var input = event.currentTarget;
                 var propertyName = input.id;
                 var platformName = input.parentElement.id;
+                console.log("Setting", propertyName, platformName, input.value, input);
                 var post = getPost();
                 post[platformName][propertyName] = input.value;
                 setPost(post);
@@ -148,6 +189,44 @@
                 console.log("Set:", current);
                 setPost(current);
                 window.location.reload();
+            }
+            function setError(value) {
+                var div = document.getElementById("errors");
+                div.style.display = "";
+                div.style.border = "1px solid red";
+                div.style.backgroundColor = "rgba(255, 0, 0, 0.2)";
+                if(typeof(value) === "string") {
+                    div.innerText = value;
+                } else {
+                    div.innerHTML ="<pre>" + JSON.stringify(value, null, 2) + "</pre>";
+                }
+            }
+            async function tryPublish(event) {
+                console.log("Publishing:", event);
+                var btn = event.currentTarget;
+                btn.toggleAttribute("disabled", true);
+                var post = getPost();
+                var errors = post.checkValid();
+                var keys = Object.keys(errors);
+                if(keys.length > 0) {
+                    console.error(errors);
+                    btn.toggleAttribute("disabled", false);
+                    setError(errors);
+                    return;
+                }
+                var response = await fetch(`/api/republisher/post`, {
+                    method: "POST"
+                });
+                var type = response.headers.get("content-type");
+                btn.toggleAttribute("disabled", false);
+                console.log(response);
+                if(type === "application/json") {
+                    var json = await response.json();
+                    setError(json);
+                } else {
+                    var text = await response.text();
+                    setError(text);
+                }
             }
         </script>
     </body>

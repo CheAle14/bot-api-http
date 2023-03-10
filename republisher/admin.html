@@ -13,9 +13,32 @@
         <REPLACE id="userTable"/>
 
         <script>
+            function setPrev() {
+                var sel = event.currentTarget;
+                sel.setAttribute("data-prev", sel.value);
+            }
             async function updateAccess() {
+                var _event = event;
                 var select = event.currentTarget;
-                console.log(select.value, select);
+                var td = select.parentElement;
+                var id = td.parentElement.id;
+                console.log(select.value, select, event);
+                select.toggleAttribute("disabled", true);
+                var response = await fetch(`/api/republisher/admin?user=${id}`, {
+                    method: "PATCH",
+                    body: JSON.stringify({
+                        "role": `${select.value}`
+                    })
+                });
+                select.toggleAttribute("disabled", false);
+                if(!response.ok) {
+                    var text = await response.text();
+                    alert("Error: " + text);
+                    select.value = select.getAttribute("data-prev");
+                }
+                select.setAttribute("data-prev", select.value);
+                    
+                return true;
             }
         </script>
     </body>
