@@ -25,13 +25,16 @@
             input.unsaved {
                 background-color: rgba(0, 0, 255, 0.171);
             }
+            h1 {
+                margin-block-end: 0.1em;
+            }
         </style>
         <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js"></script>
     </head>
     <body>
         <REPLACE id="content"/>
 
-        <hr/>
+        
         <REPLACE id="actions"/>
         <div id="errors">
         </div>
@@ -93,6 +96,9 @@
                     return true;
                 }
             }
+            function hasPost() {
+                return !!Cookies.get("current-post");
+            }
             function getPost() {
                 var value = Cookies.get("current-post");
                 if(value) {
@@ -113,10 +119,15 @@
                 } else {
                     url = urlOrEvent.currentTarget.getAttribute("data-url");
                 }
-                var domain = new URL(url).hostname;
-                if(prompt(`This action requires that you authorize through ${domain}, which will DISCARD YOUR CURRENT INPUTS\nType 'yes' to proceed`) == "yes") {
-                    window.location.href = url;
+                var confirmed;
+                if(hasPost()) {
+                    var domain = new URL(url).hostname;
+                    if(!confirm(`This action requires that you authorize through ${domain}, which could cause your current inputs to be lost\nDo you still wish to proceed?`)) {
+                        return;
+                    }
                 }
+                console.log("Data:", url);
+                window.location.href = url;
             }
 
             async function setKind() {
