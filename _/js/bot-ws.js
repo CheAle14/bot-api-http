@@ -1,9 +1,24 @@
 let WSC = {}
+
+WSC.getUrl = function() {
+    var prot = document.location.protocol;
+    if(prot === "http:") {
+        // probably localhost connection
+        return `${document.location.hostname}:4650`
+    }
+    var host = document.location.host;
+    var groups = host.split('.');
+    var subdom = groups[0];
+    if(subdom === "mlapitest")
+        return "ws://localhost:4650";
+    if(subdom === "publish")
+        subdom = "mlapi";
+    return "wss://" + subdom.replace("mlapi", "wss") + "." + groups.slice(1).join(".")
+}
+
 WSC.initWS = function (path, retryLimit, onMessage, onClose, onReconnectLimit, onError, onOpen) {
     console.log("Starting WS");
-    let prot = document.location.protocol === "http:" ? "ws" : "wss";
-    let host = prot === "wss" ? `${document.location.hostname}/wss` : `${document.location.hostname}:4650`;
-    WSC.fullUrl = `${prot}://${host}/${path}`;
+    WSC.fullUrl = WSC.getUrl() + `/${path}`;
     console.log(WSC.fullUrl);
     WSC.socket = new WebSocket(WSC.fullUrl);
     WSC.retrylimit = retryLimit === null ? 5 : retryLimit;
