@@ -45,11 +45,12 @@
                     this.defaultText = data.defaultText ?? null;
                     this.defaultMediaUrl = data.defaultMediaUrl ?? null;
                     this.instagram = new PublishInstagram(data.instagram ?? {});
+                    this.discord = new PublishDiscord(data.discord ?? {});
                 }
                 checkValid() {
                     var errs = {};
                     var noPublish = 0;
-                    for(let name of ["instagram"]) {
+                    for(let name of ["instagram", "discord"]) {
                         var platform = this[name];
                         try {
                             if(!platform.checkValid(this.defaultText, this.defaultMediaUrl)) {
@@ -68,7 +69,7 @@
                     return errs;
                 }
             }
-            class PublishInstagram {
+            class PublishBase {
                 constructor(data) {
                     this.originalId = data.originalId ?? null;
                     this.caption = data.caption ?? null;
@@ -94,6 +95,16 @@
                         throw "Media URL is not a valid URL";
                     }
                     return true;
+                }
+            }
+            class PublishInstagram extends PublishBase {
+                constructor(data) {
+                    super(data);
+                }
+            }
+            class PublishDiscord extends PublishBase {
+                constructor(data) {
+                    super(data);
                 }
             }
             function hasPost() {
