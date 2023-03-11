@@ -4,16 +4,9 @@ WSC.getUrl = function() {
     var prot = document.location.protocol;
     if(prot === "http:") {
         // probably localhost connection
-        return `${document.location.hostname}:4650`
+        return `ws://${document.location.hostname}:4650`;
     }
-    var host = document.location.host;
-    var groups = host.split('.');
-    var subdom = groups[0];
-    if(subdom === "mlapitest")
-        return "ws://localhost:4650";
-    if(subdom === "publish")
-        subdom = "mlapi";
-    return "wss://" + subdom.replace("mlapi", "wss") + "." + groups.slice(1).join(".")
+    return "wss://" + document.location.hostname + "/wss";
 }
 
 WSC.initWS = function (path, retryLimit, onMessage, onClose, onReconnectLimit, onError, onOpen) {
