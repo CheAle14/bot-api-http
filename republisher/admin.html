@@ -24,7 +24,7 @@
                 var id = td.parentElement.id;
                 console.log(select.value, select, event);
                 select.toggleAttribute("disabled", true);
-                var response = await fetch(`/api/republisher/admin?user=${id}`, {
+                var response = await fetch(getEndpoint(`<ENDPOINT 'APIPatchUser'/>`, `${id}`), {
                     method: "PATCH",
                     body: JSON.stringify({
                         "role": `${select.value}`
