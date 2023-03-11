@@ -9,6 +9,11 @@
 
         <hr>
 
+        <h2>Discord</h2>
+        <label>Webhook URL: </label><input onchange="dsWebhookUpdate(event)" type="url" value="$REPLACE id='dsWebhook'/>"/>
+
+        <hr>
+
         <h3>Manage User Access Levels</h3>
         <REPLACE id="userTable"/>
 
@@ -16,6 +21,23 @@
             function setPrev() {
                 var sel = event.currentTarget;
                 sel.setAttribute("data-prev", sel.value);
+            }
+            async function dsWebhookUpdate(event) {
+                var _event = event;
+                var input = event.currentTarget;
+                console.log(input.value, input, event);
+                input.toggleAttribute("disabled", true);
+                var response = await fetch(`<ENDPOINT 'APIPatchDiscord'/>`, {
+                    method: "PATCH",
+                    body: JSON.stringify({
+                        "webhook": `${input.value}`
+                    })
+                });
+                input.toggleAttribute("disabled", false);
+                if(!response.ok) {
+                    var text = await response.text();
+                    alert("Error: " + text);
+                }
             }
             async function updateAccess() {
                 var _event = event;
