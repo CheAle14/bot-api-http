@@ -148,7 +148,7 @@
                 event.currentTarget.toggleAttribute("disabled", true);
                 event.currentTarget.value = "Fetching...";
                 var t = event.currentTarget;
-                var response = await fetch("/api/republisher/ig", {
+                var response = await fetch("<ENDPOINT 'APIGetInstaItems'/>", {
                     redirect: "manual"
                 });
                 t.toggleAttribute("disabled", false);
@@ -214,7 +214,7 @@
                     setError(errors);
                     return;
                 }
-                var response = await fetch(`/api/republisher/post`, {
+                var response = await fetch(`<ENDPOINT 'APISchedulePublish'/>`, {
                     method: "POST"
                 });
                 var type = response.headers.get("content-type");
