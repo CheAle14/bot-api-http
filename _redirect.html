@@ -17,7 +17,7 @@
         } else {
             setCookie("redirect", null, -99);
         }
-        if(DELAY && DELAY.length > 0) {
+        if(DELAY && DELAY === "true") {
             console.log("Redirecting due to delay", DELAY);
             document.getElementById("msg").innerText = "You are being redirected to";
             setTimeout(function() {
