@@ -19,7 +19,7 @@
         }
         if(DELAY) {
             document.getElementById("msg").innerText = "You are being redirected to";
-            setTImeout(function() {
+            setTimeout(function() {
                 window.location.href = URL;
             }, 5000);
         } else {
