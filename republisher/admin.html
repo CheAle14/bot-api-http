@@ -2,6 +2,11 @@
 <html>
     <head>
         <title>Republisher Admin page</title>
+        <style>
+            .link {
+                cursor: pointer;
+            }
+        </style>
     </head>
     <body>
         <h2>Facebook & Instagram</h2>
@@ -11,6 +16,11 @@
 
         <h2>Discord</h2>
         <label>Webhook URL: </label><input onchange="dsWebhookUpdate(event)" type="url" value="$REPLACE id='dsWebhook'/>"/>
+
+        <hr>
+
+        <h3>Posts pending approval</h3>
+        <REPLACE id="postTable" />
 
         <hr>
 
@@ -61,6 +71,10 @@
                 select.setAttribute("data-prev", select.value);
                     
                 return true;
+            }
+            function gotoPost(event) {
+                var id = event.currentTarget.id;
+                window.location.href = getEndpoint("<ENDPOINT 'ViewRepublisherPost'/>", id);
             }
         </script>
     </body>
