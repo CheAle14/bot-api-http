@@ -2,18 +2,43 @@
 <html>
     <head>
         <title>Upload</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
     </head>
     <body>
         <form method="post" enctype="multipart/form-data">
-            <label for="recipient">Sent to: </label><input type="text" id="recipient" name="recipient"><br/>
-            <label for="sender">From: </label><input type="text" id="sender" name="sender"><br/>
+            <label for="recipient">Sent to: </label>
+            <select id="recipientselect" onchange="selectChange(event)">
+                <REPLACE id="recipients"/>
+                <option selected value="other">Other</option>
+            </select>
+            <input type="text" id="recipient" name="recipient"><br/>
+
+            <label for="sender">From: </label>
+            <select id="senderselect" onchange="selectChange(event)">
+                <REPLACE id="senders"/>
+                <option selected value="other">Other</option>
+            </select>
+            <input type="text" id="sender" name="sender"><br/>
             <label for="date">Date: </label><input type="date" id="date" name="date"><br/>
 
-            <label for="files">Images: </label><input type="file" multiple minlength="1" id="files" name="files">
+            <label for="files">Images: </label><input type="file" accept="image/*" multiple minlength="1" id="files" name="files"><br/>
             <input type="submit" value="Submit">
         </form>
 
         <script>
+            function selectChange(event) {
+                var select = event.currentTarget;
+                console.log(select, select.value);
+                var input = document.getElementById(select.id.replace("select", ""));
+                var value = select.value;
+                if(value === "other") {
+                    input.toggleAttribute("readonly", false);
+                    input.value = "";
+                } else {
+                    input.toggleAttribute("readonly", true);
+                    input.value = value;
+                }
+            }
             document.body.onload = function() {
                 const today = new Date();
                 const yyyy = today.getFullYear();

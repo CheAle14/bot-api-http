@@ -17,17 +17,20 @@
             }
             img {
                 max-width: 50%;
+                min-width: 50px;
+                min-height: 50px;
             }
         </style>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
     </head>
     <body>
         <h2>Add additional page(s)</h2>
         <form method="post" enctype="multipart/form-data" action="/ocr/upload">
-            <label for="recipient">Sent to: </label><input type="text" id="recipient" name="recipient"><br/>
-            <label for="sender">From: </label><input type="text" id="sender" name="sender"><br/>
-            <label for="date">Date: </label><input type="date" id="date" name="date"><br/>
+            <label for="recipient">Sent to: </label><input readonly type="text" id="recipient" name="recipient"><br/>
+            <label for="sender">From: </label><input readonly type="text" id="sender" name="sender"><br/>
+            <label for="date">Date: </label><input readonly type="date" id="date" name="date"><br/>
 
-            <label for="files">Images: </label><input type="file" multiple minlength="1" id="files" name="files">
+            <label for="files">Images: </label><input type="file" accept="image/*" multiple minlength="1" id="files" name="files">
             <input type="submit" value="Submit">
         </form>
         <h2>Scanned pages:</h2>
@@ -38,6 +41,10 @@
                 document.getElementById("recipient").value = loc[5];
                 document.getElementById("sender").value = loc[6];
                 document.getElementById("date").value = loc[7];
+            }
+            function loadImg(event) {
+                var img = event.currentTarget;
+                img.src = img.getAttribute("data-src");
             }
         </script>
     </body>

@@ -7,27 +7,20 @@
                 cursor: pointer;
             }
         </style>
+        <link rel="stylesheet" href="/_/css/republisher.css">
+        <script src="/_/js/republisher.js"></script>
     </head>
     <body>
-        <h2>Facebook & Instagram</h2>
-        <REPLACE id="facebook"/>
-
-        <hr>
-
-        <h2>Discord</h2>
-        <label>Webhook URL: </label><input onchange="dsWebhookUpdate(event)" type="url" value="$REPLACE id='dsWebhook'/>"/>
-
-        <hr>
-
         <h3>Posts pending approval</h3>
         <REPLACE id="postTable" />
-
         <hr>
-
         <h3>Manage User Access Levels</h3>
         <REPLACE id="userTable"/>
+        <hr>
 
+        <REPLACE id="platforms"/>
         <script>
+            function hasPost() {return false;}
             function setPrev() {
                 var sel = event.currentTarget;
                 sel.setAttribute("data-prev", sel.value);

@@ -2,51 +2,9 @@
 <html>
     <head>
         <title>Select posts to republish</title>
-        <style>
-            .column {
-                float: left;
-                width: 50%;
-            }
-            /* Clear floats after the columns */
-            .container:after {
-                content: "";
-                display: table;
-                clear: both;
-            }
-            .error {
-                padding-left: 3px;
-                border: 1px solid red;
-                background-color: rgba(255, 0, 0, 0.2);
-            }
-            .warn {
-                padding-left: 3px;
-                border: 1px solid orange;
-                background-color: rgba(255, 174, 0, 0.2);
-            }
-            div.ig_media:hover, div.selected {
-                border: 2px solid black;
-                background-color: grey;
-                cursor: pointer;
-            }
-            .unsaved {
-                background-color: rgba(0, 0, 255, 0.171);
-            }
-            h1 {
-                margin-block-end: 0.1em;
-            }
-            div.instaPosts, .withscroll {
-                max-height: 300px;
-                overflow-y: scroll;
-            }
-            textarea {
-                width: 100%;
-                height: 15em;
-            }
-            input[type="url"] {
-                width: 75%;
-            }
-        </style>
         <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js"></script>
+        <link rel="stylesheet" href="/_/css/republisher.css">
+        <script src="/_/js/republisher.js"></script>
     </head>
     <body>
         <REPLACE id="content"/>
@@ -57,6 +15,7 @@
         </div>
 
         <script>
+            const PLATFORMS = ["instagram", "discord", "tiktok"]
             class PostMedia {
                 constructor(data) {
                     this.postId = data.postId;
@@ -90,8 +49,12 @@
                                 base = new PublishInstagram(obj);
                             else if(name === "default")
                                 base = new PublishDefault(obj);
-                            else 
+                            else if(name === "tiktok")
+                                base = new PublishTikTok(obj);
+                            else if(name === "discord")
                                 base = new PublishDiscord(obj);
+                            else
+                                throw new Error(`'${name}' is an unknown platform`);
                             this.platforms.push(base);
                             this[base.platform] = base;
                         }
@@ -100,6 +63,7 @@
                         this.platforms.push(this.default);
                         this.platforms.push(new PublishInstagram({}));
                         this.platforms.push(new PublishDiscord({}));
+                        this.platforms.push(new PublishTikTok({}));
                     }
                     for(let plat of this.platforms) {
                         if(plat.media.length === 0) {
@@ -126,7 +90,7 @@
                 checkValid() {
                     var errs = {};
                     var noPublish = 0;
-                    for(let name of ["instagram", "discord"]) {
+                    for(let name of PLATFORMS) {
                         var platform = this[name];
                         try {
                             if(!platform.checkValid(this.defaultText, this.defaultMedia)) {
@@ -140,7 +104,7 @@
                         }
                     }
                     console.log(errs, noPublish);
-                    if(noPublish === 2)
+                    if(noPublish === PLATFORMS.length)
                         errs["*"] = "There are no social media platforms configured to publish.";
                     return errs;
                 }
@@ -188,6 +152,13 @@
                     this.platform = "discord";
                 }
             }
+            class PublishTikTok extends PublishBase {
+                constructor(data) {
+                    super(data);
+                    this.originalId = data.originalId ?? null;
+                    this.platform = "tiktok";
+                }
+            }
             class PublishDefault extends PublishBase {
                 constructor(data) {
                     super(data);
@@ -206,7 +177,7 @@
                 return new PublishPost({});
             }
             function jsonReplacer(key, value) {
-                if(key === "discord" || key == "instagram") return undefined;
+                if(PLATFORMS.indexOf(key) >= 0) return undefined;
                 return value;
             }
             function setPost(post) {
@@ -214,23 +185,6 @@
                 Cookies.set("current-post", t);
             }
 
-            function redirectErr(urlOrEvent) {
-                var url = "";
-                if(typeof(urlOrEvent) === "string") {
-                    url = urlOrEvent;
-                } else {
-                    url = urlOrEvent.currentTarget.getAttribute("data-url");
-                }
-                var confirmed;
-                if(hasPost()) {
-                    var domain = new URL(url).hostname;
-                    if(!confirm(`This action requires that you authorize through ${domain}, which could cause your current inputs to be lost\nDo you still wish to proceed?`)) {
-                        return;
-                    }
-                }
-                console.log("Data:", url);
-                window.location.href = url;
-            }
 
             function createMedia(platform, type, url) {
                 return new PostMedia({platform: platform, type: type, remoteUrl: url});
@@ -285,29 +239,62 @@
                     }
                 }
             }
-            async function igSelectPost(event) {
+            async function ttSearch(event) {
+                event.currentTarget.toggleAttribute("disabled", true);
+                event.currentTarget.value = "Fetching...";
+                var t = event.currentTarget;
+                var response = await fetch("<ENDPOINT 'APIGetTikTokItems'/>", {
+                    redirect: "manual"
+                });
+                t.toggleAttribute("disabled", false);
+                console.log(response, response.headers.get("location"));
+                if(response.ok) {
+                    var html = await response.text();
+                    document.getElementById("tiktokPosts").innerHTML = html;
+                    t.style.display = "none";
+                } else {
+                    var loc = response.headers.get("location");
+                    if(loc) {
+                        redirectErr(loc);
+                    } else {
+                        var body = await response.text();
+                        console.error(body);
+                        alert("An error occured.");
+                    }
+                }
+            }
+            async function selectPost(event, platform) {
                 var div = event.currentTarget;
                 var id = div.id.split("_")[1];
                 var current = getPost();
                 console.log("Get:", current);
-
-                var url = div.children[0].src;
+                var url = div.getAttribute("data-media-url");
+                if(!url)
+                    url = div.children[0].src;
                 var caption = div.children[1].innerText;
-                current.instagram.originalId = id;
-                current.instagram.caption = caption;
-
-                var media = createMedia("instagram", "image", url);
-                current.instagram.media.push(media);
-                current.instagram.kind = "PublishWithText";
+                current[platform].originalId = id;
+                current[platform].caption = caption;
+                var type = div.getAttribute("data-type");
+                var media = createMedia(platform, type, url);
+                current[platform].media.push(media);
+                current[platform].kind = "PublishWithText";
                 if(!current.defaultText) {
                     current.defaultText = caption;
                 }
                 if(current.defaultMedia.length === 0) {
-                    current.defaultMedia.push(createMedia("default", "image", url));
+                    current.defaultMedia.push(createMedia("default", type, url));
                 }
                 console.log("Set:", current);
                 setPost(current);
                 window.location.reload();
+            }
+
+
+            async function igSelectPost(event) {
+                await selectPost(event, "instagram");
+            }
+            async function ttSelectPost(event) {
+                await selectPost(event, "tiktok");
             }
             function setError(value) {
                 var div = document.getElementById("errors");

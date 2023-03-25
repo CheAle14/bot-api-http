@@ -1,0 +1,44 @@
+
+.error {
+    padding-left: 3px;
+    border: 1px solid red;
+    background-color: rgba(255, 0, 0, 0.2);
+}
+
+.column {
+    float: left;
+    width: 50%;
+}
+/* Clear floats after the columns */
+.container:after {
+    content: "";
+    display: table;
+    clear: both;
+}
+.warn {
+    padding-left: 3px;
+    border: 1px solid orange;
+    background-color: rgba(255, 174, 0, 0.2);
+}
+div.media:hover, div.selected {
+    border: 2px solid black;
+    background-color: grey;
+    cursor: pointer;
+}
+.unsaved {
+    background-color: rgba(0, 0, 255, 0.171);
+}
+h1 {
+    margin-block-end: 0.1em;
+}
+.withscroll {
+    max-height: 300px;
+    overflow-y: scroll;
+}
+textarea {
+    width: 100%;
+    height: 15em;
+}
+input[type="url"] {
+    width: 75%;
+}
