@@ -467,14 +467,18 @@
                         sendWs({mute: this.catalyst});
                     }
                 }
-                onAdvance() {
-                    console.log("Advance", this.catalyst);
+                onAdvance(data = null) {
+                    if(data === null) {
+                        data.started = Date.now()
+                        data.ws = true;
+                    }
+                    console.log("Advance", this.catalyst, data);
                     this.muted = null;
                     this.alarm = false;
                     refreshTableNextTick = true;
 
                     if(startedAt === null) {
-                        startedAt = Date.now();
+                        startedAt = data.started;
                     }
 
                     for(let index = 0; index < this.simpleSteps.length; index++) {
@@ -482,7 +486,7 @@
                         if(step.state === STATE.COMPLETE) continue;
                         if(step.state === STATE.PENDING) {
                             step.state = STATE.ONGOING;
-                            this.startedAt = startedAt;
+                            this.startedAt = data.started;
                             console.log("Started with", step.text, ", next up is", this.simpleSteps[index + 1]);
                             break;
                         }
@@ -492,7 +496,11 @@
                             if(next) {
                                 next.state = STATE.ONGOING;
                                 console.log("Moving to", next.text, "in", step.duration);
-
+                                if(data.time) {
+                                    var diff = (Date.now() - parseInt(data.time)) / 1000;
+                                    console.log("Skipping ", diff, "ms from next");
+                                    next.tick(diff);
+                                }
                                 if(next.duration > 0) {
                                     break;
                                 }
@@ -501,6 +509,7 @@
                             }
                         }
                     }
+                    if(!data.ws) return;
                     sendWs({advance: {
                         id: this.catalyst,
                         started: startedAt,
@@ -509,79 +518,6 @@
                     });
                 }
             }
-
-            var beans = new Recipe("microwave")
-            .withStep("Put baked beans in", 1.5 * 60)
-            .withStep("Stir beans first", 1.5 * 60)
-            .withStep("Stir beans second", 1.5 * 60)
-            .withStep("Stir beans third", 1.5 * 60);
-
-
-            var sausages = new Recipe("oven")
-            .withStep("Put sausages in", 7.5 * 60)
-            .withStep("Flip sausages", 7.5 * 60);
-
-            var toast = new Recipe("toaster")
-            .withStep("Put toast on", 160);
-
-            var bacon = new Recipe("frying pan")
-            .withStep("Heat frying pan", 120)
-            .withStep("Put bacon on pan", 1.5 * 60)
-            .withStep("Flip bacon first", 1.5 * 60)
-            .withStep("Flip bacon second", 1.5 * 60)
-            .withStep("Flip bacon third", 1.5 * 60);
-
-            var ovenBacon = new Recipe("oven")
-            .withStep("Put bacon in oven", 10 * 60)
-            .withStep("Check bacon", 60)
-            .withStep("Check bacon", 60)
-
-            var scrambledEggs = new Recipe("small pan")
-            .withStep("Heat pan up", 60)
-            .withStep("Begin scrambled eggs", 5 * 60);
-
-            var chips = new Recipe("air fryer")
-            .withStep("Put chips in", 8 * 60)
-            .withStep("Shake chips and put back on", 8 * 60);
-
-            var burgers = new Recipe("grill")
-            .withStep("Put burgers in", 4 * 60)
-            .withStep("Flip burgers first", 4 * 60)
-            .withStep("Flip burgers second", 4 * 60)
-            .withStep("Flip burgers third", 4 * 60)
-            .withStep("Flip burgers fourth, apply cheese", 4 * 60);
-
-            var hashbrowns = new Recipe("air fryer")
-            .withStep("Put hash browns in", 6 * 60)
-            .withStep("Flip hash browns", 6 * 60);
-
-
-            //var recipes = [sausages, scrambledEggs, hashbrowns, beans, ovenBacon];
-
-            var mash = new Recipe("microwave")
-            .withStep("Put mash potato in", 3 * 60)
-            .withStep("Stir and put back in", 2.5 * 60);
-
-            var yorkshirePuds = new Recipe("oven")
-            .withStep("Put yorks in", 3 * 60);
-
-            var gravy = new Recipe("kettle")
-            .withStep("Boil water and do gravy", 180);
-
-            var carrotsAndPeas = new Recipe("microwave")
-            .withStep("Put carrots+peas in", 3 * 60);
-
-            var pigsBlankets = new Recipe("oven")
-            .withStep("Put pigs in blankets in", 25 * 60);
-
-            var stuffing = new Recipe("oven")
-            .withStep("Put stuffing in", 18 * 60);
-
-            var lambSteaks = new Recipe("grill")
-            .withStep("Put lamb steaks in", 4.5 * 60)
-            .withStep("Flip lamb steaks, put back", 4.5 * 60);
-
-            //var recipes = [mash, yorkshirePuds, gravy, carrotsAndPeas, pigsBlankets, stuffing, lambSteaks];
 
             const RECIPE_ID = "<REPLACE id='id'/>";
             var startedAt = null;
@@ -614,6 +550,21 @@
                     }
                     console.log("Set groups:", recipeGroups);
                     init();
+                } else if(jobj.data) {
+                    const data = jobj.data;
+                    refreshTableNextTick = true;
+                    if(data.mute) {
+                        var group = recipeGroups[data.mute];
+                        if(group) {
+                            group.muted = true;
+                        }
+                    } else if(data.advance) {
+                        const payload = data.advance;
+                        var cat = payload.id;
+                        var time = payload.time;
+                        var group = recipeGroups[cat];
+                        group.onAdvance(payload)
+                    }
                 }
             }
             function wsClose(e) {
