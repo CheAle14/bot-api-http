@@ -471,7 +471,8 @@
                 onAdvance(data = null) {
                     if(data === null) {
                         data = {};
-                        data.started = Date.now()
+                        data.time = Date.now();
+                        data.started = data.time;
                         data.ws = true;
                     }
                     console.log("Advance", this.catalyst, data);
@@ -508,6 +509,7 @@
                                 }
                             } else {
                                 console.log("Finished group with final", step.text);
+                                this.completedAt = data.time;
                             }
                         }
                     }
