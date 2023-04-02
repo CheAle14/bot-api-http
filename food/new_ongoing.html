@@ -469,6 +469,7 @@
                 }
                 onAdvance(data = null) {
                     if(data === null) {
+                        data = {};
                         data.started = Date.now()
                         data.ws = true;
                     }
