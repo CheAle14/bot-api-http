@@ -428,7 +428,8 @@
                     if(this.completedAt) {
                         mainDiv.classList.add("complete");
                         mainDiv.classList.remove("alarm", "notice");
-                        var diffS = (this.completedAt - startedAt) / 1000;
+                        var start = this.startedAt ?? startedAt;
+                        var diffS = (this.completedAt - start) / 1000;
                         var targetS = this.sumOriginalLength();
                         var diffFromTarget = diffS - targetS;
                         console.log("Completed:", diffS, targetS);
