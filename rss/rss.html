@@ -6,8 +6,8 @@
             html, body, .rssContainer {
                 width: 100%;
                 height: 100%;
-            }
-            .rssContainer {
+                margin: 0;
+                overflow: hidden;
             }
             .sidefeed {
                 margin: 3px;
@@ -257,7 +257,11 @@
                     var form = document.createElement("form");
                     form.action = "/api/rss/feeds";
                     form.method = "post";
-                    form.appendChild(getInput("number", "id", this.id, "Id"));
+                    var idInput = getInput("number", "id", this.id, "Id");
+                    if(this.id === 0) {
+                        idInput.hidden = true;
+                    }
+                    form.appendChild(idInput);
                     form.appendChild(getInput("text", "name", this.name, "Name"));
                     var urlDiv = getInput("url", "url", this.url, "URL")
                     urlDiv.appendChild(getButton("Test", function() {
@@ -265,6 +269,7 @@
                     }))
                     form.appendChild(urlDiv);
 
+                    form.appendChild(getInput("number", "interval", this.interval, "Interval (mins)"));
                     form.appendChild(await getScriptSelect("parser", this.parser == null ? [] : [this.parser], false, "Parser", SCRIPT_PARSE));
                     form.appendChild(await getScriptSelect("filters", this.filters, true, "Filters", SCRIPT_FILTER));
 
