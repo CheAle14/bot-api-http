@@ -269,7 +269,7 @@
                     }))
                     form.appendChild(urlDiv);
 
-                    form.appendChild(getInput("number", "interval", this.interval, "Interval (mins)"));
+                    form.appendChild(getInput("number", "interval", this.interval || 720, "Interval (mins)"));
                     form.appendChild(await getScriptSelect("parser", this.parser == null ? [] : [this.parser], false, "Parser", SCRIPT_PARSE));
                     form.appendChild(await getScriptSelect("filters", this.filters, true, "Filters", SCRIPT_FILTER));
 
