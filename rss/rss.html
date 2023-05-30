@@ -344,6 +344,7 @@
                     this.id = data.id;
                     this.title = data.title;
                     this.url = data.url;
+                    this.author = data.author;
                     this.read = data.read;
                     this.important = data.important;
                     this.feed = data.feed;
@@ -425,6 +426,13 @@
                         article.updateAndRefresh({read: true});
                     }
                     titleTd.appendChild(anchor);
+                    if(this.author) {
+                        titleTd.appendChild(document.createElement("br"));
+                        var authorSpan = document.createElement("span");
+                        authorSpan.innerText = this.author;
+                        authorSpan.classList.add("author");
+                        titleTd.appendChild(authorSpan);
+                    }
                     tr.appendChild(titleTd);
 
                     var seenTd = document.createElement("td");
