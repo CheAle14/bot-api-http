@@ -168,6 +168,7 @@
                     this.remaining = originalDuration;
                     this.state = STATE.PENDING;
 
+                    this.actualDelay = null;
                     this.startedAt = null;
                     this.tentativeStartTime = null;
                 }
@@ -399,6 +400,14 @@
                     };
                 }
 
+                getCompletedDiffTime() {
+                    var sum = 0;
+                    for(let step of this.simpleSteps) {
+                        sum += step.remaining;
+                    }
+                    return sum;
+                }
+
                 toHTML(isSelected, parent) {
                     const CAT = this.catalyst.replace(' ', '-');
                     const ID = `timer-${CAT}`;                    
@@ -428,15 +437,11 @@
                     if(this.completedAt) {
                         mainDiv.classList.add("complete");
                         mainDiv.classList.remove("alarm", "notice");
-                        var start = this.startedAt ?? startedAt;
-                        var diffS = (this.completedAt - start) / 1000;
-                        var targetS = this.sumOriginalLength();
-                        var diffFromTarget = diffS - targetS;
-                        console.log("Completed:", diffS, targetS);
+                        var diffFromTarget = this.getCompletedDiffTime();
                         if(diffFromTarget > 0) {
-                            timer.innerText = "over +" + formatTimer(diffS - targetS) + "+";
+                            timer.innerText = "over +" + formatTimer(diffFromTarget) + "+";
                         } else {
-                            timer.innerText = "under " + formatTimer(diffS - targetS) + "-";
+                            timer.innerText = "under " + formatTimer(diffFromTarget) + "-";
                         }
                     } else {
                         mainDiv.classList.remove("complete");
@@ -484,6 +489,8 @@
                         startedAt = data.started;
                     }
 
+                    var updates = {};
+
                     for(let index = 0; index < this.simpleSteps.length; index++) {
                         const step = this.simpleSteps[index];
                         if(step.state === STATE.COMPLETE) continue;
@@ -495,6 +502,9 @@
                         }
                         if(step.state === STATE.ONGOING) {
                             step.state = STATE.COMPLETE;
+                            updates[index] = {
+                                remaining: step.remaining
+                            }
                             var next = this.simpleSteps[index + 1];
                             if(next) {
                                 next.state = STATE.ONGOING;
@@ -517,7 +527,8 @@
                     sendWs({advance: {
                         id: this.catalyst,
                         started: startedAt,
-                        time: `${Date.now()}`
+                        time: `${Date.now()}`,
+                        updates
                         }
                     });
                 }
