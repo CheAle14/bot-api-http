@@ -438,7 +438,7 @@
                         mainDiv.classList.add("complete");
                         mainDiv.classList.remove("alarm", "notice");
                         var diffFromTarget = this.getCompletedDiffTime();
-                        if(diffFromTarget > 0) {
+                        if(diffFromTarget < 0) {
                             timer.innerText = "over +" + formatTimer(diffFromTarget) + "+";
                         } else {
                             timer.innerText = "under " + formatTimer(diffFromTarget) + "-";
