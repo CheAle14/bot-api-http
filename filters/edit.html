@@ -27,10 +27,10 @@
                 background-color: rgb(0, 255, 55);
             }
             input[type="button"] {
-                width: 24%;
+                width: 19%;
                 height: 2em;
             }
-            textarea.dirty {
+            .dirty {
                 background-color: rgb(61, 61, 255);
             }
             #template {
@@ -43,12 +43,15 @@
         <div id="container">
             <div id="top-bit">
                 <h1>Filter:</h1>
-                <textarea id="template" onkeyup="dirty(event)" onchange="saveTemplate()"></textarea>
+                <label for="name">Name: </label><input onkeyup="dirty(event)" type="text" id="name" />
+                <br/>
+                <textarea id="template" onkeyup="dirty(event)"></textarea>
                 <br/>
                 <input type="button" value="Save" onclick="save()">
                 <input type="button" value="Add" onclick="addnew()">
                 <input type="button" value="Delete" onclick="del()">
                 <input type="button" value="Copy" onclick="cpy()">
+                <input type="button" value="Copy (script)" onclick="cpy(true)">
             </div>
             <hr>
             <div id="bottom-bit">
@@ -60,8 +63,11 @@
         <script>
             var textarea = document.getElementById("text");
             var temptext = document.getElementById("template");
+            var textname = document.getElementById("name");
             function getId() {
-                return window.location.pathname.substring(window.location.pathname.lastIndexOf('/') + 1);
+                var id = window.location.pathname.substring(window.location.pathname.lastIndexOf('/') + 1);
+                if(id === "new") return "00000000-0000-0000-0000-000000000000";
+                return id;
             }
             function dirty(event) {
                 var text = event.srcElement;
@@ -69,56 +75,52 @@
             }
             async function load() {
                 const ID = getId();
-                var response = await fetch(`/filters-raw/${ID}`);
-                var body = await response.text();
+                var response = await fetch(`/api/filters/${ID}`);
+                var body = await response.json();
                 if(!response.ok) {
                     console.error("Error: ", response, body);
                     textarea.value = ":Error: " + body;
                 } else {
-                    textarea.value = body;
+                    textarea.value = body.text;
+                    temptext.value = body.template;
+                    textname.value = body.name;
                 }
 
-                var temr = await fetch(`/filters-template/${ID}`);
-                var temp = await temr.text();
-                temptext.value = temp;
-                if(!temr.ok) {
-                    console.error("Error: ", temr, temp);
-                }
             }
             async function addnew() {
                 var template = temptext.value;
                 var url = prompt("Enter URL:");
                 if(url) {
                     var date = new Date().toISOString()
-                    textarea.value += "\r\n\r\n" + String.format(template, date, url) + "\r\n!";
+                    textarea.value += "\r\n\r\n" + String.format(template, date, url) + "\r\n";
                     await save();
                 }
             }
-            async function saveText(text, url) {
-                const ID = getId();
-                text.setAttribute("readonly", "")
-                var response = await fetch(`/filters-${url}/${ID}`, {
-                    method: "POST",
-                    body: text.value
-                });
-                var body = await response.text();
-                if(!response.ok) {
-                    console.error("Error: ", response, body);
-                    alert("Failed to save!");
-                } else {
-                    text.removeAttribute("readonly");
-                    text.classList.remove("dirty");
-                }
-            }
             async function save() {
-                await saveText(textarea, "raw")
-            }
-            async function saveTemplate() {
-                await saveText(temptext, "template")
+                var data = {};
+                data["name"] = textname.value;
+                data["text"] = textarea.value;
+                data["template"] = temptext.value;
+                
+                const ID = getId();
+                var response = await fetch(`/api/filters/${ID}`, {
+                    method: "PATCH",
+                    body: JSON.stringify(data)
+                });
+                if(response.ok) {
+                    temptext.classList.remove("dirty");
+                    textarea.classList.remove("dirty");
+                    textname.classList.remove("dirty");
+
+                    var id = await response.text();
+                    if(id != ID) {
+                        window.location.href = `/filters/${id}`;
+                    }
+                }
             }
             async function del() {
                 if(confirm("Are you sure you wish to delete?")) {
-                    var response = await fetch("/filters/" + getId(), {
+                    var response = await fetch("/api/filters/" + getId(), {
                         method: "DELETE"
                     });
                     if(response.redirected) {
@@ -126,8 +128,11 @@
                     }
                 }
             }
-            async function cpy() {
+            async function cpy(asScript) {
                 var name = window.location.href.replace('/filters/', '/filters-raw/');
+                if(asScript) {
+                    name += "?script.user.js"
+                }
                 await navigator.clipboard.writeText(name);
             }
             load();

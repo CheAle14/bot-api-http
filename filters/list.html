@@ -8,15 +8,8 @@
         <REPLACE id="list"/>
 
         <script>
-            document.getElementById("new").onclick = async function() {
-                var response = await fetch("/filters/new", {
-                    method: "POST"
-                });
-                if(response.redirected) {
-                    window.location.href = response.url;
-                }
-                console.log(response);
-                console.log(response.headers);
+            document.getElementById("new").onclick = function() {
+                window.location.href = "/filters/new";
             }
         </script>
     </body>
