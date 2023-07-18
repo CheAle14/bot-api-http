@@ -1,0 +1,37 @@
+body, head, html {
+    width: 100%;
+    height: 100%;
+}
+input[type="button"] {
+    width: 100%;
+    height: 10em;
+}
+select {
+    width: 100%;
+    height: 5em;
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+.rank {
+    float: left;
+    margin-right: 5%;
+    font-weight: bold;
+}
+.rank-1 {
+    background-color: gold;
+}
+.rank-2 {
+    background-color: silver;
+}
+.rank-3 {
+    background-color: #cd7f32;
+}
+.container:after {
+    content: "";
+    display: table;
+    clear: both;
+}
+.column {
+    float: left;
+    width: 50%;
+}

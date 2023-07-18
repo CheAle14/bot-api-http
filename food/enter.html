@@ -8,32 +8,7 @@
         <input type="text" id="inp" onkeypress="act(event);">
 
         <script src="../_/js/bot-ws.js"></script>
-        <script>
-            const elem = document.getElementById("inp");
-            elem.focus();
-
-            function gotCode(value) {
-                window.location = `/food/new?code=${value}&redirect=enter`;
-            }
-
-            function act(event) {
-                if(event.key === "Enter") {
-                    gotCode(elem.value);
-                }
-            }
-            function init() {
-                WSC.initWS(`food-scan`, 5, function(msg) {
-                    const data = JSON.parse(msg.data);
-                    if(data.code) {
-                        gotCode(data.code);
-                    }
-                }, null, function(e) {
-                    // reconnect limit reached
-                    window.location.reload();
-                });
-            }
-            init();
-        </script>
+        <script src="/_/js/food-enter.js"></script>
     </body>
 
 </html>

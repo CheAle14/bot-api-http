@@ -1,0 +1,35 @@
+.shared {
+    border-left: 5px solid black;
+    border-right: 5px solid black;
+    text-align: center; 
+    vertical-align: middle;
+}
+.manu {
+    margin-right: 3px;
+    background-color: rgb(56, 56, 255);
+    border-radius: 5%;
+    padding: 1px 3px 1px 3px;
+}
+.cbshare {
+    position: fixed;
+    right: 8px;
+}
+.shift-pressed .item:hover {
+    color: red;
+}
+.today-row {
+    background-color: rgb(67, 67, 255);
+}
+.already-exists {
+    color: rgb(242, 0, 255);
+    
+}
+.already-exists::before {
+    content: "(duplicate) ";
+}
+.expired {
+    background-color: red;
+}
+.cbToggleShare {
+    float: right;
+}

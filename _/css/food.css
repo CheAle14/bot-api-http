@@ -6,3 +6,28 @@
     margin-right: 2px;
     padding-left: 2px;
 }
+.expires-imminently {
+    background-color: red;
+}
+.expires-soon {
+    background-color: orange;
+}
+.danger {
+    background-color: blue;
+    color: white;
+}
+.dangerhover {
+    color: blue;
+    text-decoration: underline;
+    cursor: not-allowed;
+}
+.product-warn {
+    color: rgb(0, 0, 0);
+}
+img {
+    width: 32px;
+    vertical-align: middle;
+}
+td > ol {
+    margin-top: 0;
+}

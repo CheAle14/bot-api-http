@@ -98,3 +98,10 @@ ul {
 .centre {
     text-align: center;
 }
+
+.hidden {
+    display: none
+}
+.fullwidth {
+    width: 100%;
+}

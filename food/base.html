@@ -3,68 +3,12 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <style>
-            .expires-imminently {
-                background-color: red;
-            }
-            .expires-soon {
-                background-color: orange;
-            }
-            .danger {
-                background-color: blue;
-                color: white;
-            }
-            .product-warn {
-                color: rgb(0, 0, 0);
-            }
-        </style>
     </head>
     <body>
         <h1><REPLACE id='inventoryid' /> Inventory</h1>
         <REPLACE id='links' />
         <REPLACE id='table' />
 
-        <script>
-            function removeInvItem(invId, shouldUse) {
-                var uses = 99;
-                if(shouldUse) {
-                    var test = parseInt(prompt(`Please enter uses for this item`, 1), 10);
-                    if(isNaN(test)) {
-                        alert("Number was not an integer. you fail");
-                        return;
-                    }
-                    uses = test;
-                }
-                fetch(`/api/food/inventory?invId=${invId}&uses=${uses}`, {
-                    method: "DELETE"
-                }).then(function(r) {
-                    if(r.ok) {
-                        window.location.reload();
-                    } else {
-                        console.error(r);
-                        alert("Failed.");
-                    }
-                }).catch(function(x) {
-                    console.error(x);
-                    alert("Errored.");
-                })
-            }
-            function toggleFrozen(invId, isFrozen) {
-                console.log(invId);
-                fetch(`/api/food/inventory?invId=${invId}&frozen=${!isFrozen}`, {
-                    method: "PATCH"
-                }).then(function(r) {
-                    if(r.ok) {
-                        window.location.reload();
-                    } else {
-                        console.error(r);
-                        alert("Failed.");
-                    }
-                }).catch(function(x) {
-                    console.error(x);
-                    alert("Errored.");
-                })
-            }
-        </script>
+        <script src="/_/js/food-actions.js"></script>
     </body>
 </html>
