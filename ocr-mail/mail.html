@@ -2,25 +2,7 @@
 <html>
     <head>
         <title>Scanned Mails</title>
-        <style>
-            html, body, .file {
-                width: 100%;
-                height: 100%;
-            }
-            .file {
-                margin: 0 0 3px 0;
-                display: flex;
-            }
-            iframe, img {
-                width: 50%;
-                height: 100%;
-            }
-            img {
-                max-width: 50%;
-                min-width: 50px;
-                min-height: 50px;
-            }
-        </style>
+        <link rel="stylesheet" href="/_/css/ocr-mail.css">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
     </head>
     <body>
@@ -35,17 +17,6 @@
         </form>
         <h2>Scanned pages:</h2>
         <REPLACE id="pages"/>
-        <script>
-            document.body.onload = function() {
-                const loc = window.location.href.split('/');
-                document.getElementById("recipient").value = loc[5];
-                document.getElementById("sender").value = loc[6];
-                document.getElementById("date").value = loc[7];
-            }
-            function loadImg(event) {
-                var img = event.currentTarget;
-                img.src = img.getAttribute("data-src");
-            }
-        </script>
+        <script src="/_/js/ocr-mail.js"></script>
     </body>
 </html>
