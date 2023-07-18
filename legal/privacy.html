@@ -2,49 +2,7 @@
 <html>
     <head>
         <title>MLAPI Privacy Policy</title>
-        <style>
-            td.essential::before {
-                content: "As this data is essential, it can only be removed by the termination of your account. ";
-            }
-            td[consent]::before,
-            td.consent::before {
-                content: "As this data is stored only with your consent, you can request it be deleted at any time. "
-            }
-            td[optional]::before,
-            td.optional::before {
-                content: "Optional";
-                text-decoration: underline;
-                margin-right: 5px;
-            }
-            td,
-            th {
-                border: 1px solid rgb(190, 190, 190);
-                padding: 10px;
-            }
-
-            td {
-                text-align: center;
-            }
-
-            tr:nth-child(even) {
-                background-color: #eee;
-            }
-            table {
-                border-collapse: collapse;
-                border: 2px solid rgb(200, 200, 200);
-                letter-spacing: 1px;
-                font-family: sans-serif;
-                font-size: .8rem;
-            }
-            code {
-                background-color: black;
-                color: white;
-                padding-top: 1px;
-                padding-bottom: 1px;
-                padding-left: 3px;
-                padding-right: 3px;
-            }
-        </style>
+        <link rel="stylesheet" href="/_/css/privacy.css">
     </head>
     <body>
         <h1>MLAPI Privacy Policy</h1>
@@ -171,7 +129,7 @@
                 <tr>
                     <td>
                         <strong><u>Message logging</u></strong> In servers which have not opted out, all messages seen by the bot sent by non-bots will record the following:
-                        <ul style="text-align: left;">
+                        <ul class="left">
                             <li>The ID of the author</li>
                             <li>The ID of the channel</li>
                             <li>The ID of the guild</li>
