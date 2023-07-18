@@ -2,140 +2,29 @@
 <html>
     <head>
         <title>Edit filter</title>
-        <style>
-            div {
-                width: 100%;
-            }
-            #container {
-                height: 100%;
-                width: 100%;
-            }
-            #top-bit {
-                height: 10%;
-            }
-            #bottom-bit {
-                height: 50%;
-            }
-            #text {
-                width: 100%;
-                height: 100%;
-            }
-            input[value="Delete"] {
-                background-color: rgb(255, 0, 0);
-            }
-            input[value="Copy"] {
-                background-color: rgb(0, 255, 55);
-            }
-            input[type="button"] {
-                width: 19%;
-                height: 2em;
-            }
-            .dirty {
-                background-color: rgb(61, 61, 255);
-            }
-            #template {
-                width: 100%;
-                height: 5em;
-            }
-        </style>
+        <link rel="stylesheet" href="/_/css/filters.css">
     </head>
     <body>
         <div id="container">
             <div id="top-bit">
                 <h1>Filter:</h1>
-                <label for="name">Name: </label><input onkeyup="dirty(event)" type="text" id="name" />
+                <label for="name">Name: </label><input class="dirtyable" type="text" id="name" />
                 <br/>
-                <textarea id="template" onkeyup="dirty(event)"></textarea>
+                <textarea class="dirtyable" id="template" ></textarea>
                 <br/>
-                <input type="button" value="Save" onclick="save()">
-                <input type="button" value="Add" onclick="addnew()">
-                <input type="button" value="Delete" onclick="del()">
-                <input type="button" value="Copy" onclick="cpy()">
-                <input type="button" value="Copy (script)" onclick="cpy(true)">
+                <input id="btnSave" type="button" value="Save">
+                <input id="btnAdd" type="button" value="Add">
+                <input id="btnDelete" type="button" value="Delete">
+                <input id="btnCopy" type="button" value="Copy">
+                <input id="btnCopyAsScript" type="button" value="Copy (script)">
             </div>
             <hr>
             <div id="bottom-bit">
-                <textarea id="text" onkeyup="dirty(event)"></textarea>
+                <textarea class="dirtyable" id="text"></textarea>
             </div>
         </div>
         
 
-        <script>
-            var textarea = document.getElementById("text");
-            var temptext = document.getElementById("template");
-            var textname = document.getElementById("name");
-            function getId() {
-                var id = window.location.pathname.substring(window.location.pathname.lastIndexOf('/') + 1);
-                if(id === "new") return "00000000-0000-0000-0000-000000000000";
-                return id;
-            }
-            function dirty(event) {
-                var text = event.srcElement;
-                text.classList.add("dirty");
-            }
-            async function load() {
-                const ID = getId();
-                var response = await fetch(`/api/filters/${ID}`);
-                var body = await response.json();
-                if(!response.ok) {
-                    console.error("Error: ", response, body);
-                    textarea.value = ":Error: " + body;
-                } else {
-                    textarea.value = body.text;
-                    temptext.value = body.template;
-                    textname.value = body.name;
-                }
-
-            }
-            async function addnew() {
-                var template = temptext.value;
-                var url = prompt("Enter URL:");
-                if(url) {
-                    var date = new Date().toISOString()
-                    textarea.value += "\r\n\r\n" + String.format(template, date, url) + "\r\n";
-                    await save();
-                }
-            }
-            async function save() {
-                var data = {};
-                data["name"] = textname.value;
-                data["text"] = textarea.value;
-                data["template"] = temptext.value;
-                
-                const ID = getId();
-                var response = await fetch(`/api/filters/${ID}`, {
-                    method: "PATCH",
-                    body: JSON.stringify(data)
-                });
-                if(response.ok) {
-                    temptext.classList.remove("dirty");
-                    textarea.classList.remove("dirty");
-                    textname.classList.remove("dirty");
-
-                    var id = await response.text();
-                    if(id != ID) {
-                        window.location.href = `/filters/${id}`;
-                    }
-                }
-            }
-            async function del() {
-                if(confirm("Are you sure you wish to delete?")) {
-                    var response = await fetch("/api/filters/" + getId(), {
-                        method: "DELETE"
-                    });
-                    if(response.redirected) {
-                        window.location.href = response.url;
-                    }
-                }
-            }
-            async function cpy(asScript) {
-                var name = window.location.href.replace('/filters/', '/filters-raw/');
-                if(asScript) {
-                    name += "?script.user.js"
-                }
-                await navigator.clipboard.writeText(name);
-            }
-            load();
-        </script>
+        <script src="/_/js/filters-edit.js"></script>
     </body>
 </html>
