@@ -1,6 +1,6 @@
 function removeInvItem(event) {
     const invId = event.target.getAttribute("data-id");
-    const shouldUse = event.target.innerText == "Use";
+    const shouldUse = event.target.value == "Use";
     var uses = 99;
     if(shouldUse) {
         var test = parseInt(prompt(`Please enter uses for this item`, 1), 10);
