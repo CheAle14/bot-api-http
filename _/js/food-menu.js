@@ -24,7 +24,10 @@ function getExistingItems() {
     var items = document.getElementsByClassName("item");
     var ls = {};
     for(var item of items) {
-        ls[item.getAttribute("data-id")] = item;
+        var id = item.getAttribute("data-id");
+        var itemls = ls[id] ?? [];
+        itemls.push(item);
+        ls[id] = itemls;
     }
     return ls;
 }
@@ -48,6 +51,7 @@ function searchItems(event) {
             var now = new Date();
             for(let item of value) {
                 var existing = existingItems[item.id];
+                console.log(item.id, existing);
 
                 var div = document.createElement("li");
                 if(existing) {
@@ -59,8 +63,16 @@ function searchItems(event) {
                     div.classList.add("expired");
                 }
                 var t = "";
+                if(item.max_uses > 1) {
+                    var alreadyUsing = 0;
+                    if(existing) {
+                        alreadyUsing = existing.map(i => Number(i.getAttribute("data-uses"))).reduce((sofar, next) => sofar + next);
+                    }
+                    var rem = item.max_uses - alreadyUsing;
+                    t += `${rem}x `;
+                }
                 if(item.manu) {
-                    t = `(${item.manu}) `;
+                    t += `(${item.manu}) `;
                 }
                 div.innerText = t + `${item.name} expires ${formatDate(date)}`;
                 div.setAttribute("draggable", "true");
@@ -251,6 +263,9 @@ for(var el of document.getElementsByClassName("cbToggleShare")) {
         el.setAttribute("disabled", "");
     }
 }
-document.getElementById("selectMenu").onclick = function(event) {
-    selectMenu(event.target.getAttribute("title"));
+var sMenu = document.getElementById("selectMenu");
+if(sMenu) {
+    sMenu.onclick = function(event) {
+        selectMenu(event.target.getAttribute("title"));
+    }
 }

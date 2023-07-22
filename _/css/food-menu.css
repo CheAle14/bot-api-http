@@ -21,7 +21,7 @@
     background-color: rgb(67, 67, 255);
 }
 .already-exists {
-    color: rgb(242, 0, 255);
+    color: rgb(139, 0, 146);
     
 }
 .already-exists::before {

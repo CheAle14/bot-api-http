@@ -7,7 +7,7 @@
     <body>
         <h3>Add New Product</h3>
         <form action="/api/food/products" method="post">
-            <input type="text" id="redirect" name="redirect" style="display: none" value="$REPLACE id='redirect'/$">
+            <input type="text" id="redirect" name="redirect" class="hidden" value="$REPLACE id='redirect'/$">
             <label for="productId">Product ID:</label><br>
             <input type="text" id="productId" name="productId" value="$REPLACE id='code'/$"><br>
 
