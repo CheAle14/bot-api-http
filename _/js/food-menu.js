@@ -82,7 +82,7 @@ function searchItems(event) {
                     if(existing) {
                         alreadyUsing += existing.filter(i => getDateForRow(i) >= getTodaysDate())
                                                 .map(i => parseInt(i.getAttribute("data-uses"), 10))
-                                                .reduce((sofar, next) => sofar + next);
+                                                .reduce((sofar, next) => sofar + next, 0);
                     }
                     var rem = item.max_uses - alreadyUsing;
                     t += `${rem}x `;
