@@ -36,7 +36,11 @@ function getDateForRow(element) {
     if(typeof(element) === "string") {
         return parseInt(element.split('-')[1], 10);
     } else {
-        return parseInt(element.id.split('-')[1], 10);
+        const split = element.id.split('-');
+        if(split[0] === "day") {
+            return parseInt(split[1], 10);
+        }
+        return getDateForRow(element.parentElement);
     }
 }
 
