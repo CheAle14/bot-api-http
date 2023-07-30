@@ -1,6 +1,27 @@
 const EDITING = !!document.getElementById("edit");
 const searchResults = document.getElementById("searchResults");
 document.getElementById("editThings").style.display = (!!EDITING) ? "" : "none";
+
+function toInt(s) {
+    return parseInt(s, 10);
+}
+
+
+function promptAsync(text, defaultValue = null, parser = null) {
+    return new Promise((resolve, reject) => {
+        const p = prompt(text, defaultValue);
+        if(p === null) {
+            reject();
+        } else {
+            if(parser) {
+                resolve(parser(p));
+            } else {
+                resolve(p);
+            }
+        }
+    })
+}
+
 function selectMenu(id) {
     if(!EDITING) return;
     fetch(`/api/food/menu?id=${id}`, {
@@ -216,7 +237,7 @@ function onItemClick(event)  {
     }
 }
 
-function onDrop(event) {
+async function onDrop(event) {
     if(!EDITING) return;
     const data = event.dataTransfer.getData("text");
     const fromElem = document.getElementById(data);
@@ -236,31 +257,30 @@ function onDrop(event) {
     if(fromGroup) {
         evData.fromGroup = fromGroup;
     } else {
-        evData.uses = parseInt(prompt("How many uses will this use?", "1"));
+        evData.uses = await promptAsync("How many uses will this use?", "1", toInt);
     }
     if(fromDay)
         evData.fromDay = fromDay;
 
     console.log(evData);
     
-    fetch(`/api/food/menu/move`, {
-        method: "POST",
-        body: JSON.stringify(evData),
-        headers: {
-            "Content-Type": "application/json"
-        }
-    })
-    .then(function(resp) {
+    try {
+        const resp = await fetch(`/api/food/menu/move`, {
+            method: "POST",
+            body: JSON.stringify(evData),
+            headers: {
+                "Content-Type": "application/json"
+            }
+        })
         if(resp.ok) {
             toElem.appendChild(fromElem);
         } else {
-            resp.body().then(function(err) {
-                alert(err);
-            })
+            const err = await resp.body();
+            alert(err);
         }
-    }).catch(function(err) {
+    } catch(err) {
         console.error(err);
-    })
+    }
 }
 
 document.getElementById("search").onchange = searchItems;
