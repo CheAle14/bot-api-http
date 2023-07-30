@@ -31,6 +31,19 @@ function getExistingItems() {
     }
     return ls;
 }
+
+function getDateForRow(element) {
+    if(typeof(element) === "string") {
+        return parseInt(element.split('-')[1], 10);
+    } else {
+        return parseInt(element.id.split('-')[1], 10);
+    }
+}
+
+function getTodaysDate() {
+    return getDateForRow(document.getElementsByClassName("today-row")[0]);
+}
+
 function searchItems(event) {
     if(!EDITING) return;
     fetch(`/api/food/query`, {
@@ -48,6 +61,7 @@ function searchItems(event) {
             console.log(existingItems);
 
             searchResults.innerHTML = "";
+            const today = getTodaysDate();
             var now = new Date();
             for(let item of value) {
                 var existing = existingItems[item.id];
@@ -64,9 +78,11 @@ function searchItems(event) {
                 }
                 var t = "";
                 if(item.max_uses > 1) {
-                    var alreadyUsing = 0;
+                    var alreadyUsing = item.times_used ?? 0;
                     if(existing) {
-                        alreadyUsing = existing.map(i => Number(i.getAttribute("data-uses"))).reduce((sofar, next) => sofar + next);
+                        alreadyUsing += existing.filter(i => getDateForRow(i) >= getTodaysDate())
+                                                .map(i => parseInt(i.getAttribute("data-uses"), 10))
+                                                .reduce((sofar, next) => sofar + next);
                     }
                     var rem = item.max_uses - alreadyUsing;
                     t += `${rem}x `;
