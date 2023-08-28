@@ -25,7 +25,7 @@ function setFilter(event) {
     for(let row of rows) {
         const firstCell = row.children[0];
         if(firstCell.tagName === "TD") {
-            row.classList.toggle("hidden", containsFilter(firstCell, filter));
+            row.classList.toggle("hidden", !containsFilter(firstCell, filter));
         }
     }
 }
