@@ -464,6 +464,16 @@ async function getScripts(force = false) {
     return SCRIPTS;
 }
 
+function escapeHtml(unsafe)
+{
+    return unsafe
+         .replace(/&/g, "&amp;")
+         .replace(/</g, "&lt;")
+         .replace(/>/g, "&gt;")
+         .replace(/"/g, "&quot;")
+         .replace(/'/g, "&#039;");
+ }
+
 async function showScripts() {
     var table = document.createElement("table");
     table.appendChild(createRow("th", "Id", "Name", "Code", "Delete"));
@@ -481,7 +491,7 @@ async function showScripts() {
         var code = document.createElement("code");
         pre.appendChild(code);
         code.setAttribute("data-id", script.id);
-        code.classList.add("language-javascript");
+        //code.classList.add("language-javascript");
         code.name = "code";
         const highlighted = hljs.highlight(script.code, {language: "javascript", ignoreIllegals: true});
         code.innerHTML = highlighted.value;
@@ -500,7 +510,7 @@ async function showScripts() {
             }
         }
         console.log("CODE:", code.innerHTML);
-        hljs.highlightElement(code);
+        //hljs.highlightElement(code);
 
         
         var delBtn = getButton("Delete", async function() {
