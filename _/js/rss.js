@@ -83,7 +83,7 @@ class RssFeed {
 
         div.onclick = function() {
             const beforeFeed = ACTIVE_FEED;
-            showArticlesFor(feed.id);
+            showArticlesFor(feed.id, 0, newTableInsert);
             feed.refresh();
             if(beforeFeed) beforeFeed.refresh();
         }
@@ -317,22 +317,56 @@ async function updateArticle(articleId, properties) {
     return result.ok;
 }
 
-async function showArticlesFor(feedId) {
+function newTableInsert(TABLE, feedId, page, articles) {
+    TABLE.innerHTML = "";
+    for (let art of articles) {
+        TABLE.appendChild(art.toRow());
+    }
+    
+    let deleteRow = document.createElement("tr");
+    let deleteCell = document.createElement("td");
+    deleteCell.colSpan = 4;
+    deleteRow.appendChild(deleteCell);
+    let btn = document.createElement("button");
+    btn.innerText = "Load more articles";
+    btn.style.width = "100%";
+    btn.setAttribute("data-feed", feedId);
+    btn.setAttribute("data-page", page + 1);
+    btn.onclick = showMoreArticles;
+    deleteCell.appendChild(btn);
+
+    TABLE.appendChild(deleteRow);
+}   
+function appendBeforeLoadMoreBtn(TABLE, feedId, page, articles) {
+    let lastRow = TABLE.children[TABLE.children.length - 1];
+    for(let art of articles) {
+        TABLE.insertBefore(art.toRow(), lastRow);
+    }
+}
+
+async function showMoreArticles(event) {
+    let btn = event.target;
+    let feedId = parseInt(btn.getAttribute("data-feed"), 10);
+    let page = parseInt(btn.getAttribute("data-page"), 10);
+    await showArticlesFor(feedId, page, appendBeforeLoadMoreBtn);
+}
+async function showArticlesFor(feedId, page, addFunction) {
     const feed = FEEDS.find(x => x.id == feedId);
     history.replaceState(null, null, `#${feedId}`)
     ACTIVE_FEED = feed;
-    var data = await fetch(`/api/rss/articles/${feedId}`);
+    var data = await fetch(`/api/rss/articles/${feedId}?page=${page}`);
     var array = await data.json();
     console.log(array);
     const TABLE = document.getElementById("articles");
-    TABLE.innerHTML = "";
 
-    ARTICLES = [];
+    if (page === 0) {
+        ARTICLES = [];
+    }
     for(let json of array) {
         var art = new RssArticle(json);
         ARTICLES.push(art);
-        TABLE.appendChild(art.toRow());
     }
+    addFunction(TABLE, feedId, page, ARTICLES);
 }
 
 async function loadFeeds() {
@@ -561,7 +595,7 @@ async function init() {
     } catch {
     }
     if(id) {
-        await showArticlesFor(id);
+        await showArticlesFor(id, 0, newTableInsert);
     }
 }
 
