@@ -342,6 +342,8 @@ function appendBeforeLoadMoreBtn(TABLE, feedId, page, articles) {
     for(let art of articles) {
         TABLE.insertBefore(art.toRow(), lastRow);
     }
+    let b = lastRow.querySelector("btn");
+    b.setAttribute("data-page", page + 1);
 }
 
 async function showMoreArticles(event) {
