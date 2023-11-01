@@ -364,11 +364,13 @@ async function showArticlesFor(feedId, page, addFunction) {
     if (page === 0) {
         ARTICLES = [];
     }
+    let newArticlesOnly = [];
     for(let json of array) {
         var art = new RssArticle(json);
         ARTICLES.push(art);
+        newArticlesOnly.push(art);
     }
-    addFunction(TABLE, feedId, page, ARTICLES);
+    addFunction(TABLE, feedId, page, newArticlesOnly);
 }
 
 async function loadFeeds() {
