@@ -275,8 +275,8 @@ class RecipeGroup {
             }
             else if(step.state === STATE.PENDING) {
                 shownText = step.text;
-                if(startedAt) {
-                    var diff = (Date.now() - startedAt) / 1000;
+                if(globalStartedAt) {
+                    var diff = (Date.now() - globalStartedAt) / 1000;
                     shownTime = step.tentativeStartTime - diff;
                 } else {
                     shownTime = step.tentativeStartTime;
@@ -378,35 +378,33 @@ class RecipeGroup {
     onAdvance(data = null) {
         if(data === null) {
             data = {};
-            data.time = Date.now();
-            data.started = data.time;
+            data.when = Date.now();
+            data.globalStartedAt = globalStartedAt ?? data.when;
             data.ws = true;
         }
-        console.log("Advance", this.catalyst, data);
+        var diff = (Date.now() - data.when) / 1000;
+        console.log("Advance catalyst=", this.catalyst, " diff=", diff, data);
         this.muted = null;
         this.alarm = false;
         refreshTableNextTick = true;
 
-        if(startedAt === null) {
-            startedAt = data.started;
+        if(globalStartedAt === null) {
+            globalStartedAt = data.globalStartedAt;
         }
-
-        var updates = {};
 
         for(let index = 0; index < this.simpleSteps.length; index++) {
             const step = this.simpleSteps[index];
             if(step.state === STATE.COMPLETE) continue;
             if(step.state === STATE.PENDING) {
                 step.state = STATE.ONGOING;
-                this.startedAt = data.started;
+                this.startedAt = data.when;
+                step.tick(diff);
                 console.log("Started with", step.text, ", next up is", this.simpleSteps[index + 1]);
                 break;
             }
             if(step.state === STATE.ONGOING) {
                 step.state = STATE.COMPLETE;
-                updates[index] = {
-                    remaining: step.remaining
-                }
+                step.remaining += diff;
                 var next = this.simpleSteps[index + 1];
                 if(next) {
                     next.state = STATE.ONGOING;
@@ -426,19 +424,18 @@ class RecipeGroup {
             }
         }
         if(!data.ws) return;
-        sendWs({advance: {
-            id: this.catalyst,
-            allStart: startedAt,
-            startedAt: this.startedAt,
-            time: `${Date.now()}`,
-            updates
+        sendWs({
+            advance: {
+                catalyst: this.catalyst,
+                globalStartedAt: globalStartedAt,
+                when: data.when,
             }
         });
     }
 }
 
 const RECIPE_ID = new URLSearchParams(window.location.search).get("id");
-var startedAt = null;
+var globalStartedAt = null;
 var recipeGroups = null; //groupRecipes(recipes);
 var catalystOrder = [];
 var selected = null;
@@ -459,7 +456,7 @@ function wsMessage(e) {
     if(recipeGroups === null && jobj.recipe) {
         recipeGroups = {};
         if(jobj.startedAt) {
-            startedAt = parseInt(jobj.startedAt);
+            globalStartedAt = parseInt(jobj.startedAt);
         }
         for(let key in jobj.recipe) {
             const value = jobj.recipe[key];
@@ -478,10 +475,9 @@ function wsMessage(e) {
             }
         } else if(data.advance) {
             const payload = data.advance;
-            var cat = payload.id;
-            var time = payload.time;
-            var group = recipeGroups[cat];
-            group.onAdvance(payload)
+            var {catalyst, ...rest} = payload;
+            var group = recipeGroups[catalyst];
+            group.onAdvance(rest);
         }
     }
 }
@@ -496,7 +492,7 @@ function sendWs(data) {
     const packet = {
         data: data
     }
-    WSC.socket.send(JSON.stringify(packet));
+    WSC.send(JSON.stringify(packet));
 }
 
 WSC.initWS(`food?id=${RECIPE_ID}`, 0, wsMessage, wsClose, null, wsError, wsOpen);
@@ -535,7 +531,7 @@ function checkAudio() {
         setAudio(forceAudio, "force audio");
         return;
     }
-    if(startedAt == null) {
+    if(globalStartedAt == null) {
         setAudio(false, "not yet started");
         return;
     }
@@ -685,8 +681,8 @@ function refreshHtml(updateTable) {
         div.style.flex = `${widthPerc}%`;
     }
 
-    if(startedAt) {
-        var startDiff = Math.round((Date.now() - startedAt) / 1000);
+    if(globalStartedAt) {
+        var startDiff = Math.round((Date.now() - globalStartedAt) / 1000);
         document.getElementById("startTimer").innerText = formatTimer(startDiff);
     } else {
         document.getElementById("startTimer").innerText = "n.y.s";
@@ -719,7 +715,7 @@ function globalTick() {
         console.log("All", catalystOrder.length,"groups are complete!");
         clearInterval(intervalId);
         audio.pause();
-        WSC.socket.send(JSON.stringify({"done": "done"}));
+        WSC.send(JSON.stringify({"done": "done"}));
     }
 
 
@@ -768,7 +764,7 @@ document.body.onkeyup = function(event) {
             const group = recipeGroups[catalyst];
             group.tick(time);
         }
-        startedAt -= (time * 1000);
+        globalStartedAt -= (time * 1000);
     }
 }
 var maybeVolume = Cookies.get("volume");

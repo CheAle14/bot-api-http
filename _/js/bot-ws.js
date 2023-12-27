@@ -76,4 +76,10 @@ WSC.connect = function() {
         console.error("[WS] ", error);
     };
 }
+
+WSC.send = function(payload) {
+    console.log("[WS] >> ", payload);
+    WSC.socket.send(payload);
+}
+
 console.log("HEY WS", WSC);
