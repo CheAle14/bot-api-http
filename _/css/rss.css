@@ -23,8 +23,8 @@ html, body, .rssContainer {
 }
 .rssSide {
     width: 15%;
-    float: left;
     height: 100%;
+    position: fixed;
     border-right: 1px solid black;
 }
 .mainBody  {
@@ -40,8 +40,13 @@ html, body, .rssContainer {
 }
 .read {
     font-weight: lighter;
-    font-style: italic;
 }
+
+tr.read a {
+    text-decoration: none;
+    color: purple;
+}
+
 img {
     margin-right: 5px;
     cursor: pointer;
@@ -99,4 +104,8 @@ table {
 code {
     overflow-y: scroll;
     max-height: 25em;
+}
+.searchText {
+    width: 90%;
+    height: 25px;
 }

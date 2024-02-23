@@ -8,6 +8,7 @@ const SCRIPT_PARSE = "function parse(";
 const SCRIPT_FILTER = "function checkFilter(";
 
 var ACTIVE_FEED = null;
+var SEARCH_INPUT = document.getElementById("search");
 
 function getInput(type, name, value, label = null) {
     var inpt = document.createElement("input");
@@ -83,6 +84,7 @@ class RssFeed {
 
         div.onclick = function() {
             const beforeFeed = ACTIVE_FEED;
+            SEARCH_INPUT.value = "";
             showArticlesFor(feed.id, 0, newTableInsert);
             feed.refresh();
             if(beforeFeed) beforeFeed.refresh();
@@ -350,13 +352,17 @@ async function showMoreArticles(event) {
     let btn = event.target;
     let feedId = parseInt(btn.getAttribute("data-feed"), 10);
     let page = parseInt(btn.getAttribute("data-page"), 10);
-    await showArticlesFor(feedId, page, appendBeforeLoadMoreBtn);
+    await showArticlesFor(feedId, page, appendBeforeLoadMoreBtn, SEARCH_INPUT.value);
 }
-async function showArticlesFor(feedId, page, addFunction) {
+async function showArticlesFor(feedId, page, addFunction, search) {
     const feed = FEEDS.find(x => x.id == feedId);
     history.replaceState(null, null, `#${feedId}`)
     ACTIVE_FEED = feed;
-    var data = await fetch(`/api/rss/articles/${feedId}?page=${page}`);
+    var url = `/api/rss/articles/${feedId}?page=${encodeURIComponent(page)}`
+    if (search) {
+        url += "&search=" + encodeURIComponent(search);
+    }
+    var data = await fetch(url);
     var array = await data.json();
     console.log(array);
     const TABLE = document.getElementById("articles");
@@ -374,7 +380,8 @@ async function showArticlesFor(feedId, page, addFunction) {
 }
 
 async function loadFeeds() {
-    var data = await fetch(`/api/rss/feeds`);
+    const url = `/api/rss/feeds`;
+    var data = await fetch(url);
     var array = await data.json();
     var div = document.getElementById("feeds");
 
@@ -587,6 +594,11 @@ async function markAllRead() {
     }
 }
 
+async function searchInput() {
+    const feedId = !!ACTIVE_FEED ? ACTIVE_FEED.id : null;
+    await showArticlesFor(feedId, 0, newTableInsert, SEARCH_INPUT.value);
+}
+
 
 
 async function init() {
@@ -607,5 +619,6 @@ document.getElementById("imgMarkAllRead").onclick = markAllRead;
 document.getElementById("imgShowsScripts").onclick = showScripts;
 document.getElementById("modal").onclick = modalAreaClick;
 document.getElementById("btnCloseModal").onclick = () => setModal(null);
+document.getElementById("search").oninput = searchInput;
 
 init();
