@@ -15,7 +15,8 @@ function splitCsv(line) {
 }
 
 async function fetchReadings(date) {
-  const result = await fetch(`/api/temps/readings/${date}`);
+  const datestr = date.toISOString().split("T")[0];
+  const result = await fetch(`/api/temps/readings/${datestr}`);
   const text = await result.text();
   return text
     .split("\n")
@@ -88,16 +89,50 @@ function rfind(array, predicate) {
   return undefined;
 }
 
+const DATA_KEY = "temps_data";
+function getSaveData() {
+  const data = localStorage.getItem(DATA_KEY);
+  if (data === null) {
+    return {
+      min: 14.0,
+      max: 21.0,
+    };
+  } else {
+    return JSON.parse(data);
+  }
+}
+
+function getMinMaxData(data) {
+  var { min, max } = getSaveData();
+
+  for (const { x, y } of data) {
+    if (x < min) {
+      min = x;
+    }
+    if (y > max) {
+      max = y;
+    }
+  }
+
+  return { min, max };
+}
+
 async function update(date) {
-  const dateval = new Date(date);
+  const dateval = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+
   const settingsApplied = mapSettingsOnDate(
     dateval,
     rfind(settings, (v) => dateval >= v.date)
   );
 
-  const min = dateval.getTime();
-  const max = min + 1000 * 3600 * 24;
-  const data = await fetchReadings(date);
+  const data = await fetchReadings(dateval);
+
+  const x_minmax = {
+    min: dateval.getTime(),
+    max: dateval.getTime() + 1000 * 3600 * 24,
+  };
+
+  const y_minmax = getMinMaxData(data);
 
   const ctx = document.getElementById("output");
 
@@ -131,8 +166,7 @@ async function update(date) {
       animation: false,
       scales: {
         x: {
-          min,
-          max,
+          ...x_minmax,
           type: "time",
           time: {
             unit: "hour",
@@ -140,6 +174,9 @@ async function update(date) {
               hour: "HH:00",
             },
           },
+        },
+        y: {
+          ...y_minmax,
         },
       },
       plugins: {
@@ -151,23 +188,41 @@ async function update(date) {
   });
 }
 
+async function change_minmax(date) {
+  const min = Math.round(document.getElementById("minTemp").value);
+  const max = Math.round(document.getElementById("maxTemp").value);
+
+  const data = { min, max };
+  localStorage.setItem(DATA_KEY, JSON.stringify(data));
+  await update(date);
+}
+
 async function init() {
   settings = await fetchSettings();
   const showing = document.getElementById("showingDate");
   showing.onchange = async () => {
     await update(showing.value);
   };
-  const v = new Date().toISOString().split("T")[0];
-  showing.value = v;
+
+  const v = new Date();
+  showing.valueAsDate = v;
   await update(v);
+
+  const data = getSaveData();
+  for (const id of ["minTemp", "maxTemp"]) {
+    const d = document.getElementById(id);
+    d.value = data[id.substring(0, 3)];
+    d.addEventListener(
+      "change",
+      async () => await change_minmax(showing.valueAsDate)
+    );
+  }
 
   window.addEventListener("keyup", async (event) => {
     const delta = event.key === "ArrowLeft" ? -1 : 1;
-    const date = new Date(showing.value);
-    const offset = dateFns.addDays(date, delta);
-    const v = offset.toISOString().split("T")[0];
-    showing.value = v;
-    await update(v);
+    const offset = dateFns.addDays(showing.valueAsDate, delta);
+    showing.valueAsDate = offset;
+    await update(offset);
   });
 }
 

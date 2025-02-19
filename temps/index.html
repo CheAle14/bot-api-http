@@ -7,19 +7,26 @@
         <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js" integrity="sha512-CQBWl4fJHWbryGE+Pc7UAxWMUMNMWzWxF4SQo9CgkJIN1kx6djDQZjh3Y8SZ1d+6I+1zze6Z7kHXO7q3UyZAWw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-adapter-date-fns/3.0.0/chartjs-adapter-date-fns.min.js" integrity="sha512-rwTcVAtpAmT3KnwlKHOqeV7ETOTUdf0uYbR4YGf3149X+X+Rx3tgJOOhqFVsyNl0oMgJSPqAOoFuf57WNN0RYA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-annotation/3.1.0/chartjs-plugin-annotation.min.js" integrity="sha512-8MntMizyPIYkcjoDkYqgrQOuWOZsp92zlZ9d7M2RCG0s1Zua8H215p2PdsxS7qg/4hLrHrdPsZgVZpXheHYT+Q==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-        <link rel="stylesheet" href="/_/css/temps.css">
+        <link rel="stylesheet" href="../_/css/temps.css">
     </head>
     <body>
         <p>
-            Select date:
-
+            <label for="showingDate">
+                Select date:
+            </label>
             <input type="date" id="showingDate" />
+
+            <label for="minTemp">Min Temp</label>
+            <input type="number" id="minTemp" />
+
+            <label for="maxTemp">Max Temp</label>
+            <input type="number" id="maxTemp" />
         </p>
 
         <div class="chart">
             <canvas id="output"></canvas>
         </div>
 
-        <script src="/_/js/temps.js"></script>
+        <script src="../_/js/temps.js"></script>
     </body>
 </html>
