@@ -201,7 +201,7 @@ async function init() {
   settings = await fetchSettings();
   const showing = document.getElementById("showingDate");
   showing.onchange = async () => {
-    await update(showing.value);
+    await update(showing.valueAsDate);
   };
 
   const v = new Date();
