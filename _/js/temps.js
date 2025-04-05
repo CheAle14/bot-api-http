@@ -15,7 +15,13 @@ function splitCsv(line) {
 }
 
 async function fetchReadings(date) {
-  const datestr = date.toISOString().split("T")[0];
+  const dateval = new Date(
+    date.getFullYear(),
+    date.getMonth(),
+    date.getDate(),
+    1
+  );
+  const datestr = dateval.toISOString().split("T")[0];
   const result = await fetch(`/api/temps/readings/${datestr}`);
   const text = await result.text();
   return text
@@ -197,17 +203,11 @@ async function change_minmax(date) {
   await update(date);
 }
 
-function getDateFromInput(input) {
-  const valueStr = `${input.value}T00:00:00Z`;
-  return new Date(valueStr);
-}
-
 async function init() {
   settings = await fetchSettings();
   const showing = document.getElementById("showingDate");
   showing.onchange = async () => {
-    const value = getDateFromInput(showing);
-    await update(value);
+    await update(showing.valueAsDate);
   };
 
   const v = new Date();
@@ -220,13 +220,13 @@ async function init() {
     d.value = data[id.substring(0, 3)];
     d.addEventListener(
       "change",
-      async () => await change_minmax(getDateFromInput(showing))
+      async () => await change_minmax(showing.valueAsDate)
     );
   }
 
   window.addEventListener("keyup", async (event) => {
     const delta = event.key === "ArrowLeft" ? -1 : 1;
-    const offset = dateFns.addDays(getDateFromInput(showing), delta);
+    const offset = dateFns.addDays(showing.valueAsDate, delta);
     showing.valueAsDate = offset;
     await update(offset);
   });
