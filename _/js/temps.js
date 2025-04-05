@@ -197,11 +197,17 @@ async function change_minmax(date) {
   await update(date);
 }
 
+function getDateFromInput(input) {
+  const valueStr = `${input.value}T00:00:00Z`;
+  return new Date(valueStr);
+}
+
 async function init() {
   settings = await fetchSettings();
   const showing = document.getElementById("showingDate");
   showing.onchange = async () => {
-    await update(showing.valueAsDate);
+    const value = getDateFromInput(showing);
+    await update(value);
   };
 
   const v = new Date();
@@ -214,13 +220,13 @@ async function init() {
     d.value = data[id.substring(0, 3)];
     d.addEventListener(
       "change",
-      async () => await change_minmax(showing.valueAsDate)
+      async () => await change_minmax(getDateFromInput(showing))
     );
   }
 
   window.addEventListener("keyup", async (event) => {
     const delta = event.key === "ArrowLeft" ? -1 : 1;
-    const offset = dateFns.addDays(showing.valueAsDate, delta);
+    const offset = dateFns.addDays(getDateFromInput(showing), delta);
     showing.valueAsDate = offset;
     await update(offset);
   });
