@@ -1,3 +1,4 @@
+const DateTime = luxon.DateTime;
 var chart = null;
 var settings = [];
 
@@ -15,13 +16,7 @@ function splitCsv(line) {
 }
 
 async function fetchReadings(date) {
-  const dateval = new Date(
-    date.getFullYear(),
-    date.getMonth(),
-    date.getDate(),
-    1
-  );
-  const datestr = dateval.toISOString().split("T")[0];
+  const datestr = date.toISODate();
   const result = await fetch(`/api/temps/readings/${datestr}`);
   const text = await result.text();
   return text
@@ -51,8 +46,8 @@ function mapTimeRangeOnDate(date, range) {
     type: "box",
     backgroundColor: "rgba(255, 99, 132, 0.25)",
     _range: range,
-    xMin: date.getTime() + range.start,
-    xMax: date.getTime() + range.end,
+    xMin: date.toMillis() + range.start,
+    xMax: date.toMillis() + range.end,
   };
 }
 
@@ -60,10 +55,9 @@ function mapSettingsOnDate(date, settings) {
   if (!settings) return null;
   return {
     date: settings.date,
-    first: mapTimeRangeOnDate(date, settings.first),
-    second: mapTimeRangeOnDate(date, settings.second),
-    third: mapTimeRangeOnDate(date, settings.third),
-    fourth: mapTimeRangeOnDate(date, settings.fourth),
+    heatPeriods: settings.heatPeriods.map((period) =>
+      mapTimeRangeOnDate(date, period)
+    ),
   };
 }
 
@@ -75,14 +69,20 @@ async function fetchSettings() {
     .map((line) => line.trimEnd())
     .map(splitCsv)
     .map((array) => {
-      const date = new Date(array[0]);
-      const first = parseTimeRange(array[1]);
-      const second = parseTimeRange(array[2]);
-      const third = parseTimeRange(array[3]);
-      const fourth = parseTimeRange(array[4]);
+      const [date, ...rest] = array;
+      const heatPeriods = rest.map(parseTimeRange);
 
-      return { date, first, second, third, fourth };
+      return {
+        date: parseDate(date),
+        heatPeriods,
+      };
     });
+
+  function parseDate(val) {
+    const [year, month, day] = val.split("-").map((s) => parseInt(s, 10));
+
+    return DateTime.utc(year, month, day);
+  }
 }
 
 function rfind(array, predicate) {
@@ -124,18 +124,19 @@ function getMinMaxData(data) {
 }
 
 async function update(date) {
-  const dateval = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  const localVal = DateTime.fromJSDate(date).startOf("day");
+  const utcVal = DateTime.fromJSDate(date).toUTC().startOf("day");
 
   const settingsApplied = mapSettingsOnDate(
-    dateval,
-    rfind(settings, (v) => dateval >= v.date)
+    localVal,
+    rfind(settings, (v) => utcVal >= v.date)
   );
 
-  const data = await fetchReadings(dateval);
+  const data = await fetchReadings(utcVal);
 
   const x_minmax = {
-    min: dateval.getTime(),
-    max: dateval.getTime() + 1000 * 3600 * 24,
+    min: localVal.toMillis(),
+    max: localVal.endOf("day").toMillis(),
   };
 
   const y_minmax = getMinMaxData(data);
@@ -143,13 +144,11 @@ async function update(date) {
   const ctx = document.getElementById("output");
 
   const annotations = settingsApplied
-    ? {
-        first: settingsApplied.first,
-        second: settingsApplied.second,
-        third: settingsApplied.third,
-        fourth: settingsApplied.fourth,
-      }
-    : null;
+    ? settingsApplied.heatPeriods.reduce((acc, period, idx) => {
+        acc[`heat${idx}`] = period;
+        return acc;
+      }, {})
+    : {};
 
   if (chart) {
     chart.destroy();
@@ -187,7 +186,7 @@ async function update(date) {
       },
       plugins: {
         annotation: {
-          annotations: annotations ?? {},
+          annotations: annotations,
         },
       },
     },
@@ -205,6 +204,7 @@ async function change_minmax(date) {
 
 async function init() {
   settings = await fetchSettings();
+
   const showing = document.getElementById("showingDate");
   showing.onchange = async () => {
     await update(showing.valueAsDate);
@@ -226,7 +226,7 @@ async function init() {
 
   window.addEventListener("keyup", async (event) => {
     const delta = event.key === "ArrowLeft" ? -1 : 1;
-    const offset = dateFns.addDays(showing.valueAsDate, delta);
+    const offset = DateTime.local(showing.valueAsDate).add({ days: delta });
     showing.valueAsDate = offset;
     await update(offset);
   });
