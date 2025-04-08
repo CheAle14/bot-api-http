@@ -226,7 +226,7 @@ async function init() {
 
   window.addEventListener("keyup", async (event) => {
     const delta = event.key === "ArrowLeft" ? -1 : 1;
-    const offset = DateTime.local(showing.valueAsDate).add({ days: delta });
+    const offset = DateTime.local(showing.valueAsDate).plus({ days: delta });
     showing.valueAsDate = offset;
     await update(offset);
   });
