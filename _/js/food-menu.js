@@ -1,50 +1,55 @@
 const EDITING = !!document.getElementById("edit");
 const searchResults = document.getElementById("searchResults");
-document.getElementById("editThings").style.display = (!!EDITING) ? "" : "none";
+document.getElementById("editThings").style.display = !!EDITING ? "" : "none";
 
 function toInt(s) {
     return parseInt(s, 10);
 }
 
-
 function promptAsync(text, defaultValue = null, parser = null) {
     return new Promise((resolve, reject) => {
         const p = prompt(text, defaultValue);
-        if(p === null) {
+        if (p === null) {
             reject();
         } else {
-            if(parser) {
+            if (parser) {
                 resolve(parser(p));
             } else {
                 resolve(p);
             }
         }
-    })
+    });
 }
 
 function selectMenu(id) {
-    if(!EDITING) return;
+    if (!EDITING) return;
     fetch(`/api/food/menu?id=${id}`, {
-        method: "POST"
+        method: "POST",
     })
-    .then(function(resp) {
-        if(resp.ok) {
-            window.location.reload();
-        } else {
-            alert("Failed!");
-        }
-    }).catch(function(err) {
-        console.error(err);
-    })
+        .then(function (resp) {
+            if (resp.ok) {
+                window.location.reload();
+            } else {
+                alert("Failed!");
+            }
+        })
+        .catch(function (err) {
+            console.error(err);
+        });
 }
 function formatDate(date) {
-    var options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+    var options = {
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+    };
     return date.toLocaleDateString("en-US", options);
 }
 function getExistingItems() {
     var items = document.getElementsByClassName("item");
     var ls = {};
-    for(var item of items) {
+    for (var item of items) {
         var id = item.getAttribute("data-id");
         var itemls = ls[id] ?? [];
         itemls.push(item);
@@ -54,11 +59,11 @@ function getExistingItems() {
 }
 
 function getDateForRow(element) {
-    if(typeof(element) === "string") {
-        return parseInt(element.split('-')[1], 10);
+    if (typeof element === "string") {
+        return parseInt(element.split("-")[1], 10);
     } else {
-        const split = element.id.split('-');
-        if(split[0] === "day") {
+        const split = element.id.split("-");
+        if (split[0] === "day") {
             return parseInt(split[1], 10);
         }
         return getDateForRow(element.parentElement);
@@ -70,175 +75,219 @@ function getTodaysDate() {
 }
 
 function searchItems(event) {
-    if(!EDITING) return;
+    if (!EDITING) return;
     fetch(`/api/food/query`, {
         method: "POST",
         body: `query=${encodeURIComponent(event.target.value)}&sort=expires`,
         headers: {
-            "Content-Type": "application/x-www-form-urlencoded"
-        }
+            "Content-Type": "application/x-www-form-urlencoded",
+        },
     })
-    .then(function(resp) {
-        resp.json().then(function(value) {
-            console.log(value);
+        .then(function (resp) {
+            resp.json().then(function (value) {
+                console.log(value);
 
-            var existingItems = getExistingItems();
-            console.log(existingItems);
+                var existingItems = getExistingItems();
+                console.log(existingItems);
 
-            searchResults.innerHTML = "";
-            const today = getTodaysDate();
-            var now = new Date();
-            for(let item of value) {
-                var existing = existingItems[item.id];
-                console.log(item.id, existing);
+                searchResults.innerHTML = "";
+                const today = getTodaysDate();
+                var now = new Date();
+                for (let item of value) {
+                    var existing = existingItems[item.id];
+                    console.log(item.id, existing);
 
-                var div = document.createElement("li");
-                if(existing) {
-                    div.classList.add("already-exists");
-                }
-                div.id = item.id + "-n";
-                var date = new Date(item.expires);
-                if(date < now) {
-                    div.classList.add("expired");
-                }
-                var t = "";
-                if(item.max_uses > 1) {
-                    var alreadyUsing = item.times_used ?? 0;
-                    if(existing) {
-                        alreadyUsing += existing.filter(i => getDateForRow(i) >= getTodaysDate())
-                                                .map(i => parseInt(i.getAttribute("data-uses"), 10))
-                                                .reduce((sofar, next) => sofar + next, 0);
+                    var div = document.createElement("li");
+                    if (existing) {
+                        div.classList.add("already-exists");
                     }
-                    var rem = item.max_uses - alreadyUsing;
-                    t += `${rem}x `;
+                    div.id = item.id + "-n";
+                    var date = new Date(item.expires);
+                    if (date < now) {
+                        div.classList.add("expired");
+                    }
+                    var t = "";
+                    if (item.max_uses > 1) {
+                        var alreadyUsing = item.times_used ?? 0;
+                        if (existing) {
+                            alreadyUsing += existing
+                                .filter(
+                                    (i) => getDateForRow(i) >= getTodaysDate()
+                                )
+                                .map((i) =>
+                                    parseInt(i.getAttribute("data-uses"), 10)
+                                )
+                                .reduce((sofar, next) => sofar + next, 0);
+                        }
+                        var rem = item.max_uses - alreadyUsing;
+                        t += `${rem}x `;
+                    }
+                    if (item.manu) {
+                        t += `(${item.manu}) `;
+                    }
+                    div.innerText =
+                        t + `${item.name} expires ${formatDate(date)}`;
+                    div.setAttribute("draggable", "true");
+                    div.setAttribute("data-id", item.id);
+                    div.ondragstart = onDragStart;
+                    searchResults.appendChild(div);
                 }
-                if(item.manu) {
-                    t += `(${item.manu}) `;
-                }
-                div.innerText = t + `${item.name} expires ${formatDate(date)}`;
-                div.setAttribute("draggable", "true");
-                div.setAttribute("data-id", item.id);
-                div.ondragstart = onDragStart;
-                searchResults.appendChild(div);
-            }
+            });
         })
-    }).catch(function(err) {
-        console.error(err);
-    })
+        .catch(function (err) {
+            console.error(err);
+        });
 }
 
 function onDragStart(event) {
-    if(!EDITING) return;
+    if (!EDITING) return;
     console.log(event);
     event.dataTransfer.setData("text", event.target.id);
 }
 function onDragOver(event) {
-    if(!EDITING) return;
-    if(event.target.tagName === "TR") {
+    if (!EDITING) return;
+    if (event.target.tagName === "TR") {
         console.log(event);
     } else {
         event.preventDefault();
     }
 }
 function toggleShare(event) {
-    if(!EDITING) return;
+    if (!EDITING) return;
     var td = event.target.parentElement;
     var tr = td.parentElement;
-    fetch(`/api/food/menu/shared?day=${tr.id.split('-')[1]}`, {
-        method: "POST"
+    fetch(`/api/food/menu/shared?day=${tr.id.split("-")[1]}`, {
+        method: "POST",
     })
-    .then(function(resp) {
-        if(resp.ok) {
-            window.location.reload();
-        } else {
-            alert("Failed!");
-        }
-    }).catch(function(err) {
-        console.error(err);
-    })
+        .then(function (resp) {
+            if (resp.ok) {
+                window.location.reload();
+            } else {
+                alert("Failed!");
+            }
+        })
+        .catch(function (err) {
+            console.error(err);
+        });
 }
 function togglemanual(event) {
-    if(!EDITING) return;
+    if (!EDITING) return;
     var td = event.target.parentElement;
     var tr = td.parentElement;
-    fetch(`/api/food/menu/manual?day=${tr.id.split('-')[1]}&manual=${event.target.checked}`, {
-        method: "PATCH"
-    })
-    .then(function(resp) {
-        if(resp.ok) {
-            window.location.reload();
-        } else {
-            alert("Failed!");
+    fetch(
+        `/api/food/menu/manual?day=${tr.id.split("-")[1]}&manual=${
+            event.target.checked
+        }`,
+        {
+            method: "PATCH",
         }
-    }).catch(function(err) {
-        console.error(err);
-    })
+    )
+        .then(function (resp) {
+            if (resp.ok) {
+                window.location.reload();
+            } else {
+                alert("Failed!");
+            }
+        })
+        .catch(function (err) {
+            console.error(err);
+        });
 }
 function setText(event) {
-    if(!EDITING) return;
-    if(event.altKey) {
+    if (!EDITING) return;
+    if (event.altKey) {
         var td = event.currentTarget;
         var tr = td.parentElement;
         var group = td.getAttribute("data-group");
-        var text = prompt("What text to set, or 'none' to remove", td.innerText);
-        if(text) {
-            fetch(`/api/food/menu/text?day=${encodeURIComponent(tr.id.split('-')[1])}&group=${encodeURIComponent(group)}&text=${encodeURIComponent(text)}`, {
-                method: "PATCH"
-            })
-            .then(function(resp) {
-                if(resp.ok) {
-                    window.location.reload();
-                } else {
-                    alert("Failed!");
+        var text = prompt(
+            "What text to set, or 'none' to remove",
+            td.innerText
+        );
+        if (text) {
+            fetch(
+                `/api/food/menu/text?day=${encodeURIComponent(
+                    tr.id.split("-")[1]
+                )}&group=${encodeURIComponent(group)}&text=${encodeURIComponent(
+                    text
+                )}`,
+                {
+                    method: "PATCH",
                 }
-            }).catch(function(err) {
-                console.error(err);
-            })
+            )
+                .then(function (resp) {
+                    if (resp.ok) {
+                        window.location.reload();
+                    } else {
+                        alert("Failed!");
+                    }
+                })
+                .catch(function (err) {
+                    console.error(err);
+                });
         }
     }
 }
 function getTd(elem) {
-    if(elem === null) return null;
-    if(elem.tagName === "TD") return elem;
+    if (elem === null) return null;
+    if (elem.tagName === "TD") return elem;
     return getTd(elem.parentElement);
 }
 
-function onItemClick(event)  {
-    if(!EDITING) return;
+function onItemClick(event) {
+    if (!EDITING) return;
     console.log(event);
     var thing = getTd(event.target);
     var curTarget = event.currentTarget;
-    if(event.ctrlKey) {
-        var uses = parseInt(prompt("How many uses?", curTarget.getAttribute("data-uses")));
-        fetch(`/api/food/menu/item?day=${thing.getAttribute("data-date")}&group=${thing.getAttribute("data-group")}&id=${curTarget.getAttribute("data-id")}&uses=${uses}`, {
-            method: "PATCH"
-        })
-        .then(function(resp) {
-            if(resp.ok) {
-                window.location.reload();
+    if (event.ctrlKey) {
+        var uses = parseInt(
+            prompt("How many uses?", curTarget.getAttribute("data-uses"))
+        );
+        fetch(
+            `/api/food/menu/item?day=${thing.getAttribute(
+                "data-date"
+            )}&group=${thing.getAttribute(
+                "data-group"
+            )}&id=${curTarget.getAttribute("data-id")}&uses=${uses}`,
+            {
+                method: "PATCH",
             }
-        }).catch(function(err) {
-            console.error(err);
-        })
-
-    } else if(event.shiftKey) {
-        fetch(`/api/food/menu/item?day=${thing.getAttribute("data-date")}&group=${thing.getAttribute("data-group")}&id=${curTarget.getAttribute("data-id")}`, {
-            method: "DELETE"
-        })
-        .then(function(resp) {
-            if(resp.ok) {
-                curTarget.parentElement.removeChild(curTarget);
-            } else {
-                alert("Failed!");
+        )
+            .then(function (resp) {
+                if (resp.ok) {
+                    window.location.reload();
+                }
+            })
+            .catch(function (err) {
+                console.error(err);
+            });
+    } else if (event.shiftKey) {
+        fetch(
+            `/api/food/menu/item?day=${thing.getAttribute(
+                "data-date"
+            )}&group=${thing.getAttribute(
+                "data-group"
+            )}&id=${curTarget.getAttribute("data-id")}`,
+            {
+                method: "DELETE",
             }
-        }).catch(function(err) {
-            console.error(err);
-        })
+        )
+            .then(function (resp) {
+                if (resp.ok) {
+                    curTarget.parentElement.removeChild(curTarget);
+                } else {
+                    alert("Failed!");
+                }
+            })
+            .catch(function (err) {
+                console.error(err);
+            });
     }
 }
 
 async function onDrop(event) {
-    if(!EDITING) return;
+    event.preventDefault();
+    if (!EDITING) return;
+
     const data = event.dataTransfer.getData("text");
     const fromElem = document.getElementById(data);
     const toElem = getTd(event.target);
@@ -249,63 +298,68 @@ async function onDrop(event) {
     var toDay = toElem.getAttribute("data-date");
 
     const evData = {
-        "toDay": toDay,
-        "toGroup": toGroup,
-        "id": fromElem.getAttribute("data-id"),
-        "uses": 1
+        toDay: toDay,
+        toGroup: toGroup,
+        id: fromElem.getAttribute("data-id"),
+        uses: 1,
     };
-    if(fromGroup) {
+    if (fromGroup) {
         evData.fromGroup = fromGroup;
     } else {
-        evData.uses = await promptAsync("How many uses will this use?", "1", toInt);
+        evData.uses = await promptAsync(
+            "How many uses will this use?",
+            "1",
+            toInt
+        );
     }
-    if(fromDay)
-        evData.fromDay = fromDay;
+    if (fromDay) evData.fromDay = fromDay;
 
     console.log(evData);
-    
+
     try {
         const resp = await fetch(`/api/food/menu/move`, {
             method: "POST",
             body: JSON.stringify(evData),
             headers: {
-                "Content-Type": "application/json"
-            }
-        })
-        if(resp.ok) {
+                "Content-Type": "application/json",
+            },
+        });
+        if (resp.ok) {
             toElem.appendChild(fromElem);
         } else {
             const err = await resp.body();
             alert(err);
         }
-    } catch(err) {
+    } catch (err) {
         console.error(err);
     }
+
+    return false;
 }
 
 document.getElementById("search").onchange = searchItems;
-for(var el of document.getElementsByClassName("cbManual")) {
+for (var el of document.getElementsByClassName("cbManual")) {
     el.onclick = togglemanual;
 }
-for(var el of document.getElementsByClassName("drag-over")) {
+for (var el of document.getElementsByClassName("drag-over")) {
     el.ondragover = onDragOver;
     el.ondrop = onDrop;
     el.onclick = setText;
 }
-for(var el of document.getElementsByClassName("drag-start")) {
+for (var el of document.getElementsByClassName("drag-start")) {
     el.ondragstart = onDragStart;
     el.onclick = onItemClick;
 }
-for(var el of document.getElementsByClassName("cbToggleShare")) {
-    if(EDITING) {
+for (var el of document.getElementsByClassName("cbToggleShare")) {
+    if (EDITING) {
         el.onclick = toggleShare;
     } else {
         el.setAttribute("disabled", "");
     }
 }
 var sMenu = document.getElementById("selectMenu");
-if(sMenu) {
-    sMenu.onclick = function(event) {
+if (sMenu) {
+    sMenu.onclick = function (event) {
         selectMenu(event.target.getAttribute("title"));
-    }
+    };
 }
